@@ -20,7 +20,7 @@ class Jat
               raise_error(serializer, key) unless nested_serializer
 
               if nested_serializer.is_a?(Array)
-                nested_serializer.each { |serializer| call(nested_serializer, nested_includes) }
+                nested_serializer.each { |nested_ser| call(nested_ser, nested_includes) }
               else
                 call(nested_serializer, nested_includes)
               end

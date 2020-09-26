@@ -5,14 +5,14 @@ require 'jat/plugins/json_api'
 RSpec.describe Jat::Plugins::JSON_API::Serializer do
   it 'returns empty hash when nothing to serialize' do
     empty_serializer = Class.new(Jat) { type(:type)  }
-    result = described_class.(nil, empty_serializer)
+    result = empty_serializer.new.to_h(nil)
 
     expect(result).to eq({})
   end
 
   it 'returns json-api structure with meta' do
     empty_serializer = Class.new(Jat) { type(:type)  }
-    result = described_class.(nil, empty_serializer, meta: { any: :thing })
+    result = empty_serializer.new.to_h(nil, meta: { any: :thing })
 
     expect(result).to eq(meta: { any: :thing })
   end
@@ -23,7 +23,7 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
       id { |_| 'STRING' }
     end
 
-    result = described_class.('STRING', str_serializer)
+    result = str_serializer.new.to_h('STRING')
     expect(result).to eq(data: { type: :str, id: 'STRING' })
   end
 
@@ -33,7 +33,7 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
       id { |obj| obj }
     end
 
-    result = described_class.(%w[1 2], str_serializer, many: true)
+    result = str_serializer.new.to_h(%w[1 2], many: true)
     expect(result).to eq(data: [{ type: :str, id: '1' }, { type: :str, id: '2' }])
   end
 
@@ -43,7 +43,7 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
       id { |obj| obj }
     end
 
-    result = described_class.('STRING', str_serializer, meta: { any: :thing })
+    result = str_serializer.new.to_h('STRING', meta: { any: :thing })
     expect(result).to eq(data: { type: :str, id: 'STRING' }, meta: { any: :thing })
   end
 
@@ -56,7 +56,7 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
       def length(obj); obj.length; end
     end
 
-    result = described_class.('STRING', str_serializer)
+    result = str_serializer.new.to_h('STRING')
     expect(result).to eq(data: { type: :str, id: 'S', attributes: { length: 6 } })
   end
 
@@ -74,7 +74,7 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
       relationship :length, serializer: int_serializer, exposed: true
     end
 
-    result = described_class.('STRING', str_serializer)
+    result = str_serializer.new.to_h('STRING')
 
     expect(result).to eq(
       data: {
@@ -103,7 +103,7 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
       relationship :length, serializer: int_serializer
     end
 
-    result = described_class.('STRING', str_serializer)
+    result = str_serializer.new.to_h('STRING')
 
     expect(result).to eq(data: { type: :str, id: 'S' })
   end
@@ -117,7 +117,7 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
       relationship :length, serializer: self, exposed: true
     end
 
-    result = described_class.('STRING', str_serializer)
+    result = str_serializer.new.to_h('STRING')
 
     expect(result).to eq(
       data: {
@@ -144,7 +144,7 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
       relationship :length, serializer: int_serializer, exposed: true
     end
 
-    result = described_class.('STRING', str_serializer)
+    result = str_serializer.new.to_h('STRING')
 
     expect(result).to eq(
       data: {
@@ -173,7 +173,7 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
       relationship :chars, serializer: chr_serializer, many: true, exposed: true
     end
 
-    result = described_class.('ab', str_serializer)
+    result = str_serializer.new.to_h('ab')
 
     expect(result).to eq(
       data: {
@@ -205,7 +205,7 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
       relationship :chars, serializer: chr_serializer, many: true, exposed: true
     end
 
-    result = described_class.('ab', str_serializer)
+    result = str_serializer.new.to_h('ab')
 
     expect(result).to eq(
       data: {
@@ -235,7 +235,7 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
       relationship :chars, serializer: chr_serializer, many: true, exposed: false
     end
 
-    result = described_class.('ab', str_serializer, params: { include: 'chars' })
+    result = str_serializer.new(include: 'chars').to_h('ab', )
 
     expect(result).to eq(
       data: {
@@ -249,7 +249,6 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
       ]
     )
   end
-
 
   it 'accepts sparse_fieldset' do
    chr_serializer = Class.new(Jat) do
@@ -265,7 +264,36 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
       relationship :chars, serializer: chr_serializer, many: true, exposed: false
     end
 
-    result = described_class.('ab', str_serializer, params: { fields: { str: 'chars' } })
+    result = str_serializer.new(fields: { str: 'chars' }).to_h('ab')
+
+    expect(result).to eq(
+      data: {
+        type: :str, id: 'a',
+        relationships: {
+          chars: { data: [{ type: :chr, id: 'a' }, { type: :chr, id: 'b' }] }
+        }
+      },
+      included: [
+        { type: :chr, id: 'a' }, { type: :chr, id: 'b' }
+      ]
+    )
+  end
+
+  it 'accepts polymorphic serializers' do
+   chr_serializer = Class.new(Jat) do
+      type 'chr'
+      id { |obj| obj }
+    end
+
+    str_serializer = Class.new(Jat) do
+      type 'str'
+      id { |obj| obj[0] }
+      def chars(obj); obj.chars; end
+
+      relationship :chars, serializer: chr_serializer, many: true, exposed: false
+    end
+
+    result = str_serializer.new(fields: { str: 'chars' }).to_h('ab')
 
     expect(result).to eq(
       data: {

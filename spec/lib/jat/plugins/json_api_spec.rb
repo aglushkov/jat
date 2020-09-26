@@ -87,23 +87,23 @@ RSpec.describe Jat do
     end
   end
 
-  describe '.serialize' do
-    it 'calls serializer with default params' do
-      allow(Jat::Plugins::JSON_API::Serializer).to receive(:call)
+  # describe '.serialize' do
+  #   it 'calls serializer with default params' do
+  #     allow(Jat::Plugins::JSON_API::Serializer).to receive(:call)
 
-      described_class.serialize('OBJ', 'SER')
+  #     described_class.serialize('OBJ', 'SER')
 
-      expect(Jat::Plugins::JSON_API::Serializer)
-        .to have_received(:call).with('OBJ', 'SER', many: false, meta: nil, params: nil)
-    end
+  #     expect(Jat::Plugins::JSON_API::Serializer)
+  #       .to have_received(:call).with('OBJ', 'SER', many: false, meta: nil, params: nil)
+  #   end
 
-    it 'calls serializer with provided params' do
-      allow(Jat::Plugins::JSON_API::Serializer).to receive(:call)
+  #   it 'calls serializer with provided params' do
+  #     allow(Jat::Plugins::JSON_API::Serializer).to receive(:call)
 
-      described_class.serialize('OBJ', 'SER', many: 'MANY', meta: 'META', params: 'PARAMS')
+  #     described_class.serialize('OBJ', 'SER', many: 'MANY', meta: 'META', params: 'PARAMS')
 
-      expect(Jat::Plugins::JSON_API::Serializer)
-        .to have_received(:call).with('OBJ', 'SER', many: 'MANY', meta: 'META', params: 'PARAMS')
-    end
-  end
+  #     expect(Jat::Plugins::JSON_API::Serializer)
+  #       .to have_received(:call).with('OBJ', 'SER', many: 'MANY', meta: 'META', params: 'PARAMS')
+  #   end
+  # end
 end

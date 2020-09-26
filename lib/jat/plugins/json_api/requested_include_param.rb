@@ -33,7 +33,7 @@ class Jat
               nested_serializer = data.fetch(:serializer)
 
               if nested_serializer.is_a?(Array)
-                nested_serializer.each { |serializer| typed_includes(nested_serializer, nested_includes, obj) }
+                nested_serializer.each { |nested_ser| typed_includes(nested_ser, nested_includes, obj) }
               else
                 typed_includes(nested_serializer, nested_includes, obj)
               end

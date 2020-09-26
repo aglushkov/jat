@@ -23,7 +23,6 @@ class Jat
 
           private
 
-
           def requested_fields(serializer, fields)
             fields_types = RequestedFieldsParam.(serializer, fields)
 

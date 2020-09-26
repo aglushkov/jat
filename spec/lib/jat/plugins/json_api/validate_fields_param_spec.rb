@@ -35,4 +35,13 @@ RSpec.describe Jat::Plugins::JSON_API::ValidateFieldsParam do
     expect { described_class.(a_serializer, a: %i[a1], b: %i[a1]) }
       .to raise_error "#{b_serializer} has no requested attribute or relationship `a1`"
   end
+
+  it 'does not raises when polymorphoc serializer includes requested keys' do
+    pol_serializer = Class.new(Jat)
+    pol_serializer.type(:pol)
+    pol_serializer.relationship :rel, serializer: [a_serializer, b_serializer]
+
+    expect { described_class.(pol_serializer, pol: %i[rel], a: %i[a1 a2], b: %i[b1 b2]) }
+      .not_to raise_error
+  end
 end

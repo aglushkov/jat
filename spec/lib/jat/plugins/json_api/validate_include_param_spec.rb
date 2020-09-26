@@ -41,4 +41,40 @@ RSpec.describe Jat::Plugins::JSON_API::ValidateIncludeParam do
     expect { described_class.(a_serializer, a2: { b1: {} }) }
       .to raise_error Jat::InvalidIncludeParam, "#{b_serializer} has no `b1` relationship"
   end
+
+  it 'works with polymorphic associations' do
+    main_ser = Class.new(Jat)
+    main_ser.type :main
+    main_ser.relationship :polym, serializer: [a_serializer, b_serializer]
+    include_param = { polym: {} }
+
+    expect { described_class.(main_ser, include_param) }.not_to raise_error
+  end
+
+  it 'works with polymorphic associations when included nested association' do
+    main_ser = Class.new(Jat)
+    main_ser.type :main
+    main_ser.relationship :polym, serializer: [a_serializer, b_serializer]
+
+    a_serializer.relationship :common, serializer: a_serializer
+    b_serializer.relationship :common, serializer: b_serializer
+
+    include_param = { polym: { common: {} } }
+
+    expect { described_class.(main_ser, include_param) }.not_to raise_error
+  end
+
+  it 'raises error when some polymorphic associations not includes require relationship' do
+    main_ser = Class.new(Jat)
+    main_ser.type :main
+    main_ser.relationship :polym, serializer: [a_serializer, b_serializer]
+
+    a_serializer.relationship :common1, serializer: a_serializer
+    a_serializer.relationship :common2, serializer: a_serializer
+
+    include_param = { polym: { common1: {} } }
+
+    expect { described_class.(main_ser, include_param) }
+      .to raise_error Jat::InvalidIncludeParam, "#{b_serializer} has no `common1` relationship"
+  end
 end
