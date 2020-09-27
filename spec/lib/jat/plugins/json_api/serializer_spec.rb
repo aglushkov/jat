@@ -52,8 +52,6 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
       type 'str'
       id { |obj| obj[0] }
       attribute :length
-
-      def length(obj); obj.length; end
     end
 
     result = str_serializer.new.to_h('STRING')
@@ -69,8 +67,6 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
     str_serializer = Class.new(Jat) do
       type 'str'
       id { |obj| obj[0] }
-      def length(obj); obj.length; end
-
       relationship :length, serializer: int_serializer, exposed: true
     end
 
@@ -98,8 +94,6 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
     str_serializer = Class.new(Jat) do
       type 'str'
       id { |obj| obj[0] }
-      def length(obj); obj.length; end
-
       relationship :length, serializer: int_serializer
     end
 
@@ -112,9 +106,7 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
     str_serializer = Class.new(Jat) do
       type 'str'
       id { |obj| obj[0] }
-      def length(obj); nil; end
-
-      relationship :length, serializer: self, exposed: true
+      relationship(:length, serializer: self, exposed: true) { |obj| nil }
     end
 
     result = str_serializer.new.to_h('STRING')
@@ -131,16 +123,12 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
     int_serializer = Class.new(Jat) do
       type 'int'
       id { |obj| obj }
-      def next(obj); obj + 1; end
-
-      attribute :next
+      attribute(:next) { |obj| obj + 1 }
     end
 
     str_serializer = Class.new(Jat) do
       type 'str'
       id { |obj| obj[0] }
-      def length(obj); obj.length; end
-
       relationship :length, serializer: int_serializer, exposed: true
     end
 
@@ -168,8 +156,6 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
     str_serializer = Class.new(Jat) do
       type 'str'
       id { |obj| obj[0] }
-      def chars(obj); obj.chars; end
-
       relationship :chars, serializer: chr_serializer, many: true, exposed: true
     end
 
@@ -192,16 +178,12 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
     chr_serializer = Class.new(Jat) do
       type 'chr'
       id { |obj| obj }
-      def next(obj); obj.next; end
-
       attribute :next
     end
 
     str_serializer = Class.new(Jat) do
       type 'str'
       id { |obj| obj[0] }
-      def chars(obj); obj.chars; end
-
       relationship :chars, serializer: chr_serializer, many: true, exposed: true
     end
 
@@ -230,8 +212,6 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
     str_serializer = Class.new(Jat) do
       type 'str'
       id { |obj| obj[0] }
-      def chars(obj); obj.chars; end
-
       relationship :chars, serializer: chr_serializer, many: true, exposed: false
     end
 
@@ -259,8 +239,6 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
     str_serializer = Class.new(Jat) do
       type 'str'
       id { |obj| obj[0] }
-      def chars(obj); obj.chars; end
-
       relationship :chars, serializer: chr_serializer, many: true, exposed: false
     end
 
@@ -280,7 +258,7 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
   end
 
   it 'accepts polymorphic serializers' do
-   chr_serializer = Class.new(Jat) do
+    chr_serializer = Class.new(Jat) do
       type 'chr'
       id { |obj| obj }
     end
@@ -288,8 +266,6 @@ RSpec.describe Jat::Plugins::JSON_API::Serializer do
     str_serializer = Class.new(Jat) do
       type 'str'
       id { |obj| obj[0] }
-      def chars(obj); obj.chars; end
-
       relationship :chars, serializer: chr_serializer, many: true, exposed: false
     end
 

@@ -42,6 +42,7 @@ RSpec.describe Jat::Plugins::JSON_API::RequestedIncludeParam do
 
     a_serializer.relationship :common1, serializer: a_serializer
     a_serializer.relationship :common2, serializer: a_serializer
+
     b_serializer.relationship :common1, serializer: b_serializer
     b_serializer.relationship :common2, serializer: b_serializer
 

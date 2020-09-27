@@ -47,7 +47,7 @@ class Jat
             return if attributes.empty?
 
             result[:attributes] = attributes.each_with_object({}) do |attribute, attrs|
-              attrs[attribute] = serializer.public_send(attribute, obj)
+              attrs[attribute] = serializer.public_send(attribute, obj, serializer._params)
             end
           end
 
@@ -64,7 +64,7 @@ class Jat
           end
 
           def any_relationship_data(obj, serializer, attribute, includes)
-            rel_object = serializer.public_send(attribute, obj)
+            rel_object = serializer.public_send(attribute, obj, serializer._params)
             opts = serializer.class.keys[attribute]
 
             if opts[:many]

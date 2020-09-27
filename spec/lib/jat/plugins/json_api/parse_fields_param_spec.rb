@@ -8,8 +8,8 @@ RSpec.describe Jat::Plugins::JSON_API::ParseFieldsParam do
   end
 
   it 'returns hash with parsed keys' do
-    result = described_class.(type1: 'a1,a2', type2: 'b1')
+    result = described_class.(a: 'a1,a2', b: 'b1')
 
-    expect(result).to eq(type1: %i[a1 a2], type2: %i[b1])
+    expect(result).to eq(a: %i[a1 a2], b: %i[b1])
   end
 end

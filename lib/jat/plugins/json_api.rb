@@ -8,10 +8,6 @@ class Jat
   module Plugins
     module JSON_API
       module ClassMethods
-        def keys
-          @keys ||= {}
-        end
-
         def type(new_type = nil)
           if new_type
             new_type = new_type.to_sym
@@ -36,36 +32,25 @@ class Jat
           @exposed_map ||= Map.(self, :exposed)
         end
 
-        def attribute(key, **opts)
+        def attribute(key, **opts, &block)
           validate_attr(key)
 
           defaults = { exposed: true }
           opts = defaults.merge!(opts)
 
-          add_key(key, opts)
+          add_key(key, opts, &block).tap { clear_maps }
         end
 
-        def relationship(key, serializer:, **opts)
+        def relationship(key, serializer:, **opts, &block)
           validate_rel(key)
 
           defaults = { exposed: false, many: false }
           opts = defaults.merge!(opts).merge!(serializer: serializer, relationship: true)
 
-          add_key(key, opts)
+          add_key(key, opts, &block).tap { clear_maps }
         end
-
-        # def serialize(obj, serializer_class, many: false, meta: nil, params: nil)
-        #   Serializer.(obj, serializer_class, many: many, meta: meta, params: params)
-        # end
 
         private
-
-        def add_key(key, opts)
-          key = key.to_sym
-
-          clear_maps
-          keys[key] = opts
-        end
 
         def clear_maps
           @full_map = nil
