@@ -33,7 +33,7 @@ class Jat
         end
 
         def attribute(key, **opts, &block)
-          validate_attr(key)
+          validate_attribute(key, opts, block)
 
           defaults = { exposed: true }
           opts = defaults.merge!(opts)
@@ -41,8 +41,9 @@ class Jat
           add_key(key, opts, &block).tap { clear_maps }
         end
 
-        def relationship(key, serializer:, **opts, &block)
-          validate_rel(key)
+        def relationship(key, **opts, &block)
+          validate_relationship(key, opts, block)
+          prepare_relationship_opts(key, opts, block)
 
           defaults = { exposed: false, many: false }
           opts = defaults.merge!(opts).merge!(serializer: serializer, relationship: true)
@@ -57,16 +58,43 @@ class Jat
           @exposed_map = nil
         end
 
-        def validate_attr(key)
+        def validate_attribute(key, opts, block)
+          validate_attribute_key(key)
+          validate_attribute_includes(opts) # ??? allow any value ? hash or array any level with simple string/symbol
+          validate_attribute_field(opts, block) # can't be provided with block, must be string or symbol
+        end
+
+        def validate_attribute_key(key)
           if (key == :type) || (key == :id) || (key == 'type') || (key == 'id')
             raise Error, "Attribute can't have `#{key}` name"
           end
         end
 
-        def validate_rel(key)
+        def validate_relationship(key, opts, block)
+          validate_relationship_key(key)
+          validate_relationship_serializer(opts) # must be provided, must be Jat::JSON_API
+          validate_relationship_includes(opts, block) # can't be provided with block
+          validate_relationship_field(opts, block) # can't be provided with block, must be string or symbol
+        end
+
+        def validate_relationship_key(key)
           if (key == :type) || (key == :id) || (key == 'type') || (key == 'id')
             raise Error, "Relationship can't have `#{key}` name"
           end
+        end
+
+        def prepare_attributes_opts(key, opts, block)
+          defaults = { exposed: true }
+          opts = defaults.merge!(opts)
+
+          opts[:field] ||= key
+        end
+
+        def prepare_relationship_opts(key, opts, block)
+          defaults = { exposed: false, many: false }
+          opts = defaults.merge!(opts).merge!(relationship: true)
+
+          opts[:field] ||= key
         end
       end
 
@@ -94,6 +122,10 @@ class Jat
 
         def id(obj)
           obj.id
+        end
+
+        def _includes
+          Includes.(_full_map)
         end
       end
     end

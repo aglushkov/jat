@@ -4,7 +4,11 @@ require 'jat/plugins'
 
 # Main namespace
 class Jat
-  @opts = { delegate: true }
+  @opts = {
+    delegate: true, # false
+    includes: :auto, # manual, none
+
+  }
 
   # A generic exception used by Jat.
   class Error < StandardError
