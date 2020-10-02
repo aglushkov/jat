@@ -29,12 +29,12 @@ RSpec.describe Jat do
 
     it 'adds attribute with default params' do
       jat.attribute :foo
-      expect(jat.keys[:foo]).to eq(exposed: true)
+      expect(jat.keys[:foo]).to eq(exposed: true, key: :foo)
     end
 
     it 'adds attribute with provided params' do
-      jat.attribute :foo, exposed: false, foo: :bar
-      expect(jat.keys[:foo]).to eq(exposed: false, foo: :bar)
+      jat.attribute :foo, exposed: false, foo: :bar, key: :foobar
+      expect(jat.keys[:foo]).to eq(exposed: false, foo: :bar, key: :foobar)
     end
   end
 
@@ -50,17 +50,35 @@ RSpec.describe Jat do
     end
 
     it 'adds relationship with default params' do
-      jat.relationship :foo, serializer: nil
-      expect(jat.keys[:foo]).to eq(exposed: false, serializer: nil, many: false, relationship: true)
+      ser = Class.new(Jat)
+      jat.relationship :foo, serializer: ser
+      expect(jat.keys[:foo]).to eq(
+        exposed: false,
+        key: :foo,
+        many: false,
+        relationship: true,
+        serializer: ser,
+        include: { foo: {} }
+      )
     end
 
     it 'adds relationship with provided params' do
-      jat.relationship :foo, serializer: nil, exposed: true, foo: :bar, many: true
-      expect(jat.keys[:foo]).to eq(serializer: nil, exposed: true, foo: :bar, many: true, relationship: true)
+      ser = Class.new(Jat)
+      jat.relationship :foo, serializer: ser, exposed: true, foo: :bar, many: true, key: :foobar, include: :bazz
+      expect(jat.keys[:foo]).to eq(
+        serializer: ser,
+        exposed: true,
+        foo: :bar,
+        many: true,
+        relationship: true,
+        key: :foobar,
+        include: { bazz: {}}
+      )
     end
 
     it 'adds relationship even when requested to not' do
-      jat.relationship :foo, serializer: nil, relationship: false
+      ser = Class.new(Jat)
+      jat.relationship :foo, serializer: ser, relationship: false
       expect(jat.keys[:foo]).to include(relationship: true)
     end
   end
