@@ -10,7 +10,6 @@ class Jat
     module JSON_API
       class ValidateIncludeParam
         class << self
-
           def call(serializer, includes)
             includes.each do |key, nested_includes|
               data = serializer.keys[key]
@@ -19,11 +18,7 @@ class Jat
               nested_serializer = data[:serializer]
               raise_error(serializer, key) unless nested_serializer
 
-              if nested_serializer.is_a?(Array)
-                nested_serializer.each { |nested_ser| call(nested_ser, nested_includes) }
-              else
-                call(nested_serializer, nested_includes)
-              end
+              call(nested_serializer, nested_includes)
             end
           end
 

@@ -33,8 +33,8 @@ RSpec.describe Jat do
     end
 
     it 'adds attribute with provided params' do
-      jat.attribute :foo, exposed: false, foo: :bar, key: :foobar
-      expect(jat.keys[:foo]).to eq(exposed: false, foo: :bar, key: :foobar)
+      jat.attribute :foo, exposed: false, key: :foobar
+      expect(jat.keys[:foo]).to eq(exposed: false, key: :foobar)
     end
   end
 
@@ -56,7 +56,6 @@ RSpec.describe Jat do
         exposed: false,
         key: :foo,
         many: false,
-        relationship: true,
         serializer: ser,
         includes: { foo: {} }
       )
@@ -64,22 +63,14 @@ RSpec.describe Jat do
 
     it 'adds relationship with provided params' do
       ser = Class.new(Jat)
-      jat.relationship :foo, serializer: ser, exposed: true, foo: :bar, many: true, key: :foobar, includes: :bazz
+      jat.relationship :foo, serializer: ser, exposed: true, many: true, key: :foobar, includes: :bazz
       expect(jat.keys[:foo]).to eq(
         serializer: ser,
         exposed: true,
-        foo: :bar,
         many: true,
-        relationship: true,
         key: :foobar,
         includes: { bazz: {}}
       )
-    end
-
-    it 'adds relationship even when requested to not' do
-      ser = Class.new(Jat)
-      jat.relationship :foo, serializer: ser, relationship: false
-      expect(jat.keys[:foo]).to include(relationship: true)
     end
   end
 
@@ -92,7 +83,7 @@ RSpec.describe Jat do
 
     it 'allows to redefine #id by providing other field' do
       set_type
-      jat.id(field: :new_id)
+      jat.id(key: :new_id)
       obj = Class.new { def new_id; 'ID'; end }.new
       expect(jat.new.id(obj)).to eq 'ID'
     end

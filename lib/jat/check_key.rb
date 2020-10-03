@@ -3,6 +3,8 @@
 class Jat
   class CheckKey
     module ClassMethods
+      ALLOWED_OPTS = %i[key delegate serializer includes many exposed]
+
       # @param params [Hash] new key params, includes :name, :opts, :block keys
       def call(params)
         check_name(params)
@@ -21,6 +23,10 @@ class Jat
         check_opts_delegate(params)
         check_opts_serializer(params)
         check_opts_includes(params)
+        check_opts_many(params)
+        check_opts_exposed(params)
+
+        check_opts_extra_keys(params[:opts])
       end
 
       def check_block(params)
@@ -51,18 +57,28 @@ class Jat
         check_is_boolean(opts[:delegate], 'opts[:delegate]') if opts.key?(:delegate)
       end
 
+      def check_opts_exposed(opts:, **)
+        check_is_boolean(opts[:exposed], 'opts[:exposed]') if opts.key?(:exposed)
+      end
+
       def check_opts_serializer(opts:, **)
         return unless opts.key?(:serializer)
 
-        serializer = opts[:serializer]
-        invalid_serializer_error(serializer, 'opts[:serializer]') if serializer == nil
-        invalid_serializer_error(serializer, 'opts[:serializer]') if serializer == []
+        value = opts[:serializer]
+        return if value.is_a?(Class) && (value < Jat)
 
-        Array(serializer).each do |ser|
-          next if ser.is_a?(Class) && (ser < Jat)
+        error("Invalid opts[:serializer] param, must be a subclass of Jat, but #{value.inspect} was given")
+      end
 
-          invalid_serializer_error(ser, 'opts[:serializer]')
+      def check_opts_many(opts:, **)
+        opt_many = opts.key?(:many)
+        opt_serializer = opts.key?(:serializer)
+
+        if (!opt_many && opt_serializer) || (opt_many && !opt_serializer)
+          error('opts[:many] must be provided together with opts[:serializer]')
         end
+
+        check_is_boolean(opts[:many], 'opts[:many]') if opt_many
       end
 
       # `includes` for relations must be simple Symbol or String. It is
@@ -72,9 +88,16 @@ class Jat
       # need to include anything nested inside it.
       def check_opts_includes(opts:, **)
         return unless opts.key?(:includes)
+        value = opts[:includes]
+        opt_name = 'opts[:includes]'
 
-        check_method = opts[:serializer] ? :check_is_string : :check_is_simple_object
-        __send__(check_method, opts[:includes], 'opts[:includes]')
+        if opts[:serializer]
+          return unless value
+
+          check_is_string(value, opt_name)
+        else
+          check_is_simple_object(value, opt_name)
+        end
       end
 
       # Simple object consists of symbols, strings, arrays, hashes with symbol or string keys
@@ -109,8 +132,13 @@ class Jat
         error("Invalid #{opt_name} param, can be a simple Hash, Array, String, Symbol")
       end
 
-      def invalid_serializer_error(value, opt_name)
-        error("Invalid #{opt_name} param, must be a subclass of Jat, but #{value.inspect} was given")
+      def check_opts_extra_keys(opts)
+        given_opts = opts.keys
+        extra_opts = given_opts - ALLOWED_OPTS
+
+        return if extra_opts.size.zero?
+
+        error("Opts #{extra_opts.inspect} are not allowed")
       end
 
       def error(error_message)

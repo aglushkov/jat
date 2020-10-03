@@ -20,8 +20,11 @@ class Jat
           end
         end
 
-        def id(field: :id, &block)
-          block ||= proc { |obj| obj.public_send(field) }
+        def id(key: nil, &block)
+          raise Error, "Key and block can't be provided together" if key && block
+          raise Error, "Key or block must be provided" if !key && !block
+
+          block ||= proc { |obj| obj.public_send(key) }
           define_method(:id, &block)
         end
 
@@ -57,7 +60,7 @@ class Jat
 
         def prepare_relationship_opts(serializer, opts)
           defaults = { exposed: false, many: false }
-          defaults.merge!(opts).merge!(relationship: true, serializer: serializer)
+          defaults.merge!(opts).merge!(serializer: serializer)
         end
       end
 

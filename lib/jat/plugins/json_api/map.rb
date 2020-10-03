@@ -46,7 +46,7 @@ class Jat
 
               if key_data[:serializer]
                 type_relationships << key
-                add_other_types(key_data[:serializer], map_type, exposed, result)
+                keys(key_data[:serializer], map_type, exposed, result)
               else
                 type_attributes << key
               end
@@ -58,14 +58,6 @@ class Jat
             return true if map_type == :none
 
             !key_data[:exposed]
-          end
-
-          def add_other_types(other_serializer, map_type, exposed, result)
-            if other_serializer.is_a?(Array)
-              other_serializer.each { |serializer| keys(serializer, map_type, exposed, result) }
-            else
-              keys(other_serializer, map_type, exposed, result)
-            end
           end
         end
       end

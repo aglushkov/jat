@@ -29,14 +29,8 @@ class Jat
               obj[type] ||= []
               obj[type] |= [key]
 
-              data = serializer.keys.fetch(key)
-              nested_serializer = data.fetch(:serializer)
-
-              if nested_serializer.is_a?(Array)
-                nested_serializer.each { |nested_ser| typed_includes(nested_ser, nested_includes, obj) }
-              else
-                typed_includes(nested_serializer, nested_includes, obj)
-              end
+              nested_serializer = serializer.keys.fetch(key).fetch(:serializer)
+              typed_includes(nested_serializer, nested_includes, obj)
             end
           end
         end
