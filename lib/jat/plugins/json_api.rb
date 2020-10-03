@@ -3,7 +3,7 @@
 require 'jat/plugins/json_api/map'
 require 'jat/plugins/json_api/serialization_map'
 require 'jat/plugins/json_api/serializer'
-require 'jat/plugins/json_api/validate'
+require 'jat/plugins/json_api/check_key'
 
 class Jat
   module Plugins
@@ -33,14 +33,14 @@ class Jat
           @exposed_map ||= Map.(self, :exposed)
         end
 
-        def attribute(key, **opts, &block)
+        def attribute(name, **opts, &block)
           opts = prepare_attributes_opts(opts)
-          add_key(key, opts, &block).tap { clear_maps }
+          key(name, opts, &block).tap { clear_maps }
         end
 
-        def relationship(key, serializer:, **opts, &block)
+        def relationship(name, serializer:, **opts, &block)
           opts = prepare_relationship_opts(serializer, opts)
-          add_key(key, opts, &block).tap { clear_maps }
+          key(name, opts, &block).tap { clear_maps }
         end
 
         private
@@ -63,18 +63,13 @@ class Jat
 
       # Serializers DSL instance methods
       module InstanceMethods
-        attr_reader :_params, :_full_map, :_attributes, :_relationships
+        attr_reader :_params, :_attributes, :_relationships
 
-        def initialize(params = nil, _full_map = nil)
+        def initialize(params = nil, _prev_full_map = nil)
           @_params ||= params
+          @_full_map = _prev_full_map if _prev_full_map
 
-          @_full_map = _full_map || begin
-            fields = params && (params[:fields] || params['fields'])
-            includes = params && (params[:include] || params['include'])
-            SerializationMap.(self.class, fields, includes)
-          end
-
-          current_map = @_full_map.fetch(self.class.type)
+          current_map = _full_map.fetch(self.class.type)
           @_attributes = current_map[:attributes]
           @_relationships = current_map[:relationships]
         end
@@ -85,6 +80,14 @@ class Jat
 
         def id(obj)
           obj.id
+        end
+
+        def _full_map
+          @_full_map ||= begin
+            fields = _params && (_params[:fields] || _params['fields'])
+            includes = _params && (_params[:include] || _params['include'])
+            SerializationMap.(self.class, fields, includes)
+          end
         end
 
         def _includes

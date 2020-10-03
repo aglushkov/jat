@@ -44,7 +44,7 @@ class Jat
             serializer.keys.each do |key, key_data|
               next if skip_key?(serializer, key, key_data, map_type, exposed)
 
-              if key_data[:relationship]
+              if key_data[:serializer]
                 type_relationships << key
                 add_other_types(key_data[:serializer], map_type, exposed, result)
               else

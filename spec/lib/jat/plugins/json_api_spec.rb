@@ -58,13 +58,13 @@ RSpec.describe Jat do
         many: false,
         relationship: true,
         serializer: ser,
-        include: { foo: {} }
+        includes: { foo: {} }
       )
     end
 
     it 'adds relationship with provided params' do
       ser = Class.new(Jat)
-      jat.relationship :foo, serializer: ser, exposed: true, foo: :bar, many: true, key: :foobar, include: :bazz
+      jat.relationship :foo, serializer: ser, exposed: true, foo: :bar, many: true, key: :foobar, includes: :bazz
       expect(jat.keys[:foo]).to eq(
         serializer: ser,
         exposed: true,
@@ -72,7 +72,7 @@ RSpec.describe Jat do
         many: true,
         relationship: true,
         key: :foobar,
-        include: { bazz: {}}
+        includes: { bazz: {}}
       )
     end
 
