@@ -138,7 +138,7 @@ class Jat
 
         return if extra_opts.size.zero?
 
-        error("Opts #{extra_opts.inspect} are not allowed")
+        error("Extra opts #{extra_opts.inspect} were provided. Allowed opts: #{ALLOWED_OPTS.inspect}")
       end
 
       def error(error_message)

@@ -193,4 +193,9 @@ RSpec.describe Jat::CheckKey do
     opts[:many] = true
     expect { check.(params) }.to raise_error Jat::Error, /opts\[:many\].*opts\[:serializer\]/
   end
+
+  it 'checks extra opts keys' do
+    opts[:foo] = true
+    expect { check.(params) }.to raise_error Jat::Error, /foo/
+  end
 end
