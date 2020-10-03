@@ -18,6 +18,30 @@ RSpec.describe Jat do
     end
   end
 
+  describe '.id' do
+    it 'prohibits to add key and block together' do
+      expect { jat.id(key: :foo) { |_obj| 'ID' } }.to raise_error Jat::Error, /key.*block/i
+    end
+
+    it 'prohibits to call .id without key and block' do
+      expect { jat.id }.to raise_error Jat::Error, /key.*block/i
+    end
+
+    it 'allows to redefine #id by providing other key' do
+      jat.id(key: :new_id)
+      set_type
+      obj = Class.new { def new_id; 'ID'; end }.new
+      expect(jat.new.id(obj)).to eq 'ID'
+    end
+
+    it 'allows to redefine #id by providing block' do
+      jat.id { |_obj| 'ID' }
+      set_type
+      obj = Class.new
+      expect(jat.new.id(obj)).to eq 'ID'
+    end
+  end
+
   describe '.attribute' do
     it 'does not allows to add attribute with `type` name' do
       expect { jat.attribute :type }.to raise_error Jat::Error, /Attribute can't have `type` name/
@@ -78,20 +102,6 @@ RSpec.describe Jat do
     it 'delegates to objects #id method' do
       set_type
       obj = Class.new { def id; 'ID'; end }.new
-      expect(jat.new.id(obj)).to eq 'ID'
-    end
-
-    it 'allows to redefine #id by providing other field' do
-      set_type
-      jat.id(key: :new_id)
-      obj = Class.new { def new_id; 'ID'; end }.new
-      expect(jat.new.id(obj)).to eq 'ID'
-    end
-
-    it 'allows to redefine #id by providing block' do
-      set_type
-      jat.id { |_obj| 'ID' }
-      obj = Class.new
       expect(jat.new.id(obj)).to eq 'ID'
     end
   end
