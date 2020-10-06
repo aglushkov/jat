@@ -16,6 +16,15 @@ class Jat
 
       def check_name(params)
         check_is_string(params[:name], 'name')
+        json_api_check_name(params)
+      end
+
+      def json_api_check_name(name:, opts:, **)
+        name = name.to_sym
+        return if (name != :type) && (name != :id)
+
+        key_type = opts.key?(:serializer) ? 'Relationship' : 'Attribute'
+        error("#{key_type} can't have `#{name}` name")
       end
 
       def check_opts(params)
@@ -92,7 +101,7 @@ class Jat
         opt_name = 'opts[:includes]'
 
         if opts[:serializer]
-          return unless value
+          return if !value || value.empty?
 
           check_is_string(value, opt_name)
         else

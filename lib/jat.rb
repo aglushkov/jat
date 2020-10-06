@@ -1,18 +1,19 @@
 # frozen_string_literal: true
 
-require 'jat/utils/includes_to_hash'
-require 'jat/plugins'
 require 'jat/check_key'
+require 'jat/error'
+require 'jat/includes'
+require 'jat/map'
+require 'jat/serialization_map'
+require 'jat/serializer'
+require 'jat/utils/includes_to_hash'
 
 # Main namespace
 class Jat
   @options = {
-    delegate: true # false
+    delegate: true, # false
+    exposed: :default, # all, none
   }
-
-  # A generic exception used by Jat.
-  class Error < StandardError
-  end
 
   module ClassMethods
     attr_reader :options
@@ -22,37 +23,51 @@ class Jat
     end
 
     def inherited(subclass)
-      subclass.instance_variable_set(:@options, deep_dup(options))
+      subclass.instance_variable_set(:@options, options.dup)
     end
 
-    # Load a new plugin into the current class. A plugin can be a module
-    # which is used directly, or a symbol representing a registered plugin
-    # which will be required and then loaded.
-    #
-    #     Jat.plugin MyPlugin
-    #     Jat.plugin :my_plugin
-    def plugin(plugin, *args, **kwargs, &block)
-      plugin = Plugins.load_plugin(plugin) if plugin.is_a?(Symbol)
-      Plugins.load_dependencies(plugin, self, *args, **kwargs, &block)
-
-      self.include(plugin::InstanceMethods) if defined?(plugin::InstanceMethods)
-      self.extend(plugin::ClassMethods) if defined?(plugin::ClassMethods)
-
-      CheckKey.extend(plugin::CheckKey::ClassMethods) if defined?(plugin::CheckKey::ClassMethods)
-      # Plugins.configure(plugin, self, *args, **kwargs, &block)
-      plugin
+    def type(new_type = nil)
+      if new_type
+        new_type = new_type.to_sym
+        define_method(:type) { new_type }
+        @type = new_type
+      else
+        raise Error, "#{self} has no defined type" unless @type
+        @type
+      end
     end
 
-    def key(name, **opts, &block)
-      CheckKey.(name: name, opts: opts, block: block)
+    def id(key: nil, &block)
+      raise Error, "Key and block can't be provided together" if key && block
+      raise Error, "Key or block must be provided" if !key && !block
 
+      block ||= proc { |obj| obj.public_send(key) }
+      define_method(:id, &block)
+    end
+
+    def full_map
+      @full_map ||= Map.(self, :all)
+    end
+
+    def exposed_map
+      @exposed_map ||= Map.(self, :exposed)
+    end
+
+    def attribute(name, **opts, &block)
+      opts = prepare_attributes_opts(opts)
+      add_key(name, opts, block)
+    end
+
+    def relationship(name, serializer:, **opts, &block)
+      opts = prepare_relationship_opts(serializer, opts)
       add_key(name, opts, block)
     end
 
     private
 
-    # All opts must have symbol keys
     def add_key(name, opts, block)
+      CheckKey.(name: name, opts: opts, block: block)
+
       name = name.to_sym
       generate_opts_key(name, opts)
       generate_opts_include(opts)
@@ -60,7 +75,7 @@ class Jat
 
       add_method(name, opts, block)
 
-      [name, opts, block]
+      [name, opts, block].tap { clear_maps }
     end
 
     def add_method(name, opts, block)
@@ -76,9 +91,10 @@ class Jat
       # Warning-free method redefinition
       remove_method(name) if method_defined?(name)
 
-      case block.parameters.count
-      when 2 then define_method(name, &block)
-      when 1 then define_method(name) { |obj, _params| block.(obj) }
+      if block.parameters.count == 1
+        define_method(name) { |obj, _params| block.(obj) }
+      else # 2
+        define_method(name, &block)
       end
     end
 
@@ -98,20 +114,53 @@ class Jat
       opts[:includes] = Utils::IncludesToHash.(includes) if includes
     end
 
-    def deep_dup(hash)
-      duplicate_hash = hash.dup
+    def clear_maps
+      @full_map = nil
+      @exposed_map = nil
+    end
 
-      if duplicate_hash.is_a?(Hash)
-        duplicate_hash.each do |key, value|
-          duplicate_hash[key] = deep_dup(value) if value.is_a?(Enumerable)
-        end
+    def prepare_attributes_opts(opts)
+      exposed = options[:exposed] == :none ? false : true
+
+      defaults = { exposed: exposed }
+      defaults.merge!(opts)
+    end
+
+    def prepare_relationship_opts(serializer, opts)
+      exposed = options[:exposed] == :all ? true : false
+
+      defaults = { exposed: exposed, many: false }
+      defaults.merge!(opts).merge!(serializer: serializer)
+    end
+  end
+
+  # Serializers DSL instance methods
+  module InstanceMethods
+    attr_reader :_params, :_full_map, :_map
+
+    def initialize(params = nil, full_map = nil)
+      @_params = params
+      @_full_map = full_map || begin
+        fields = params && (params[:fields] || params['fields'])
+        includes = params && (params[:include] || params['include'])
+        SerializationMap.(self.class, fields, includes)
       end
+      @_map = @_full_map.fetch(type)
+    end
 
-      duplicate_hash
+    def to_h(obj, many: false, meta: nil)
+      Serializer.(obj, self, many: many, meta: meta)
+    end
+
+    def id(obj)
+      obj.id
+    end
+
+    def _includes
+      Includes.(self.class, _full_map)
     end
   end
 
   extend ClassMethods
-
-  plugin :json_api
+  include InstanceMethods
 end

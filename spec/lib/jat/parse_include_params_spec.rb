@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Jat::Plugins::JSON_API::ParseIncludeParam do
+RSpec.describe Jat::ParseIncludeParam do
   it 'returns empty hash when param not provided' do
     result = described_class.(nil)
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Jat::Plugins::JSON_API::ValidateFieldsParam do
+RSpec.describe Jat::ValidateFieldsParam do
   let(:a_serializer) { Class.new(Jat) }
   let(:b_serializer) { Class.new(Jat) }
 

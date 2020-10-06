@@ -20,6 +20,22 @@ RSpec.describe Jat::CheckKey do
     expect { check.(params) }.to raise_error Jat::Error, /name/
   end
 
+  it 'does not allows to add attribute and relationship with `type` and `id` names' do
+    params[:name] = :id
+    expect { check.(params) }.to raise_error Jat::Error, /Attribute can't have `id` name/
+
+    params[:name] = :type
+    expect { check.(params) }.to raise_error Jat::Error, /Attribute can't have `type` name/
+
+    params[:opts][:serializer] = Class.new(Jat)
+
+    params[:name] = :id
+    expect { check.(params) }.to raise_error Jat::Error, /Relationship can't have `id` name/
+
+    params[:name] = :type
+    expect { check.(params) }.to raise_error Jat::Error, /Relationship can't have `type` name/
+  end
+
   it 'allows only 1 or 2 arguments in block' do
     params[:block] = ->(a) {}
     expect { check.(params) }.not_to raise_error
@@ -127,10 +143,10 @@ RSpec.describe Jat::CheckKey do
     opts[:includes] = nil
     expect { check.(params) }.not_to raise_error
 
-    opts[:includes] = {}
+    opts[:includes] = { foo: :bar }
     expect { check.(params) }.to raise_error Jat::Error, /opts\[:includes\]/
 
-    opts[:includes] = []
+    opts[:includes] = [:foo]
     expect { check.(params) }.to raise_error Jat::Error, /opts\[:includes\]/
   end
 

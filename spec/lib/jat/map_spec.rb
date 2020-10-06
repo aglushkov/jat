@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Jat::Plugins::JSON_API::Map do
+RSpec.describe Jat::Map do
   let(:a) do
     ser = Class.new(Jat)
     ser.type :a
