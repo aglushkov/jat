@@ -102,10 +102,16 @@ RSpec.describe Jat::CheckKey do
     expect { check.(params) }.to raise_error Jat::Error, /opts\[:delegate\]/
   end
 
-  it 'allows only callable is in opts[:serializer]' do
+  it 'allows only direct serializer or callable in opts[:serializer]' do
     opts[:many] = true
     opts[:serializer] = Class.new(Jat)
     expect { check.(params) }.not_to raise_error
+
+    opts[:serializer] = -> { Class.new(Jat) }
+    expect { check.(params) }.not_to raise_error
+
+    opts[:serializer] = ->(foo) { Class.new(Jat) }
+    expect { check.(params) }.to raise_error Jat::Error, /no params/
 
     opts[:serializer] = nil
     expect { check.(params) }.to raise_error Jat::Error, /callable/

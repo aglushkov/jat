@@ -19,10 +19,6 @@ class Jat
   module ClassMethods
     attr_reader :options
 
-    def call
-      self
-    end
-
     def keys
       @keys ||= {}
     end

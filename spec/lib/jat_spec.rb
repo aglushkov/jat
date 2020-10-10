@@ -42,123 +42,32 @@ RSpec.describe Jat do
 
 
   describe '.attribute' do
-    it 'does not allows to add attribute with `type` name' do
-      expect { jat.attribute :type }.to raise_error Jat::Error, /Attribute can't have `type` name/
-    end
-
-    it 'does not allows to add attribute with `id` name' do
-      expect { jat.attribute :id }.to raise_error Jat::Error, /Attribute can't have `id` name/
-    end
-
-    it 'adds attribute with default params' do
+    it 'adds attribute' do
       jat.attribute :foo
-      opts = jat.keys[:foo]
-
-      expect(opts.exposed?).to eq true
-      expect(opts.key).to eq :foo
-    end
-
-    it 'adds attribute with provided params' do
-      jat.attribute :foo, exposed: false, key: :foobar
-      opts = jat.keys[:foo]
-
-      expect(opts.exposed?).to eq false
-      expect(opts.key).to eq :foobar
-    end
-
-    it 'delegates attribute' do
-      jat.type :jat
-      jat.attribute :length
-      expect(jat.new.length('word', nil)).to eq 4
-    end
-
-    it 'does not delegate attribute with { delegate: false } option' do
-      jat.type :jat
-      jat.attribute :length, delegate: false
-      jat.define_method(:length) { |obj, _params| 33 }
-      expect(jat.new.length('word', nil)).to eq 33
-    end
-
-    it 'allows to provide block' do
-      jat.type :jat
-      jat.attribute(:length) { |obj| obj.length * 2 }
-      expect(jat.new.length('word', nil)).to eq 8
-    end
-
-    it 'allows to provide block with two params' do
-      jat.type :jat
-      jat.attribute(:length) { |obj, params| obj.length * params[:mod] }
-      expect(jat.new.length('word', mod: 10)).to eq 40
+      expect(jat.keys[:foo].relation?).to eq false
     end
 
     it 'allows to redefine attribute' do
-      jat.type :jat
-      jat.attribute(:length) { |obj| obj.length * 2 }
-      jat.attribute(:length) { |obj, params| obj.length / 2 + params[:mod] }
-      expect(jat.new.length('word', mod: 100)).to eq 102
-    end
+      jat.attribute(:foo, delegate: true)
+      expect(jat.keys[:foo].delegate?).to eq true
 
-    it 'sets `exposed: true` by default' do
-      jat.attribute(:key)
-      expect(jat.keys[:key].exposed?).to eq true
-    end
-
-    it 'sets `exposed: false` when global option `exposed: :none` provided' do
-      jat.options[:exposed] = :none
-      jat.attribute(:key)
-
-      expect(jat.keys[:key].exposed?).to eq false
+      jat.attribute(:foo, delegate: false)
+      expect(jat.keys[:foo].delegate?).to eq false
     end
   end
 
   describe '.relationship' do
-    it 'does not allows to add relationship with `type` name' do
-      expect { jat.relationship :type, serializer: nil }
-        .to raise_error Jat::Error, /Relationship can't have `type` name/
+    it 'adds relationship' do
+      jat.attribute :foo, serializer: jat
+      expect(jat.keys[:foo].serializer).to eq jat
     end
 
-    it 'does not allows to add relationship with `id` name' do
-      expect { jat.relationship :id, serializer: nil }
-        .to raise_error Jat::Error, /Relationship can't have `id` name/
-    end
+    it 'allows to redefine relationship' do
+      jat.attribute(:foo, exposed: true, serializer: jat)
+      expect(jat.keys[:foo].exposed?).to eq true
 
-    it 'adds relationship with default params' do
-      ser = Class.new(Jat)
-      jat.relationship :foo, serializer: ser
-      opts = jat.keys[:foo]
-
-      expect(opts.key).to eq :foo
-      expect(opts.serializer).to eq ser
-      expect(opts.includes).to eq(foo: {})
-      expect(opts.exposed?).to eq false
-      expect(opts.many?).to eq false
-    end
-
-    it 'adds relationship with provided params' do
-      ser = Class.new(Jat)
-      jat.relationship :foo, serializer: ser, exposed: true, many: true, key: :foobar, includes: :bazz
-      opts = jat.keys[:foo]
-
-      expect(opts.key).to eq :foobar
-      expect(opts.serializer).to eq ser
-      expect(opts.includes).to eq(bazz: {})
-      expect(opts.exposed?).to eq true
-      expect(opts.many?).to eq true
-    end
-
-    it 'sets `exposed: false` by default' do
-      ser = Class.new(Jat)
-      jat.relationship :key, serializer: ser
-
-      expect(jat.keys[:key].exposed?).to eq false
-    end
-
-    it 'sets `exposed: true` when global option `exposed: :all` provided' do
-      ser = Class.new(Jat)
-      jat.options[:exposed] = :all
-      jat.relationship :key, serializer: ser
-
-      expect(jat.keys[:key].exposed?).to eq true
+      jat.attribute(:foo, exposed: false, serializer: jat)
+      expect(jat.keys[:foo].exposed?).to eq false
     end
   end
 

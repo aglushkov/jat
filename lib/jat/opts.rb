@@ -47,15 +47,18 @@ class Jat
     def serializer
       return @serializer if defined?(@serializer)
 
-      @serializer = relation? ? opts[:serializer].call : nil
+      @serializer = if relation?
+        value = opts[:serializer]
+        value.is_a?(Proc) ? proc_serializer(value) : value
+      end
     end
 
     def includes
       return @includes if defined?(@includes)
 
       @includes = begin
-        inc = relation? ? opts.fetch(:includes, key) : opts[:includes]
-        Services::IncludesToHash.(inc) if inc
+        incl = relation? ? opts.fetch(:includes, key) : opts[:includes]
+        Services::IncludesToHash.(incl) if incl
       end
     end
 
@@ -95,6 +98,13 @@ class Jat
     def delegate_block
       delegate_field = key
       -> (obj, _params) { obj.public_send(delegate_field) }
+    end
+
+    def proc_serializer(value)
+      value = value.call
+      return value if value.is_a?(Class) && (value < Jat)
+
+      raise Jat::Error, "Invalid serializer `#{value.inspect}`, must be a subclass of Jat"
     end
   end
 end

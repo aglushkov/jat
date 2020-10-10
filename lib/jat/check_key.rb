@@ -79,9 +79,16 @@ class Jat
         return unless opts.key?(:serializer)
 
         value = opts[:serializer]
-        return if value.respond_to?(:call)
+        return if value.is_a?(Class) && (value < Jat)
 
-        error "Invalid opts[:serializer] param, must be callable that returns subclass of Jat, but #{value} was given"
+        if value.is_a?(Proc)
+          error 'Invalid opts[:serializer] proc, must be no params' if value.parameters.any?
+        else
+          error "Invalid opts[:serializer] param, must be callable or a subclass of Jat, but #{value} was given"
+        end
+      end
+
+      def check_opts_serializer_proc
       end
 
       def check_opts_serializer_with_many(opts)
