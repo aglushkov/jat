@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Jat::ValidateIncludeParam do
+RSpec.describe Jat::Params::Include::Validate do
   let(:a_serializer) { Class.new(Jat) }
   let(:b_serializer) { Class.new(Jat) }
 
@@ -24,21 +24,21 @@ RSpec.describe Jat::ValidateIncludeParam do
 
   it 'raises error when some key is invalid' do
     expect { described_class.(a_serializer, foo: {}) }
-      .to raise_error Jat::InvalidIncludeParam, "#{a_serializer} has no `foo` relationship"
+      .to raise_error Jat::Params::Include::Invalid, "#{a_serializer} has no `foo` relationship"
   end
 
   it 'raises error when some children key is invalid' do
     expect { described_class.(a_serializer, a2: { foo: {} }) }
-      .to raise_error Jat::InvalidIncludeParam, "#{b_serializer} has no `foo` relationship"
+      .to raise_error Jat::Params::Include::Invalid, "#{b_serializer} has no `foo` relationship"
   end
 
   it 'raises error when trying to include attribute, not relationship' do
     expect { described_class.(a_serializer, a1: {}) }
-      .to raise_error Jat::InvalidIncludeParam, "#{a_serializer} has no `a1` relationship"
+      .to raise_error Jat::Params::Include::Invalid, "#{a_serializer} has no `a1` relationship"
   end
 
   it 'raises error when trying to include attribute to children' do
     expect { described_class.(a_serializer, a2: { b1: {} }) }
-      .to raise_error Jat::InvalidIncludeParam, "#{b_serializer} has no `b1` relationship"
+      .to raise_error Jat::Params::Include::Invalid, "#{b_serializer} has no `b1` relationship"
   end
 end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
-require 'jat/requested_fields_param'
-require 'jat/requested_include_param'
+require 'jat/params/fields'
+require 'jat/params/include'
 
 class Jat
   class SerializationMap
@@ -22,13 +22,13 @@ class Jat
       private
 
       def requested_fields(serializer, fields)
-        fields_types = RequestedFieldsParam.(serializer, fields)
+        fields_types = Params::Fields.(serializer, fields)
 
         Map.(serializer, :none, exposed: fields_types)
       end
 
       def requested_includes_fields(serializer, includes)
-        include_types = RequestedIncludeParam.(serializer, includes)
+        include_types = Params::Include.(serializer, includes)
 
         Map.(serializer, :exposed, exposed: include_types)
       end

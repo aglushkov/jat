@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Jat::ParseFieldsParam do
+RSpec.describe Jat::Params::Fields::Parse do
   it 'returns empty hash when param not provided' do
     result = described_class.(nil)
 

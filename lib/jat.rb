@@ -6,7 +6,7 @@ require 'jat/includes'
 require 'jat/map'
 require 'jat/serialization_map'
 require 'jat/serializer'
-require 'jat/utils/includes_to_hash'
+require 'jat/services/includes_to_hash'
 
 # Main namespace
 class Jat
@@ -117,7 +117,7 @@ class Jat
 
     def generate_opts_include(opts)
       includes = opts[:serializer] ? opts.fetch(:includes, opts[:key]) : opts[:includes]
-      opts[:includes] = Utils::IncludesToHash.(includes) if includes
+      opts[:includes] = Services::IncludesToHash.(includes) if includes
     end
 
     def clear_maps

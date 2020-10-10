@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Jat::RequestedIncludeParam do
+RSpec.describe Jat::Params::Include do
   let(:a_serializer) { Class.new(Jat) }
   let(:b_serializer) { Class.new(Jat) }
 
