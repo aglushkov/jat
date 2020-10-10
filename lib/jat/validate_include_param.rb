@@ -16,7 +16,7 @@ class Jat
           nested_serializer = data[:serializer]
           raise_error(serializer, key) unless nested_serializer
 
-          call(nested_serializer, nested_includes)
+          call(nested_serializer.call, nested_includes)
         end
       end
 

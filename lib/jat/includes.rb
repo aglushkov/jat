@@ -20,7 +20,7 @@ class Jat
 
           # includes can have only one key
           nested_result = result.fetch(includes.keys.first)
-          nested_serializer = attrs.fetch(:serializer)
+          nested_serializer = attrs.fetch(:serializer).call
 
           call(nested_serializer, types_keys, nested_result)
         end

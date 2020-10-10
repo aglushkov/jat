@@ -27,7 +27,7 @@ class Jat
           obj[type] ||= []
           obj[type] |= [key]
 
-          nested_serializer = serializer.keys.fetch(key).fetch(:serializer)
+          nested_serializer = serializer.keys.fetch(key).fetch(:serializer).call
           typed_includes(nested_serializer, nested_includes, obj)
         end
       end

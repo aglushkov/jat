@@ -25,7 +25,7 @@ class Jat
 
       def check_key(serializer, type, key)
         type_data = serializer.full_map.fetch(type)
-        type_serializer = type_data.fetch(:serializer)
+        type_serializer = type_data.fetch(:serializer).call
         return if type_serializer.keys.key?(key)
 
         message = "#{type_serializer} has no requested attribute or relationship `#{key}`"

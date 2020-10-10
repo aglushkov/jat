@@ -70,13 +70,13 @@ class Jat
         else
           return unless rel_object
 
-          rel_serializer = opts[:serializer].new(serializer._params, serializer._full_map)
+          rel_serializer = opts[:serializer].call.new(serializer._params, serializer._full_map)
           add_relationship_data(rel_object, rel_serializer, includes)
         end
       end
 
       def add_relationships_data(objects, serializer, opts, includes)
-        rel_serializer = opts[:serializer].new(serializer._params, serializer._full_map)
+        rel_serializer = opts[:serializer].call.new(serializer._params, serializer._full_map)
 
         objects.map { |obj| add_relationship_data(obj, rel_serializer, includes) }
       end

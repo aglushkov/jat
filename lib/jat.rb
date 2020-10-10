@@ -12,11 +12,15 @@ require 'jat/utils/includes_to_hash'
 class Jat
   @options = {
     delegate: true, # false
-    exposed: :default, # all, none
+    exposed: :default # all, none
   }
 
   module ClassMethods
     attr_reader :options
+
+    def call
+      self
+    end
 
     def keys
       @keys ||= {}
@@ -100,7 +104,9 @@ class Jat
 
     def add_delegate_method(name, opts)
       delegate_field = opts[:key]
-      block  = ->(obj, _params) { obj.public_send(delegate_field) }
+      block  = ->(obj, _params) do
+        obj.public_send(delegate_field)
+      end
 
       add_block_method(name, block)
     end
