@@ -63,20 +63,20 @@ class Jat
         rel_object = serializer.public_send(attribute, obj, serializer._params)
         opts = serializer.class.keys[attribute]
 
-        if opts[:many]
+        if opts.many?
           return [] if rel_object.empty?
 
           add_relationships_data(rel_object, serializer, opts, includes)
         else
           return unless rel_object
 
-          rel_serializer = opts[:serializer].call.new(serializer._params, serializer._full_map)
+          rel_serializer = opts.serializer.new(serializer._params, serializer._full_map)
           add_relationship_data(rel_object, rel_serializer, includes)
         end
       end
 
       def add_relationships_data(objects, serializer, opts, includes)
-        rel_serializer = opts[:serializer].call.new(serializer._params, serializer._full_map)
+        rel_serializer = opts.serializer.new(serializer._params, serializer._full_map)
 
         objects.map { |obj| add_relationship_data(obj, rel_serializer, includes) }
       end

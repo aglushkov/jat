@@ -4,6 +4,7 @@ require 'jat/check_key'
 require 'jat/error'
 require 'jat/includes'
 require 'jat/map'
+require 'jat/opts'
 require 'jat/serialization_map'
 require 'jat/serializer'
 require 'jat/services/includes_to_hash'
@@ -58,12 +59,11 @@ class Jat
     end
 
     def attribute(name, **opts, &block)
-      opts = prepare_attributes_opts(opts)
       add_key(name, opts, block)
     end
 
     def relationship(name, serializer:, **opts, &block)
-      opts = prepare_relationship_opts(serializer, opts)
+      opts[:serializer] = serializer
       add_key(name, opts, block)
     end
 
@@ -73,70 +73,25 @@ class Jat
       CheckKey.(name: name, opts: opts, block: block)
 
       name = name.to_sym
-      generate_opts_key(name, opts)
-      generate_opts_include(opts)
+      opts = Opts.new(self, name, opts, block)
       keys[name] = opts
 
-      add_method(name, opts, block)
-
-      [name, opts, block].tap { clear_maps }
+      add_method(name, opts)
+      clear
     end
 
-    def add_method(name, opts, block)
-      if block
-        add_block_method(name, block)
-      else
-        delegate = opts.fetch(:delegate, options[:delegate])
-        add_delegate_method(name, opts) if delegate
-      end
-    end
+    def add_method(name, opts)
+      block = opts.block
+      return if !block
 
-    def add_block_method(name, block)
       # Warning-free method redefinition
       remove_method(name) if method_defined?(name)
-
-      if block.parameters.count == 1
-        define_method(name) { |obj, _params| block.(obj) }
-      else # 2
-        define_method(name, &block)
-      end
+      define_method(name, &block)
     end
 
-    def add_delegate_method(name, opts)
-      delegate_field = opts[:key]
-      block  = ->(obj, _params) do
-        obj.public_send(delegate_field)
-      end
-
-      add_block_method(name, block)
-    end
-
-    def generate_opts_key(name, opts)
-      opts[:key] = opts.key?(:key) ? opts[:key].to_sym : name
-    end
-
-    def generate_opts_include(opts)
-      includes = opts[:serializer] ? opts.fetch(:includes, opts[:key]) : opts[:includes]
-      opts[:includes] = Services::IncludesToHash.(includes) if includes
-    end
-
-    def clear_maps
+    def clear
       @full_map = nil
       @exposed_map = nil
-    end
-
-    def prepare_attributes_opts(opts)
-      exposed = options[:exposed] == :none ? false : true
-
-      defaults = { exposed: exposed }
-      defaults.merge!(opts)
-    end
-
-    def prepare_relationship_opts(serializer, opts)
-      exposed = options[:exposed] == :all ? true : false
-
-      defaults = { exposed: exposed, many: false }
-      defaults.merge!(opts).merge!(serializer: serializer)
     end
   end
 

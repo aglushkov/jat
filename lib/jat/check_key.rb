@@ -71,6 +71,11 @@ class Jat
       end
 
       def check_opts_serializer(opts:, **)
+        check_opts_serializer_type(opts)
+        check_opts_serializer_with_many(opts)
+      end
+
+      def check_opts_serializer_type(opts)
         return unless opts.key?(:serializer)
 
         value = opts[:serializer]
@@ -79,15 +84,18 @@ class Jat
         error "Invalid opts[:serializer] param, must be callable that returns subclass of Jat, but #{value} was given"
       end
 
+      def check_opts_serializer_with_many(opts)
+        return unless opts.key?(:many)
+        return if opts.key?(:serializer)
+
+        error 'opts[:many] must be provided only together with opts[:serializer]'
+      end
+
       def check_opts_many(opts:, **)
         opt_many = opts.key?(:many)
-        opt_serializer = opts.key?(:serializer)
+        return unless opt_many
 
-        if (!opt_many && opt_serializer) || (opt_many && !opt_serializer)
-          error('opts[:many] must be provided together with opts[:serializer]')
-        end
-
-        check_is_boolean(opts[:many], 'opts[:many]') if opt_many
+        check_is_boolean(opts[:many], 'opts[:many]')
       end
 
       # `includes` for relations must be simple Symbol or String. It is

@@ -52,12 +52,18 @@ RSpec.describe Jat do
 
     it 'adds attribute with default params' do
       jat.attribute :foo
-      expect(jat.keys[:foo]).to eq(exposed: true, key: :foo)
+      opts = jat.keys[:foo]
+
+      expect(opts.exposed?).to eq true
+      expect(opts.key).to eq :foo
     end
 
     it 'adds attribute with provided params' do
       jat.attribute :foo, exposed: false, key: :foobar
-      expect(jat.keys[:foo]).to eq(exposed: false, key: :foobar)
+      opts = jat.keys[:foo]
+
+      expect(opts.exposed?).to eq false
+      expect(opts.key).to eq :foobar
     end
 
     it 'delegates attribute' do
@@ -94,14 +100,14 @@ RSpec.describe Jat do
 
     it 'sets `exposed: true` by default' do
       jat.attribute(:key)
-      expect(jat.keys[:key][:exposed]).to eq true
+      expect(jat.keys[:key].exposed?).to eq true
     end
 
     it 'sets `exposed: false` when global option `exposed: :none` provided' do
       jat.options[:exposed] = :none
       jat.attribute(:key)
 
-      expect(jat.keys[:key][:exposed]).to eq false
+      expect(jat.keys[:key].exposed?).to eq false
     end
   end
 
@@ -119,32 +125,32 @@ RSpec.describe Jat do
     it 'adds relationship with default params' do
       ser = Class.new(Jat)
       jat.relationship :foo, serializer: ser
-      expect(jat.keys[:foo]).to eq(
-        exposed: false,
-        key: :foo,
-        many: false,
-        serializer: ser,
-        includes: { foo: {} }
-      )
+      opts = jat.keys[:foo]
+
+      expect(opts.key).to eq :foo
+      expect(opts.serializer).to eq ser
+      expect(opts.includes).to eq(foo: {})
+      expect(opts.exposed?).to eq false
+      expect(opts.many?).to eq false
     end
 
     it 'adds relationship with provided params' do
       ser = Class.new(Jat)
       jat.relationship :foo, serializer: ser, exposed: true, many: true, key: :foobar, includes: :bazz
-      expect(jat.keys[:foo]).to eq(
-        serializer: ser,
-        exposed: true,
-        many: true,
-        key: :foobar,
-        includes: { bazz: {}}
-      )
+      opts = jat.keys[:foo]
+
+      expect(opts.key).to eq :foobar
+      expect(opts.serializer).to eq ser
+      expect(opts.includes).to eq(bazz: {})
+      expect(opts.exposed?).to eq true
+      expect(opts.many?).to eq true
     end
 
     it 'sets `exposed: false` by default' do
       ser = Class.new(Jat)
       jat.relationship :key, serializer: ser
 
-      expect(jat.keys[:key][:exposed]).to eq false
+      expect(jat.keys[:key].exposed?).to eq false
     end
 
     it 'sets `exposed: true` when global option `exposed: :all` provided' do
@@ -152,7 +158,7 @@ RSpec.describe Jat do
       jat.options[:exposed] = :all
       jat.relationship :key, serializer: ser
 
-      expect(jat.keys[:key][:exposed]).to eq true
+      expect(jat.keys[:key].exposed?).to eq true
     end
   end
 

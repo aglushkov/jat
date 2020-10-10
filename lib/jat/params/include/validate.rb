@@ -10,13 +10,10 @@ class Jat
         class << self
           def call(serializer, includes)
             includes.each do |key, nested_includes|
-              data = serializer.keys[key]
-              raise_error(serializer, key) unless data
+              opts = serializer.keys[key]
+              raise_error(serializer, key) if !opts || !opts.relation?
 
-              nested_serializer = data[:serializer]
-              raise_error(serializer, key) unless nested_serializer
-
-              call(nested_serializer.call, nested_includes)
+              call(opts.serializer, nested_includes)
             end
           end
 

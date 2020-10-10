@@ -39,24 +39,23 @@ class Jat
           relationships: type_relationships
         }
 
-        serializer.keys.each do |key, key_data|
-          next if skip_key?(serializer, key, key_data, map_type, exposed)
+        serializer.keys.each do |key, opts|
+          next if skip_key?(serializer, key, opts, map_type, exposed)
 
-          key_serializer = key_data[:serializer]
-          if key_serializer
+          if opts.relation?
             type_relationships << key
-            keys(key_serializer.call, map_type, exposed, result)
+            keys(opts.serializer, map_type, exposed, result)
           else
             type_attributes << key
           end
         end
       end
 
-      def skip_key?(serializer, key, key_data, map_type, exposed)
+      def skip_key?(serializer, key, opts, map_type, exposed)
         return false if map_type == :all || exposed.fetch(serializer.type, EMPTY_ARRAY).include?(key)
         return true if map_type == :none
 
-        !key_data[:exposed]
+        !opts.exposed?
       end
     end
   end

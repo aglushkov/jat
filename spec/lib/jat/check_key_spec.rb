@@ -102,22 +102,21 @@ RSpec.describe Jat::CheckKey do
     expect { check.(params) }.to raise_error Jat::Error, /opts\[:delegate\]/
   end
 
-  it 'allows only subclass of Jat serializer class in opts[:serializer]' do
+  it 'allows only callable is in opts[:serializer]' do
     opts[:many] = true
     opts[:serializer] = Class.new(Jat)
     expect { check.(params) }.not_to raise_error
 
     opts[:serializer] = nil
-    expect { check.(params) }.to raise_error Jat::Error, /opts\[:serializer\]/
+    expect { check.(params) }.to raise_error Jat::Error, /callable/
+  end
 
-    opts[:serializer] = []
-    expect { check.(params) }.to raise_error Jat::Error, /opts\[:serializer\]/
+  it 'requires opts[:serializer] with opts[:many]' do
+    opts[:many] = true
+    expect { check.(params) }.to raise_error Jat::Error, /opts\[:many\].*opts\[:serializer\]/
 
-    opts[:serializer] = Class.new
-    expect { check.(params) }.to raise_error Jat::Error, /opts\[:serializer\]/
-
-    opts[:serializer] = [Class.new]
-    expect { check.(params) }.to raise_error Jat::Error, /opts\[:serializer\]/
+    opts[:serializer] = Class.new(Jat)
+    expect { check.(params) }.not_to raise_error
   end
 
   it 'does not allows opts :key and block together' do
@@ -188,26 +187,23 @@ RSpec.describe Jat::CheckKey do
     expect { check.(params) }.to raise_error Jat::Error, /opts\[:includes\]/
   end
 
-  it 'required opts[:many] of type Boolean when serializer provided' do
+  it 'required opts[:many] of type Boolean if provided' do
     opts[:serializer] = Class.new(Jat)
-    expect { check.(params) }.to raise_error Jat::Error, /opts\[:many\].*opts\[:serializer\]/
 
-    opts[:many] = nil
-    expect { check.(params) }.to raise_error Jat::Error, /opts\[:many\].*boolean/i
-
-    opts[:many] = :foo
-    expect { check.(params) }.to raise_error Jat::Error, /opts\[:many\].*boolean/i
+    opts.delete(:many)
+    expect { check.(params) }.not_to raise_error
 
     opts[:many] = true
     expect { check.(params) }.not_to raise_error
 
     opts[:many] = false
     expect { check.(params) }.not_to raise_error
-  end
 
-  it 'required opts[:many] to be not provided when serializer not provided' do
-    opts[:many] = true
-    expect { check.(params) }.to raise_error Jat::Error, /opts\[:many\].*opts\[:serializer\]/
+    opts[:many] = nil
+    expect { check.(params) }.to raise_error Jat::Error, /opts\[:many\].*boolean/i
+
+    opts[:many] = :foo
+    expect { check.(params) }.to raise_error Jat::Error, /opts\[:many\].*boolean/i
   end
 
   it 'checks extra opts keys' do
