@@ -3,7 +3,7 @@
 class Jat
   class CheckKey
     module ClassMethods
-      ALLOWED_OPTS = %i[key delegate serializer includes many exposed]
+      ALLOWED_OPTS = %i[key delegate serializer includes many exposed].freeze
 
       # @param params [Hash] new key params, includes :name, :opts, :block keys
       def call(params)
@@ -88,9 +88,6 @@ class Jat
         end
       end
 
-      def check_opts_serializer_proc
-      end
-
       def check_opts_serializer_with_many(opts)
         return unless opts.key?(:many)
         return if opts.key?(:serializer)
@@ -112,6 +109,7 @@ class Jat
       # need to include anything nested inside it.
       def check_opts_includes(opts:, **)
         return unless opts.key?(:includes)
+
         value = opts[:includes]
         opt_name = 'opts[:includes]'
 

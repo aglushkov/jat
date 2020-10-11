@@ -1,6 +1,5 @@
 module CrossRef
   class User
-    attr_accessor :id
-    attr_accessor :comments
+    attr_accessor :id, :comments
   end
 end

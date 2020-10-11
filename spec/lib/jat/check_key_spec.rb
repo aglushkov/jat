@@ -110,7 +110,7 @@ RSpec.describe Jat::CheckKey do
     opts[:serializer] = -> { Class.new(Jat) }
     expect { check.(params) }.not_to raise_error
 
-    opts[:serializer] = ->(foo) { Class.new(Jat) }
+    opts[:serializer] = ->(_foo) { Class.new(Jat) }
     expect { check.(params) }.to raise_error Jat::Error, /no params/
 
     opts[:serializer] = nil
@@ -177,7 +177,7 @@ RSpec.describe Jat::CheckKey do
     opts[:includes] = { a: { b: [{ c: :d }, :e] } }
     expect { check.(params) }.not_to raise_error
 
-    opts[:includes] = [:a, b: [:c, :d]]
+    opts[:includes] = [:a, {b: %i[c d]}]
     expect { check.(params) }.not_to raise_error
 
     opts[:includes] = nil

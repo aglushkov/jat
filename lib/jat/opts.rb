@@ -47,10 +47,11 @@ class Jat
     def serializer
       return @serializer if defined?(@serializer)
 
-      @serializer = if relation?
-        value = opts[:serializer]
-        value.is_a?(Proc) ? proc_serializer(value) : value
-      end
+      @serializer =
+        if relation?
+          value = opts[:serializer]
+          value.is_a?(Proc) ? proc_serializer(value) : value
+        end
     end
 
     def includes
@@ -97,11 +98,11 @@ class Jat
 
     def delegate_block
       delegate_field = key
-      -> (obj, _params) { obj.public_send(delegate_field) }
+      ->(obj, _params) { obj.public_send(delegate_field) }
     end
 
     def proc_serializer(value)
-      value = value.call
+      value = value.()
       return value if value.is_a?(Class) && (value < Jat)
 
       raise Jat::Error, "Invalid serializer `#{value.inspect}`, must be a subclass of Jat"

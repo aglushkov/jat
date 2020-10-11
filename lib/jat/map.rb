@@ -1,61 +1,41 @@
 # frozen_string_literal: true
 
-# Combines all serializer and its realtions exposed fields into one hash
+require 'jat/params/fields'
+require 'jat/params/include'
+
 class Jat
   class Map
-    EMPTY_ARRAY = [].freeze
-    EMPTY_HASH = {}.freeze
-
+    # This must return structure like
+    # {
+    #   type => {
+    #     attributes: [attr1, attr2, ...],
+    #     relationships: [rel1, rel2, ...]
+    #   }
+    # }
     class << self
-      # returns Hash
-      # {
-      #   type1 => {
-      #     serializer: ser1,
-      #     attributes: [key1, key2, ...],
-      #     relationships: [key1, key2, ...]
-      #   },
-      #   ...
-      # }
-      #
-      # @map_type can be :all, :none, :exposed
-      def call(serializer, map_type, exposed: EMPTY_HASH)
-        result = {}
-        keys(serializer, map_type, exposed, result)
-        result
+      def call(serializer, fields, includes)
+        return requested_fields(serializer, fields) if fields
+        return requested_includes_fields(serializer, includes) if includes
+
+        serializer.exposed_map
       end
 
       private
 
-      def keys(serializer, map_type, exposed, result)
-        type = serializer.type
-        return result if result.key?(type)
+      def requested_fields(serializer, fields)
+        fields_types = Params::Fields.(serializer, fields)
 
-        type_attributes = []
-        type_relationships = []
-
-        result[type] = {
-          serializer: serializer,
-          attributes: type_attributes,
-          relationships: type_relationships
-        }
-
-        serializer.keys.each do |key, opts|
-          next if skip_key?(serializer, key, opts, map_type, exposed)
-
-          if opts.relation?
-            type_relationships << key
-            keys(opts.serializer, map_type, exposed, result)
-          else
-            type_attributes << key
-          end
-        end
+        Services::ConstructMap
+          .new(:none, exposed_additionally: fields_types)
+          .for(serializer)
       end
 
-      def skip_key?(serializer, key, opts, map_type, exposed)
-        return false if map_type == :all || exposed.fetch(serializer.type, EMPTY_ARRAY).include?(key)
-        return true if map_type == :none
+      def requested_includes_fields(serializer, includes)
+        include_types = Params::Include.(serializer, includes)
 
-        !opts.exposed?
+        Services::ConstructMap
+          .new(:default, exposed_additionally: include_types)
+          .for(serializer)
       end
     end
   end

@@ -5,8 +5,8 @@ require 'jat/error'
 require 'jat/includes'
 require 'jat/map'
 require 'jat/opts'
-require 'jat/serialization_map'
 require 'jat/serializer'
+require 'jat/services/construct_map'
 require 'jat/services/includes_to_hash'
 
 # Main namespace
@@ -34,24 +34,25 @@ class Jat
         @type = new_type
       else
         raise Error, "#{self} has no defined type" unless @type
+
         @type
       end
     end
 
     def id(key: nil, &block)
       raise Error, "Key and block can't be provided together" if key && block
-      raise Error, "Key or block must be provided" if !key && !block
+      raise Error, 'Key or block must be provided' if !key && !block
 
       block ||= proc { |obj| obj.public_send(key) }
       define_method(:id, &block)
     end
 
     def full_map
-      @full_map ||= Map.(self, :all)
+      @full_map ||= Services::ConstructMap.new(:all).for(self)
     end
 
     def exposed_map
-      @exposed_map ||= Map.(self, :exposed)
+      @exposed_map ||= Services::ConstructMap.new(:exposed).for(self)
     end
 
     def attribute(name, **opts, &block)
@@ -78,7 +79,7 @@ class Jat
 
     def add_method(name, opts)
       block = opts.block
-      return if !block
+      return unless block
 
       # Warning-free method redefinition
       remove_method(name) if method_defined?(name)
@@ -100,7 +101,7 @@ class Jat
       @_full_map = full_map || begin
         fields = params && (params[:fields] || params['fields'])
         includes = params && (params[:include] || params['include'])
-        SerializationMap.(self.class, fields, includes)
+        Map.(self.class, fields, includes)
       end
       @_map = @_full_map.fetch(type)
     end

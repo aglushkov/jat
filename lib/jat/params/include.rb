@@ -3,7 +3,6 @@
 require 'jat/params/include/parse'
 require 'jat/params/include/validate'
 
-
 class Jat
   module Params
     class Include

@@ -1,93 +1,93 @@
 # frozen_string_literal: true
 
 RSpec.describe Jat::Map do
-  let(:a) do
-    ser = Class.new(Jat)
-    ser.type :a
+  subject { described_class.(serializer, fields, includes) }
 
-    ser.attribute :a1
-    ser.attribute :a2
-    ser.attribute :a3, exposed: false
+  let(:serializer) { Class.new(Jat) }
+  let(:fields) { nil }
+  let(:includes) { nil }
 
-    ser.relationship :b, serializer: b
-    ser.relationship :c, serializer: c
-    ser.relationship :d, serializer: d, exposed: true
-    ser
+  context 'when no params given' do
+    before { allow(serializer).to receive(:exposed_map).and_return('EXPOSED_MAP') }
+
+    it 'returns map of exposed by default fields' do
+      expect(subject).to eq 'EXPOSED_MAP'
+    end
   end
 
-  let(:b) do
-    ser = Class.new(Jat)
-    ser.type :b
-    ser.attribute :b1
-    ser.attribute :b2
-    ser.attribute :b3, exposed: false
-    ser
+  context 'when fields given' do
+    let(:fields) { 'FIELDS' }
+
+    it 'constructs map with only provided fields' do
+      constructor = instance_double(Jat::Services::ConstructMap)
+
+      allow(Jat::Params::Fields)
+        .to receive(:call)
+        .with(serializer, 'FIELDS')
+        .and_return('PARSED_FIELDS')
+
+      allow(Jat::Services::ConstructMap)
+        .to receive(:new)
+        .with(:none, exposed_additionally: 'PARSED_FIELDS')
+        .and_return(constructor)
+
+      allow(constructor)
+        .to receive(:for)
+        .with(serializer)
+        .and_return('FIELDS_MAP')
+
+      expect(subject).to eq 'FIELDS_MAP'
+    end
   end
 
-  let(:c) do
-    ser = Class.new(Jat)
-    ser.type :c
-    ser.attribute :c1
-    ser.attribute :c2
-    ser.attribute :c3, exposed: false
-    ser
+  context 'when includes given' do
+    let(:includes) { 'INCLUDES' }
+
+    it 'constructs map with default and included fields' do
+      constructor = instance_double(Jat::Services::ConstructMap)
+
+      allow(Jat::Params::Include)
+        .to receive(:call)
+        .with(serializer, 'INCLUDES')
+        .and_return('PARSED_INCLUDES')
+
+      allow(Jat::Services::ConstructMap)
+        .to receive(:new)
+        .with(:default, exposed_additionally: 'PARSED_INCLUDES')
+        .and_return(constructor)
+
+      allow(constructor)
+        .to receive(:for)
+        .with(serializer)
+        .and_return('INCLUDES_MAP')
+
+      expect(subject).to eq 'INCLUDES_MAP'
+    end
   end
 
-  let(:d) do
-    ser = Class.new(Jat)
-    ser.type :d
-    ser.attribute :d1
-    ser.attribute :d2
-    ser.attribute :d3, exposed: false
-    ser
-  end
+  context 'when fields and includes given' do
+    let(:fields) { 'FIELDS' }
+    let(:includes) { 'INCLUDES' }
 
-  it 'returns all attributes' do
-    result = described_class.(a, :all)
+    it 'constructs map with only provided fields (and does not use includes)' do
+      constructor = instance_double(Jat::Services::ConstructMap)
 
-    expect(result).to eq(
-      a: { serializer: a, attributes: %i[a1 a2 a3], relationships: %i[b c d] },
-      b: { serializer: b, attributes: %i[b1 b2 b3], relationships: [] },
-      c: { serializer: c, attributes: %i[c1 c2 c3], relationships: [] },
-      d: { serializer: d, attributes: %i[d1 d2 d3], relationships: [] }
-    )
-  end
+      allow(Jat::Params::Fields)
+        .to receive(:call)
+        .with(serializer, 'FIELDS')
+        .and_return('PARSED_FIELDS')
 
-  it 'returns exposed attributes' do
-    result = described_class.(a, :exposed)
+      allow(Jat::Services::ConstructMap)
+        .to receive(:new)
+        .with(:none, exposed_additionally: 'PARSED_FIELDS')
+        .and_return(constructor)
 
-    expect(result).to eq(
-      a: { serializer: a, attributes: %i[a1 a2], relationships: %i[d] },
-      d: { serializer: d, attributes: %i[d1 d2], relationships: [] }
-    )
-  end
+      allow(constructor)
+        .to receive(:for)
+        .with(serializer)
+        .and_return('FIELDS_MAP')
 
-  it 'returns only manually exposed per-type attributes' do
-    exposed = {
-      a: %i[a2 a3 c d],
-      c: %i[c2 c3],
-      d: %i[d2 d3]
-    }
-    result = described_class.(a, :none, exposed: exposed)
-
-    expect(result).to eq(
-      a: { serializer: a, attributes: %i[a2 a3], relationships: %i[c d] },
-      c: { serializer: c, attributes: %i[c2 c3], relationships: [] },
-      d: { serializer: d, attributes: %i[d2 d3], relationships: [] }
-    )
-  end
-
-  it 'returns combined auto-exposed and manualy exposed attributes' do
-    exposed = {
-      a: %i[c],
-      c: %i[c3],
-    }
-    result = described_class.(a, :exposed, exposed: exposed)
-
-    expect(result).to eq(
-      a: { serializer: a, attributes: %i[a1 a2], relationships: %i[c d] },
-      c: { serializer: c, attributes: %i[c1 c2 c3], relationships: [] },
-      d: { serializer: d, attributes: %i[d1 d2], relationships: [] }
-    )
+      expect(subject).to eq 'FIELDS_MAP'
+    end
   end
 end

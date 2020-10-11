@@ -42,8 +42,8 @@ class Jat
         attributes = serializer._map[:attributes]
         return if attributes.empty?
 
-        result[:attributes] = attributes.each_with_object({}) do |attribute, attrs|
-          attrs[attribute] = serializer.public_send(attribute, obj, serializer._params)
+        result[:attributes] = attributes.each_with_object({}) do |name, attrs|
+          attrs[name] = serializer.public_send(name, obj, serializer._params)
         end
       end
 
@@ -51,17 +51,14 @@ class Jat
         relationships = serializer._map[:relationships]
         return if relationships.empty?
 
-        result[:relationships] = relationships.each_with_object({}) do |attribute, rels|
-          data = any_relationship_data(obj, serializer, attribute, includes)
-          rels_attribute = {}
-          rels_attribute[:data] = data
-          rels[attribute] = rels_attribute
+        result[:relationships] = relationships.each_with_object({}) do |name, rels|
+          rels[name] = { data: relationship_data(obj, serializer, name, includes) }
         end
       end
 
-      def any_relationship_data(obj, serializer, attribute, includes)
-        rel_object = serializer.public_send(attribute, obj, serializer._params)
-        opts = serializer.class.keys[attribute]
+      def relationship_data(obj, serializer, name, includes)
+        rel_object = serializer.public_send(name, obj, serializer._params)
+        opts = serializer.class.keys[name]
 
         if opts.many?
           return [] if rel_object.empty?

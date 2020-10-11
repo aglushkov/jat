@@ -19,5 +19,5 @@ class Jat
         end
       end
     end
-    end
+  end
 end
