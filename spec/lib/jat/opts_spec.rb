@@ -9,21 +9,23 @@ RSpec.describe Jat::Opts do
   let(:original_block) { nil }
 
   describe '#name' do
-    subject { opts.name }
+    subject(:new_name) { opts.name }
+
     let(:name) { 'foo' }
 
     it 'symbolizes name' do
-      expect(subject).to eq :foo
+      expect(new_name).to eq :foo
     end
   end
 
   describe '#key' do
-    subject { opts.key }
+    subject(:key) { opts.key }
+
     let(:name) { 'foo' }
 
     context 'when no key provided' do
       it 'defaults to name' do
-        expect(subject).to eq :foo
+        expect(key).to eq :foo
       end
     end
 
@@ -31,18 +33,19 @@ RSpec.describe Jat::Opts do
       let(:data) { { key: 'foo_key' } }
 
       it 'returns symbolized data key' do
-        expect(subject).to eq :foo_key
+        expect(key).to eq :foo_key
       end
     end
   end
 
   describe '#delegate?' do
-    subject { opts.delegate? }
+    subject(:is_delegate) { opts.delegate? }
+
     before { jat.options[:delegate] = true }
 
     context 'when no key provided' do
       it 'defaults to serializer delegate option' do
-        expect(subject).to eq true
+        expect(is_delegate).to eq true
       end
     end
 
@@ -50,19 +53,19 @@ RSpec.describe Jat::Opts do
       let(:data) { { delegate: false } }
 
       it 'returns provided value' do
-        expect(subject).to eq false
+        expect(is_delegate).to eq false
       end
     end
   end
 
   describe '#exposed?' do
-    subject { opts.exposed? }
+    subject(:is_exposed) { opts.exposed? }
 
     context 'when key provided' do
       let(:data) { { exposed: false } }
 
       it 'returns provided value' do
-        expect(subject).to eq false
+        expect(is_exposed).to eq false
       end
     end
 
@@ -70,7 +73,7 @@ RSpec.describe Jat::Opts do
       before { jat.options[:exposed] = :all }
 
       it 'returns true' do
-        expect(subject).to eq true
+        expect(is_exposed).to eq true
       end
     end
 
@@ -78,35 +81,37 @@ RSpec.describe Jat::Opts do
       before { jat.options[:exposed] = :none }
 
       it 'returns false' do
-        expect(subject).to eq false
+        expect(is_exposed).to eq false
       end
     end
 
     context 'with serializer by default' do
       before { jat.options[:exposed] = :default }
+
       let(:data) { { serializer: jat } }
 
       it 'returns false when has serializer' do
-        expect(subject).to eq false
+        expect(is_exposed).to eq false
       end
     end
 
     context 'without serializer by default' do
       before { jat.options[:exposed] = :default }
+
       let(:data) { {} }
 
       it 'returns true' do
-        expect(subject).to eq true
+        expect(is_exposed).to eq true
       end
     end
   end
 
   describe '#many?' do
-    subject { opts.many? }
+    subject(:is_many) { opts.many? }
 
     context 'when no key provided' do
       it 'defaults to false' do
-        expect(subject).to eq false
+        expect(is_many).to eq false
       end
     end
 
@@ -114,17 +119,17 @@ RSpec.describe Jat::Opts do
       let(:data) { { many: true } }
 
       it 'returns provided data' do
-        expect(subject).to eq true
+        expect(is_many).to eq true
       end
     end
   end
 
   describe '#relation?' do
-    subject { opts.relation? }
+    subject(:is_relation) { opts.relation? }
 
     context 'when no serializer key' do
       it 'returns false' do
-        expect(subject).to eq false
+        expect(is_relation).to eq false
       end
     end
 
@@ -132,18 +137,17 @@ RSpec.describe Jat::Opts do
       let(:data) { { serializer: jat } }
 
       it 'returns true' do
-        expect(subject).to eq true
+        expect(is_relation).to eq true
       end
     end
   end
 
-
   describe '#serializer' do
-    subject { opts.serializer }
+    subject(:serializer) { opts.serializer }
 
     context 'when no serializer key' do
       it 'returns nil' do
-        expect(subject).to eq nil
+        expect(serializer).to eq nil
       end
     end
 
@@ -151,7 +155,7 @@ RSpec.describe Jat::Opts do
       let(:data) { { serializer: jat } }
 
       it 'returns provided serializer' do
-        expect(subject).to eq jat
+        expect(serializer).to eq jat
       end
     end
 
@@ -159,7 +163,7 @@ RSpec.describe Jat::Opts do
       let(:data) { { serializer: -> { jat } } }
 
       it 'returns provided serializer' do
-        expect(subject).to eq jat
+        expect(serializer).to eq jat
       end
     end
 
@@ -167,17 +171,17 @@ RSpec.describe Jat::Opts do
       let(:data) { { serializer: -> { nil } } }
 
       it 'raises error' do
-        expect { subject }.to raise_error Jat::Error, /must be a subclass of Jat/
+        expect { serializer }.to raise_error Jat::Error, /must be a subclass of Jat/
       end
     end
   end
 
   describe '#includes' do
-    subject { opts.includes }
+    subject(:includes) { opts.includes }
 
     context 'when no data provided and no serializer' do
       it 'returns nil' do
-        expect(subject).to eq nil
+        expect(includes).to eq nil
       end
     end
 
@@ -185,7 +189,7 @@ RSpec.describe Jat::Opts do
       let(:data) { { includes: { some: :data } } }
 
       it 'returns transformed hash' do
-        expect(subject).to eq(some: { data: {}})
+        expect(includes).to eq(some: { data: {} })
       end
     end
 
@@ -195,7 +199,7 @@ RSpec.describe Jat::Opts do
       it 'generates hash from current key' do
         allow(opts).to receive(:key).and_return(:foobar)
 
-        expect(subject).to eq(foobar: {})
+        expect(includes).to eq(foobar: {})
       end
     end
 
@@ -203,19 +207,19 @@ RSpec.describe Jat::Opts do
       let(:data) { { includes: :data } }
 
       it 'returns transformed hash' do
-        expect(subject).to eq(data: {})
+        expect(includes).to eq(data: {})
       end
     end
   end
 
   describe '#block' do
-    subject { opts.block }
+    subject(:block) { opts.block }
 
     context 'with block with two params' do
       let(:original_block) { ->(arg1, arg2) {} }
 
       it 'returns this block' do
-        expect(subject).to eq original_block
+        expect(block).to eq original_block
       end
     end
 
@@ -223,11 +227,11 @@ RSpec.describe Jat::Opts do
       let(:original_block) { ->(arg) { arg } }
 
       it 'returns block with two params that delegates first param to original block' do
-        res = subject
+        res = block
 
         expect(res).to be_a Proc
         expect(res.parameters.count).to eq 2
-        expect(res.call('foo', 'bar')).to eq 'foo'
+        expect(res.('foo', 'bar')).to eq 'foo'
       end
     end
 
@@ -238,12 +242,12 @@ RSpec.describe Jat::Opts do
       end
 
       it 'constructs block that calls current key method on object' do
-        res = subject
+        res = block
 
         object = Array.new(3)
         expect(res).to be_a Proc
         expect(res.parameters.count).to eq 2
-        expect(res.call(object, nil)).to eq 3
+        expect(res.(object, nil)).to eq 3
       end
     end
 
@@ -252,7 +256,7 @@ RSpec.describe Jat::Opts do
       let(:original_block) { nil }
 
       it 'returns nil' do
-        expect(subject).to eq nil
+        expect(block).to eq nil
       end
     end
   end

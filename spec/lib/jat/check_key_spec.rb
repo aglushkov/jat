@@ -177,7 +177,7 @@ RSpec.describe Jat::CheckKey do
     opts[:includes] = { a: { b: [{ c: :d }, :e] } }
     expect { check.(params) }.not_to raise_error
 
-    opts[:includes] = [:a, {b: %i[c d]}]
+    opts[:includes] = [:a, { b: %i[c d] }]
     expect { check.(params) }.not_to raise_error
 
     opts[:includes] = nil

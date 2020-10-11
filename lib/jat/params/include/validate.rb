@@ -9,16 +9,16 @@ class Jat
       class Validate
         class << self
           def call(serializer, includes)
-            includes.each do |key, nested_includes|
-              opts = serializer.keys[key]
-              raise_error(serializer, key) if !opts || !opts.relation?
+            includes.each do |attr, nested_includes|
+              opts = serializer.attrs[attr]
+              raise_error(serializer, attr) if !opts || !opts.relation?
 
               call(opts.serializer, nested_includes)
             end
           end
 
-          def raise_error(serializer, key)
-            raise Invalid, "#{serializer} has no `#{key}` relationship"
+          def raise_error(serializer, attr)
+            raise Invalid, "#{serializer} has no `#{attr}` relationship"
           end
         end
       end

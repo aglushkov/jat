@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Jat::Map do
-  subject { described_class.(serializer, fields, includes) }
+  subject(:map) { described_class.(serializer, fields, includes) }
 
   let(:serializer) { Class.new(Jat) }
   let(:fields) { nil }
@@ -11,7 +11,7 @@ RSpec.describe Jat::Map do
     before { allow(serializer).to receive(:exposed_map).and_return('EXPOSED_MAP') }
 
     it 'returns map of exposed by default fields' do
-      expect(subject).to eq 'EXPOSED_MAP'
+      expect(map).to eq 'EXPOSED_MAP'
     end
   end
 
@@ -36,7 +36,7 @@ RSpec.describe Jat::Map do
         .with(serializer)
         .and_return('FIELDS_MAP')
 
-      expect(subject).to eq 'FIELDS_MAP'
+      expect(map).to eq 'FIELDS_MAP'
     end
   end
 
@@ -61,7 +61,7 @@ RSpec.describe Jat::Map do
         .with(serializer)
         .and_return('INCLUDES_MAP')
 
-      expect(subject).to eq 'INCLUDES_MAP'
+      expect(map).to eq 'INCLUDES_MAP'
     end
   end
 
@@ -87,7 +87,7 @@ RSpec.describe Jat::Map do
         .with(serializer)
         .and_return('FIELDS_MAP')
 
-      expect(subject).to eq 'FIELDS_MAP'
+      expect(map).to eq 'FIELDS_MAP'
     end
   end
 end

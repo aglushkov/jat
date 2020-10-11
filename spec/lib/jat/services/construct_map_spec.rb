@@ -80,7 +80,7 @@ RSpec.describe Jat::Services::ConstructMap do
   it 'returns combined auto-exposed and manualy exposed attributes' do
     exposed = {
       a: %i[c],
-      c: %i[c3],
+      c: %i[c3]
     }
     result = described_class.new(:exposed, exposed_additionally: exposed).for(a)
 

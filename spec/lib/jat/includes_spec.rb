@@ -16,7 +16,7 @@ RSpec.describe Jat::Includes do
   it 'returns empty hash when no attributes requested' do
     types_keys = { user: { attributes: [], relationships: [] } }
 
-    result = described_class.(user_serializer, types_keys)
+    result = described_class.new(types_keys).for(user_serializer)
     expect(result).to eq({})
   end
 
@@ -24,7 +24,7 @@ RSpec.describe Jat::Includes do
     user_serializer.attribute :name
     types_keys = { user: { attributes: [:name], relationships: [] } }
 
-    result = described_class.(user_serializer, types_keys)
+    result = described_class.new(types_keys).for(user_serializer)
     expect(result).to eq({})
   end
 
@@ -32,7 +32,7 @@ RSpec.describe Jat::Includes do
     user_serializer.attribute :name, includes: :profile
     types_keys = { user: { attributes: [:name], relationships: [] } }
 
-    result = described_class.(user_serializer, types_keys)
+    result = described_class.new(types_keys).for(user_serializer)
     expect(result).to eq(profile: {})
   end
 
@@ -43,7 +43,7 @@ RSpec.describe Jat::Includes do
 
     types_keys = { user: { attributes: %i[first_name phone email], relationships: [] } }
 
-    result = described_class.(user_serializer, types_keys)
+    result = described_class.new(types_keys).for(user_serializer)
     expect(result).to eq(profile: { phones: {}, emails: {} })
   end
 
@@ -57,7 +57,7 @@ RSpec.describe Jat::Includes do
       profile: { attributes: [], relationships: [] }
     }
 
-    result = described_class.(user_serializer, types_keys)
+    result = described_class.new(types_keys).for(user_serializer)
     expect(result).to eq({})
   end
 
@@ -68,7 +68,7 @@ RSpec.describe Jat::Includes do
       profile: { attributes: [], relationships: [] }
     }
 
-    result = described_class.(user_serializer, types_keys)
+    result = described_class.new(types_keys).for(user_serializer)
     expect(result).to eq(profile: {})
   end
 
@@ -81,7 +81,7 @@ RSpec.describe Jat::Includes do
       profile: { attributes: %i[email], relationships: [] }
     }
 
-    result = described_class.(user_serializer, types_keys)
+    result = described_class.new(types_keys).for(user_serializer)
     expect(result).to eq(profile: { confirmed_email: {}, unconfirmed_email: {} })
   end
 

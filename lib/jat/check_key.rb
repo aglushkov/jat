@@ -124,8 +124,9 @@ class Jat
 
       # Simple object consists of symbols, strings, arrays, hashes with symbol or string keys
       def check_is_simple_object(value, opt_name)
+        return if value.is_a?(Symbol) || value.is_a?(String)
+
         case value
-        when Symbol, String
         when Hash
           value.each do |key, val|
             invalid_includes_error(opt_name) if !key.is_a?(Symbol) && !key.is_a?(String)

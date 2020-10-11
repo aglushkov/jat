@@ -9,6 +9,11 @@ Style/SingleLineMethods:
   Enabled: false
 
 RSpec/ExampleLength:
-  Max: 10
+  Enabled: false
 
+RSpec/MultipleExpectations:
+  Enabled: false
 
+RSpec/DescribeClass:
+  Exclude:
+    - features/**/*_spec.rb

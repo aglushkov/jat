@@ -2,14 +2,14 @@
 
 RSpec.describe Jat::Serializer do
   it 'returns empty hash when nothing to serialize' do
-    empty_serializer = Class.new(Jat) { type(:type)  }
+    empty_serializer = Class.new(Jat) { type(:type) }
     result = empty_serializer.new.to_h(nil)
 
     expect(result).to eq({})
   end
 
   it 'returns correct structure with meta' do
-    empty_serializer = Class.new(Jat) { type(:type)  }
+    empty_serializer = Class.new(Jat) { type(:type) }
     result = empty_serializer.new.to_h(nil, meta: { any: :thing })
 
     expect(result).to eq(meta: { any: :thing })
@@ -104,7 +104,7 @@ RSpec.describe Jat::Serializer do
     str_serializer = Class.new(Jat) do
       type 'str'
       id { |obj| obj[0] }
-      relationship(:length, serializer: self, exposed: true) { |obj| nil }
+      relationship(:length, serializer: self, exposed: true) { |_obj| nil }
     end
 
     result = str_serializer.new.to_h('STRING')
@@ -152,7 +152,7 @@ RSpec.describe Jat::Serializer do
 
     str_serializer = Class.new(Jat) do
       type 'str'
-      id { |obj| 'id' }
+      id { |_obj| 'id' }
       relationship :chars, serializer: chr_serializer, many: true, exposed: true
     end
 
@@ -233,7 +233,7 @@ RSpec.describe Jat::Serializer do
       relationship :chars, serializer: chr_serializer, many: true, exposed: false
     end
 
-    result = str_serializer.new(include: 'chars').to_h('ab', )
+    result = str_serializer.new(include: 'chars').to_h('ab')
 
     expect(result).to eq(
       data: {
@@ -249,7 +249,7 @@ RSpec.describe Jat::Serializer do
   end
 
   it 'accepts sparse_fieldset' do
-   chr_serializer = Class.new(Jat) do
+    chr_serializer = Class.new(Jat) do
       type 'chr'
       id { |obj| obj }
     end

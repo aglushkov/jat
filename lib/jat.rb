@@ -19,12 +19,13 @@ class Jat
   module ClassMethods
     attr_reader :options
 
-    def keys
-      @keys ||= {}
+    def attrs
+      @attrs ||= {}
     end
 
     def inherited(subclass)
       subclass.instance_variable_set(:@options, options.dup)
+      super
     end
 
     def type(new_type = nil)
@@ -71,7 +72,7 @@ class Jat
 
       name = name.to_sym
       opts = Opts.new(self, name, opts, block)
-      keys[name] = opts
+      attrs[name] = opts
 
       add_method(name, opts)
       clear
@@ -115,7 +116,7 @@ class Jat
     end
 
     def _includes
-      Includes.(self.class, _full_map)
+      Includes.new(_full_map).for(self.class)
     end
   end
 

@@ -8,11 +8,8 @@ Metrics/BlockLength:
   Exclude:
     - spec/**/*
 
-Style/ClassAndModuleChildren:
-  Exclude:
-    - lib/jat.rb
-  EnforcedStyle: compact
-
 Style/LambdaCall:
   EnforcedStyle: braces
 
+Style/Documentation:
+  Enabled: false

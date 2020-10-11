@@ -40,34 +40,33 @@ RSpec.describe Jat do
     end
   end
 
-
   describe '.attribute' do
     it 'adds attribute' do
       jat.attribute :foo
-      expect(jat.keys[:foo].relation?).to eq false
+      expect(jat.attrs[:foo].relation?).to eq false
     end
 
     it 'allows to redefine attribute' do
       jat.attribute(:foo, delegate: true)
-      expect(jat.keys[:foo].delegate?).to eq true
+      expect(jat.attrs[:foo].delegate?).to eq true
 
       jat.attribute(:foo, delegate: false)
-      expect(jat.keys[:foo].delegate?).to eq false
+      expect(jat.attrs[:foo].delegate?).to eq false
     end
   end
 
   describe '.relationship' do
     it 'adds relationship' do
       jat.attribute :foo, serializer: jat
-      expect(jat.keys[:foo].serializer).to eq jat
+      expect(jat.attrs[:foo].serializer).to eq jat
     end
 
     it 'allows to redefine relationship' do
       jat.attribute(:foo, exposed: true, serializer: jat)
-      expect(jat.keys[:foo].exposed?).to eq true
+      expect(jat.attrs[:foo].exposed?).to eq true
 
       jat.attribute(:foo, exposed: false, serializer: jat)
-      expect(jat.keys[:foo].exposed?).to eq false
+      expect(jat.attrs[:foo].exposed?).to eq false
     end
   end
 
@@ -83,7 +82,10 @@ RSpec.describe Jat do
     it 'delegates to Jat::Include with correct params' do
       jat.type :jat
       serializer = jat.new
-      allow(Jat::Includes).to receive(:call).with(jat, serializer._full_map).and_return('RES')
+
+      includes = instance_double(Jat::Includes)
+      allow(Jat::Includes).to receive(:new).with(serializer._full_map).and_return(includes)
+      allow(includes).to receive(:for).with(serializer.class).and_return('RES')
 
       expect(serializer._includes).to eq 'RES'
     end

@@ -7,7 +7,7 @@ class Jat
   module Params
     class Include
       class << self
-        # returns Hash { type => [key1, key2] }
+        # returns Hash { type => [attr1, attr2] }
         def call(serializer, includes_string)
           return {} unless includes_string
 
@@ -20,12 +20,12 @@ class Jat
         private
 
         def typed_includes(serializer, includes, result = {})
-          includes.each_with_object(result) do |(key, nested_includes), obj|
+          includes.each_with_object(result) do |(attr, nested_includes), obj|
             type = serializer.type
             obj[type] ||= []
-            obj[type] |= [key]
+            obj[type] |= [attr]
 
-            nested_serializer = serializer.keys.fetch(key).serializer
+            nested_serializer = serializer.attrs.fetch(attr).serializer
             typed_includes(nested_serializer, nested_includes, obj)
           end
         end

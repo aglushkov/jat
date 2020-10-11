@@ -1,40 +1,67 @@
 # frozen_string_literal: true
 
-# Combines all serializer and its realtions exposed fields into one hash
 class Jat
   class Includes
-    class << self
-      def call(serializer, types_keys, res = {})
-        typed_keys = types_keys.fetch(serializer.type)
+    def initialize(types_attrs)
+      @types_attrs = types_attrs
+    end
 
-        typed_keys.fetch(:attributes).each_with_object(res) do |key, result|
-          merge(result, serializer.keys[key].includes)
-        end
+    def for(serializer)
+      result = {}
+      append(result, serializer)
+      result
+    end
 
-        typed_keys.fetch(:relationships).each_with_object(res) do |key, result|
-          opts = serializer.keys[key]
-          includes = opts.includes
-          next if !includes || includes.empty?
+    private
 
-          merge(result, includes)
+    attr_reader :types_attrs
 
-          # includes can have only one key
-          nested_result = result.fetch(includes.keys.first)
-          nested_serializer = opts.serializer
+    def append(result, serializer)
+      add_attributes(result, serializer)
+      add_relationships(result, serializer)
+    end
 
-          call(nested_serializer, types_keys, nested_result)
-        end
+    def add_attributes(result, serializer)
+      attributes = types_attrs[serializer.type][:attributes]
+
+      attributes.each do |attr|
+        includes = serializer.attrs[attr].includes
+        next unless include?(includes)
+
+        add_includes(result, includes)
       end
+    end
 
-      private
+    def add_relationships(result, serializer)
+      relationships = types_attrs[serializer.type][:relationships]
 
-      def merge(res, includes)
-        return unless includes
+      relationships.each do |attr|
+        opts = serializer.attrs[attr]
+        includes = opts.includes
+        next unless include?(includes)
 
-        res.merge!(includes) do |_key, current_value, new_value|
-          current_value.merge(new_value)
-        end
+        add_nested_includes(result, includes, opts)
       end
+    end
+
+    def add_nested_includes(result, includes, opts)
+      add_includes(result, includes)
+
+      # nested includes can have only one key
+      nested_result = result.fetch(includes.keys.first)
+      nested_serializer = opts.serializer
+
+      append(nested_result, nested_serializer)
+    end
+
+    def add_includes(res, includes)
+      res.merge!(includes) do |_key, current_value, new_value|
+        current_value.merge(new_value)
+      end
+    end
+
+    def include?(includes)
+      includes&.any?
     end
   end
 end

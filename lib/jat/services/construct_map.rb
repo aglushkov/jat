@@ -6,8 +6,8 @@
 # {
 #   type1 => {
 #     serializer: ser1,
-#     attributes: [key1, key2, ...],
-#     relationships: [key1, key2, ...]
+#     attributes: [attr1, attr2, ...],
+#     relationships: [attr1, attr2, ...]
 #   },
 #
 class Jat
@@ -46,36 +46,36 @@ class Jat
         type = serializer.type
         type_result = result[type]
 
-        serializer.keys.each do |key, opts|
-          next if hidden?(type, key, opts)
+        serializer.attrs.each do |attr, opts|
+          next if hidden?(type, attr, opts)
 
-          fill_key(result, type_result, key, opts)
+          fill_attr(result, type_result, attr, opts)
         end
       end
 
-      def fill_key(result, type_result, key, opts)
+      def fill_attr(result, type_result, attr, opts)
         if opts.relation?
-          type_result[:relationships] << key
+          type_result[:relationships] << attr
           append(result, opts.serializer)
         else
-          type_result[:attributes] << key
+          type_result[:attributes] << attr
         end
       end
 
-      def hidden?(type, key, opts)
-        return false if exposed == :all || manually_exposed?(type, key)
+      def hidden?(type, attr, opts)
+        return false if exposed == :all || manually_exposed?(type, attr)
         return true if exposed == :none
 
         !opts.exposed?
       end
 
-      def manually_exposed?(type, key)
+      def manually_exposed?(type, attr)
         return false unless exposed_additionally
 
-        exposed_keys = exposed_additionally[type]
-        return false unless exposed_keys
+        exposed_attrs = exposed_additionally[type]
+        return false unless exposed_attrs
 
-        exposed_keys.include?(key)
+        exposed_attrs.include?(attr)
       end
     end
   end

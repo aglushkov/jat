@@ -9,11 +9,11 @@ class Jat
       class Validate
         class << self
           def call(serializer, fields)
-            fields.each do |type, keys|
+            fields.each do |type, attrs|
               check_fields_type(serializer, type)
 
-              keys.each do |key|
-                check_key(serializer, type, key)
+              attrs.each do |attr|
+                check_attr(serializer, type, attr)
               end
             end
           end
@@ -25,12 +25,12 @@ class Jat
             raise Invalid, message
           end
 
-          def check_key(serializer, type, key)
+          def check_attr(serializer, type, attr)
             type_data = serializer.full_map.fetch(type)
             type_serializer = type_data.fetch(:serializer)
-            return if type_serializer.keys.key?(key)
+            return if type_serializer.attrs.key?(attr)
 
-            message = "#{type_serializer} has no requested attribute or relationship `#{key}`"
+            message = "#{type_serializer} has no requested attribute or relationship `#{attr}`"
             raise Invalid, message
           end
         end

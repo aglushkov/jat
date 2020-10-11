@@ -7,13 +7,13 @@ class Jat
         COMMA = ','
 
         class << self
-          # returns Hash { type => [key1, key2] }
+          # returns Hash { type => [attr1, attr2] }
           def call(fields)
             return {} unless fields
 
-            fields.each_with_object({}) do |(type, keys_string), obj|
-              keys = keys_string.split(COMMA).map!(&:to_sym)
-              obj[type] = keys
+            fields.each_with_object({}) do |(type, attrs_string), obj|
+              attrs = attrs_string.split(COMMA).map!(&:to_sym)
+              obj[type] = attrs
             end
           end
         end
