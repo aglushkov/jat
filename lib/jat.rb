@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require 'jat/check_key'
+require 'jat/attributes'
+require 'jat/check_attribute'
 require 'jat/error'
 require 'jat/includes'
 require 'jat/map'
@@ -20,7 +21,7 @@ class Jat
     attr_reader :options
 
     def attrs
-      @attrs ||= {}
+      @attrs ||= Attributes.new
     end
 
     def inherited(subclass)
@@ -57,29 +58,28 @@ class Jat
     end
 
     def attribute(name, **opts, &block)
-      add_key(name, opts, block)
+      add_attribute(name, opts, block)
     end
 
     def relationship(name, serializer:, **opts, &block)
       opts[:serializer] = serializer
-      add_key(name, opts, block)
+      add_attribute(name, opts, block)
     end
 
     private
 
-    def add_key(name, opts, block)
-      CheckKey.(name: name, opts: opts, block: block)
+    def add_attribute(name, opts, block)
+      CheckAttribute.new(name, opts, block).validate
 
-      name = name.to_sym
       opts = Opts.new(self, name, opts, block)
       attrs[name] = opts
 
-      add_method(name, opts)
+      add_method(name)
       clear
     end
 
-    def add_method(name, opts)
-      block = opts.block
+    def add_method(name)
+      block = attrs[name].block
       return unless block
 
       # Warning-free method redefinition

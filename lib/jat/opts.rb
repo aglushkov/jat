@@ -18,52 +18,38 @@ class Jat
     end
 
     def key
-      @key ||= opts.key?(:key) ? opts[:key].to_sym : name
+      opts.key?(:key) ? opts[:key].to_sym : name
     end
 
-    # We should not memorize this method as it depends on current serializer options
     def delegate?
       opts.fetch(:delegate, current_serializer.options[:delegate])
     end
 
-    # We should not memorize this method as it depends on current serializer options
     def exposed?
       exposed_method = EXPOSED.fetch(current_serializer.options[:exposed])
       __send__(exposed_method)
     end
 
     def many?
-      return @many if defined?(@many)
-
-      @many = opts.fetch(:many, false)
+      opts.fetch(:many, false)
     end
 
     def relation?
-      return @relation if defined?(@relation)
-
-      @relation = opts.key?(:serializer)
+      opts.key?(:serializer)
     end
 
     def serializer
-      return @serializer if defined?(@serializer)
+      return unless relation?
 
-      @serializer =
-        if relation?
-          value = opts[:serializer]
-          value.is_a?(Proc) ? proc_serializer(value) : value
-        end
+      value = opts[:serializer]
+      value.is_a?(Proc) ? proc_serializer(value) : value
     end
 
     def includes
-      return @includes if defined?(@includes)
-
-      @includes = begin
-        incl = relation? ? opts.fetch(:includes, key) : opts[:includes]
-        Services::IncludesToHash.(incl) if incl
-      end
+      incl = relation? ? opts.fetch(:includes, key) : opts[:includes]
+      Services::IncludesToHash.(incl) if incl
     end
 
-    # We should not memorize this method as it depends on current serializer options
     def block
       return if !original_block && !delegate?
 
