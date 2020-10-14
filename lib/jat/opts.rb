@@ -8,7 +8,7 @@ class Jat
       default: :exposed_default
     }.freeze
 
-    attr_reader :name
+    attr_reader :current_serializer, :name, :opts, :original_block
 
     def initialize(current_serializer, name, opts, original_block)
       @current_serializer = current_serializer
@@ -22,11 +22,11 @@ class Jat
     end
 
     def delegate?
-      opts.fetch(:delegate, current_serializer.options[:delegate])
+      opts.fetch(:delegate, current_serializer.config.delegate)
     end
 
     def exposed?
-      exposed_method = EXPOSED.fetch(current_serializer.options[:exposed])
+      exposed_method = EXPOSED.fetch(current_serializer.config.exposed)
       __send__(exposed_method)
     end
 
@@ -56,9 +56,11 @@ class Jat
       original_block ? transform_original_block : delegate_block
     end
 
-    private
+    def copy_to(subclass)
+      self.class.new(subclass, name, opts, original_block)
+    end
 
-    attr_reader :current_serializer, :opts, :original_block
+    private
 
     def exposed_all
       opts.fetch(:exposed, true)

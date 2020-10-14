@@ -36,7 +36,7 @@ RSpec.describe Jat::CheckAttribute do
     expect { check.new(*params.values).validate }.to raise_error Jat::Error, /Relationship can't have `type` name/
   end
 
-  it 'does not allow to add names strating or ending with - or _' do
+  it 'does not allow to add names starting or ending with - or _' do
     params[:name] = '-foo'
     expect { check.new(*params.values).validate }.to raise_error Jat::Error, /'-' or '_'/
 
@@ -62,6 +62,11 @@ RSpec.describe Jat::CheckAttribute do
     part3 = (0..9).to_a.join
     params[:name] = "#{part1}-#{part2}_#{part3}"
     expect { check.new(*params.values).validate }.not_to raise_error
+  end
+
+  it 'prohibits name with non a-z, A-Z, 0-9, `-` and `_` symbols' do
+    params[:name] = 'abc!'
+    expect { check.new(*params.values).validate }.to raise_error Jat::Error, /A-Z/
   end
 
   it 'allows only 1 or 2 arguments in block' do

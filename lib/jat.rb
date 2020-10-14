@@ -2,6 +2,7 @@
 
 require 'jat/attributes'
 require 'jat/check_attribute'
+require 'jat/config'
 require 'jat/error'
 require 'jat/includes'
 require 'jat/map'
@@ -12,20 +13,20 @@ require 'jat/services/includes_to_hash'
 
 # Main namespace
 class Jat
-  @options = {
-    delegate: true, # false
-    exposed: :default # all, none
-  }
-
   module ClassMethods
-    attr_reader :options
+    def refresh
+      attrs.refresh
+      clear
+    end
 
     def attrs
       @attrs ||= Attributes.new
     end
 
     def inherited(subclass)
-      subclass.instance_variable_set(:@options, options.dup)
+      config.copy_to(subclass)
+      attrs.copy_to(subclass)
+
       super
     end
 
@@ -66,13 +67,21 @@ class Jat
       add_attribute(name, opts, block)
     end
 
+    def config
+      @config ||= Config.new(self)
+    end
+
+    def config=(config)
+      @config = config
+    end
+
     private
 
     def add_attribute(name, opts, block)
       CheckAttribute.new(name, opts, block).validate
 
       opts = Opts.new(self, name, opts, block)
-      attrs[name] = opts
+      attrs[name] = Attribute.new(opts)
 
       add_method(name)
       clear

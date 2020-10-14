@@ -41,7 +41,7 @@ RSpec.describe Jat::Opts do
   describe '#delegate?' do
     subject(:is_delegate) { opts.delegate? }
 
-    before { jat.options[:delegate] = true }
+    before { jat.config.delegate = true }
 
     context 'when no key provided' do
       it 'defaults to serializer delegate option' do
@@ -70,7 +70,7 @@ RSpec.describe Jat::Opts do
     end
 
     context 'when all keys are exposed' do
-      before { jat.options[:exposed] = :all }
+      before { jat.config.exposed = :all }
 
       it 'returns true' do
         expect(is_exposed).to eq true
@@ -78,7 +78,7 @@ RSpec.describe Jat::Opts do
     end
 
     context 'when no keys are exposed' do
-      before { jat.options[:exposed] = :none }
+      before { jat.config.exposed = :none }
 
       it 'returns false' do
         expect(is_exposed).to eq false
@@ -86,7 +86,7 @@ RSpec.describe Jat::Opts do
     end
 
     context 'with serializer by default' do
-      before { jat.options[:exposed] = :default }
+      before { jat.config.exposed = :default }
 
       let(:data) { { serializer: jat } }
 
@@ -96,7 +96,7 @@ RSpec.describe Jat::Opts do
     end
 
     context 'without serializer by default' do
-      before { jat.options[:exposed] = :default }
+      before { jat.config.exposed = :default }
 
       let(:data) { {} }
 

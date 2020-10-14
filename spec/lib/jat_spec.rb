@@ -90,4 +90,67 @@ RSpec.describe Jat do
       expect(serializer._includes).to eq 'RES'
     end
   end
+
+  describe 'inheritance' do
+    it 'inherits config' do
+      parent = jat
+      parent.config.exposed = :none
+
+      child = Class.new(parent)
+      expect(child.config.exposed).to eq :none
+    end
+
+    it 'does not overwrites parent config' do
+      parent = jat
+      parent.config.exposed = :all
+
+      child = Class.new(parent)
+      child.config.exposed = :none
+
+      expect(parent.config.exposed).to eq :all
+    end
+
+    it 'inherits attributes' do
+      parent = jat
+      parent.attribute :foo, exposed: true
+      parent.relationship :bar, serializer: -> { parent }, exposed: false
+
+      child = Class.new(parent)
+      expect(child.attrs[:foo].exposed).to eq true
+      expect(child.attrs[:bar].exposed).to eq false
+    end
+
+    it 'does not overwrites parent attributes' do
+      parent = jat
+      child = Class.new(parent)
+      child.attribute :foo
+
+      expect(parent.attrs[:foo]).to eq nil
+    end
+  end
+
+  it 'refreshes attributes when config updated' do
+    jat.attribute :foo
+
+    expect(jat.attrs[:foo]).to be_exposed # before
+    jat.config.exposed = :none
+    expect(jat.attrs[:foo]).not_to be_exposed # after
+  end
+
+  it 'nullifies @full_map and @exposed_map when settings changed' do
+    jat.type(:jat)
+    jat.attribute :foo
+    jat.full_map
+    jat.exposed_map
+
+    # Before
+    expect(jat.instance_variable_get(:@full_map)).to be_any
+    expect(jat.instance_variable_get(:@exposed_map)).to be_any
+
+    jat.config.delegate = false
+
+    # After
+    expect(jat.instance_variable_get(:@full_map)).to eq nil
+    expect(jat.instance_variable_get(:@exposed_map)).to eq nil
+  end
 end

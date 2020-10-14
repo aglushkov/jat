@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ClassLength
 class Jat
   class CheckAttribute
     attr_reader :name, :opts, :block
 
     ALLOWED_OPTS = %i[key delegate serializer includes many exposed].freeze
-    NAME_REGEXP = /\A[-a-zA-Z0-9_]+\z/
+    NAME_REGEXP = /\A[-a-zA-Z0-9_]+\z/.freeze
 
     def initialize(name, opts, block)
       @name = name.is_a?(String) ? name.to_sym : name
@@ -35,15 +36,11 @@ class Jat
     end
 
     def check_is_valid_name
-      if '-_'.include?(name[0]) || '-_'.include?(name[-1])
-        error "Name must not start or end with '-' or '_'"
-      end
-
+      error "Name must not start or end with '-' or '_'" if '-_'.include?(name[0]) || '-_'.include?(name[-1])
       return if NAME_REGEXP.match?(name)
 
       error "Name can include only a-z, A-Z, 0-9, '-' and '_'"
     end
-
 
     def check_opts
       check_opts_key
@@ -186,3 +183,4 @@ class Jat
     end
   end
 end
+# rubocop:enable Metrics/ClassLength

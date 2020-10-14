@@ -22,6 +22,9 @@ class Jat
       refresh
     end
 
+    # rubocop:disable Metrics/AbcSize
+    # Some attributes options depends on serializer options, so when we change
+    # options, we need to update stored attributes
     def refresh
       @block = opts.block
       @delegate = opts.delegate?
@@ -31,6 +34,12 @@ class Jat
       @many = opts.many?
       @relation = opts.relation?
       @serializer = opts.serializer
+    end
+    # rubocop:enable Metrics/AbcSize
+
+    def copy_to(subclass)
+      opts_copy = opts.copy_to(subclass)
+      self.class.new(opts_copy)
     end
   end
 end
