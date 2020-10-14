@@ -4,13 +4,20 @@ require 'jat/opts'
 require 'jat/attribute'
 
 class Jat
-  class Attributes < Hash
+  class Attributes
+    extend Forwardable
+    def_delegators :@attributes, :each, :each_value, :key?, :fetch
+
+    def initialize
+      @attributes = {}
+    end
+
     def [](name)
-      super(name.to_sym)
+      @attributes[name.to_sym]
     end
 
     def []=(name, attr)
-      super(name.to_sym, attr)
+      @attributes[name.to_sym] = attr
     end
 
     def refresh
