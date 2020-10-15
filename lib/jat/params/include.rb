@@ -20,21 +20,21 @@ class Jat
         private
 
         def typed_includes(serializer, includes, result)
-          includes.each do |include_name, nested_includes|
-            add_include(result, serializer, include_name)
+          includes.each do |included_attr_name, nested_includes|
+            add_include(result, serializer, included_attr_name)
 
-            nested_serializer = serializer.attrs.fetch(include_name).serializer
+            nested_serializer = serializer.attributes.fetch(included_attr_name).serializer
             typed_includes(nested_serializer, nested_includes, result)
           end
 
           result
         end
 
-        def add_include(result, serializer, include_name)
+        def add_include(result, serializer, included_attr_name)
           type = serializer.type
 
           includes = result[type] || []
-          includes |= [include_name]
+          includes |= [included_attr_name]
 
           result[type] = includes
         end

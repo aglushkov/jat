@@ -2,16 +2,20 @@
 
 # rubocop:disable Metrics/ClassLength
 class Jat
-  class CheckAttribute
+  class CheckOpts
     attr_reader :name, :opts, :block
 
     ALLOWED_OPTS = %i[key delegate serializer includes many exposed].freeze
     NAME_REGEXP = /\A[-a-zA-Z0-9_]+\z/.freeze
 
-    def initialize(name, opts, block)
-      @name = name.is_a?(String) ? name.to_sym : name
-      @opts = opts
-      @block = block
+    def self.call(params)
+      new(params).validate
+    end
+
+    def initialize(params)
+      @name = params.fetch(:name)
+      @opts = params.fetch(:opts)
+      @block = params.fetch(:block)
     end
 
     def validate
@@ -29,7 +33,7 @@ class Jat
     end
 
     def check_is_reserved
-      return if (name != :type) && (name != :id)
+      return if (name != :type) && (name != :id) && (name != 'type') && (name != 'id')
 
       key_type = opts.key?(:serializer) ? 'Relationship' : 'Attribute'
       error("#{key_type} can't have `#{name}` name")

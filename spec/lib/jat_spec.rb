@@ -43,30 +43,30 @@ RSpec.describe Jat do
   describe '.attribute' do
     it 'adds attribute' do
       jat.attribute :foo
-      expect(jat.attrs[:foo].relation?).to eq false
+      expect(jat.attributes[:foo].relation?).to eq false
     end
 
     it 'allows to redefine attribute' do
       jat.attribute(:foo, delegate: true)
-      expect(jat.attrs[:foo].delegate?).to eq true
+      expect(jat.attributes[:foo].delegate?).to eq true
 
       jat.attribute(:foo, delegate: false)
-      expect(jat.attrs[:foo].delegate?).to eq false
+      expect(jat.attributes[:foo].delegate?).to eq false
     end
   end
 
   describe '.relationship' do
     it 'adds relationship' do
       jat.attribute :foo, serializer: jat
-      expect(jat.attrs[:foo].serializer).to eq jat
+      expect(jat.attributes[:foo].serializer).to eq jat
     end
 
     it 'allows to redefine relationship' do
       jat.attribute(:foo, exposed: true, serializer: jat)
-      expect(jat.attrs[:foo].exposed?).to eq true
+      expect(jat.attributes[:foo].exposed?).to eq true
 
       jat.attribute(:foo, exposed: false, serializer: jat)
-      expect(jat.attrs[:foo].exposed?).to eq false
+      expect(jat.attributes[:foo].exposed?).to eq false
     end
   end
 
@@ -116,8 +116,8 @@ RSpec.describe Jat do
       parent.relationship :bar, serializer: -> { parent }, exposed: false
 
       child = Class.new(parent)
-      expect(child.attrs[:foo].exposed).to eq true
-      expect(child.attrs[:bar].exposed).to eq false
+      expect(child.attributes[:foo].exposed).to eq true
+      expect(child.attributes[:bar].exposed).to eq false
     end
 
     it 'does not overwrites parent attributes' do
@@ -125,16 +125,16 @@ RSpec.describe Jat do
       child = Class.new(parent)
       child.attribute :foo
 
-      expect(parent.attrs[:foo]).to eq nil
+      expect(parent.attributes[:foo]).to eq nil
     end
   end
 
   it 'refreshes attributes when config updated' do
-    jat.attribute :foo
+    attribute = jat.attribute :foo
+    expect(attribute).to be_exposed # before
 
-    expect(jat.attrs[:foo]).to be_exposed # before
     jat.config.exposed = :none
-    expect(jat.attrs[:foo]).not_to be_exposed # after
+    expect(attribute).not_to be_exposed # after
   end
 
   it 'nullifies @full_map and @exposed_map when settings changed' do

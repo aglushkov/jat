@@ -16,8 +16,9 @@ class Jat
       @attributes[name.to_sym]
     end
 
-    def []=(name, attr)
-      @attributes[name.to_sym] = attr
+    def <<(attribute)
+      @attributes[attribute.name] = attribute
+      self
     end
 
     def refresh
@@ -25,9 +26,9 @@ class Jat
     end
 
     def copy_to(subclass)
-      each do |key, attr|
-        attr_copy = attr.copy_to(subclass)
-        subclass.attrs[key] = attr_copy
+      each_value do |attribute|
+        attribute_copy = attribute.copy_to(subclass)
+        subclass.attributes << attribute_copy
       end
     end
   end

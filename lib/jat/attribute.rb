@@ -9,6 +9,7 @@ class Jat
                 :includes,
                 :key,
                 :many,
+                :name,
                 :relation,
                 :serializer
 
@@ -33,6 +34,7 @@ class Jat
       @includes = opts.includes
       @key = opts.key
       @many = opts.many?
+      @name = opts.name
       @relation = opts.relation?
       @serializer = opts.serializer
     end

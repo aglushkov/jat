@@ -46,36 +46,38 @@ class Jat
         type = serializer.type
         type_result = result[type]
 
-        serializer.attrs.each do |attr, opts|
-          next if hidden?(type, attr, opts)
+        serializer.attributes.each_value do |attribute|
+          next if hidden?(type, attribute)
 
-          fill_attr(result, type_result, attr, opts)
+          fill_attr(result, type_result, attribute)
         end
       end
 
-      def fill_attr(result, type_result, attr, opts)
-        if opts.relation?
-          type_result[:relationships] << attr
-          append(result, opts.serializer)
+      def fill_attr(result, type_result, attribute)
+        attribute_name = attribute.name
+
+        if attribute.relation?
+          type_result[:relationships] << attribute_name
+          append(result, attribute.serializer)
         else
-          type_result[:attributes] << attr
+          type_result[:attributes] << attribute_name
         end
       end
 
-      def hidden?(type, attr, opts)
-        return false if exposed == :all || manually_exposed?(type, attr)
+      def hidden?(type, attribute)
+        return false if exposed == :all || manually_exposed?(type, attribute)
         return true if exposed == :none
 
-        !opts.exposed?
+        !attribute.exposed?
       end
 
-      def manually_exposed?(type, attr)
+      def manually_exposed?(type, attribute)
         return false unless exposed_additionally
 
         exposed_attrs = exposed_additionally[type]
         return false unless exposed_attrs
 
-        exposed_attrs.include?(attr)
+        exposed_attrs.include?(attribute.name)
       end
     end
   end

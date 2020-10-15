@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'jat/check_opts'
+
 class Jat
   class Opts
     EXPOSED = {
@@ -10,11 +12,13 @@ class Jat
 
     attr_reader :current_serializer, :name, :opts, :original_block
 
-    def initialize(current_serializer, name, opts, original_block)
+    def initialize(current_serializer, params)
+      CheckOpts.(params)
+
       @current_serializer = current_serializer
-      @name = name.to_sym
-      @opts = opts.freeze
-      @original_block = original_block
+      @name = params.fetch(:name).to_sym
+      @opts = params.fetch(:opts).freeze
+      @original_block = params.fetch(:block)
     end
 
     def key
@@ -57,7 +61,7 @@ class Jat
     end
 
     def copy_to(subclass)
-      self.class.new(subclass, name, opts, original_block)
+      self.class.new(subclass, name: name, opts: opts, block: original_block)
     end
 
     private

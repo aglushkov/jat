@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'jat/attributes'
-require 'jat/check_attribute'
+
 require 'jat/config'
 require 'jat/error'
 require 'jat/includes'
@@ -15,17 +15,17 @@ require 'jat/services/includes_to_hash'
 class Jat
   module ClassMethods
     def refresh
-      attrs.refresh
+      attributes.refresh
       clear
     end
 
-    def attrs
-      @attrs ||= Attributes.new
+    def attributes
+      @attributes ||= Attributes.new
     end
 
     def inherited(subclass)
       config.copy_to(subclass)
-      attrs.copy_to(subclass)
+      attributes.copy_to(subclass)
 
       super
     end
@@ -59,12 +59,12 @@ class Jat
     end
 
     def attribute(name, **opts, &block)
-      add_attribute(name, opts, block)
+      add_attribute(name: name, opts: opts, block: block)
     end
 
     def relationship(name, serializer:, **opts, &block)
       opts[:serializer] = serializer
-      add_attribute(name, opts, block)
+      add_attribute(name: name, opts: opts, block: block)
     end
 
     def config
@@ -77,20 +77,21 @@ class Jat
 
     private
 
-    def add_attribute(name, opts, block)
-      CheckAttribute.new(name, opts, block).validate
+    def add_attribute(params)
+      opts = Opts.new(self, params)
 
-      opts = Opts.new(self, name, opts, block)
-      attrs[name] = Attribute.new(opts)
-
-      add_method(name)
-      clear
+      Attribute.new(opts).tap do |attribute|
+        attributes << attribute
+        add_method(attribute)
+        clear
+      end
     end
 
-    def add_method(name)
-      block = attrs[name].block
+    def add_method(attribute)
+      block = attribute.block
       return unless block
 
+      name = attribute.name
       # Warning-free method redefinition
       remove_method(name) if method_defined?(name)
       define_method(name, &block)

@@ -25,7 +25,7 @@ class Jat
       attributes_names = types_attrs[serializer.type][:attributes]
 
       attributes_names.each do |name|
-        attribute = serializer.attrs[name]
+        attribute = serializer.attributes[name]
         add_attribute(result, attribute)
       end
     end
@@ -38,10 +38,10 @@ class Jat
     end
 
     def add_relationships(result, serializer)
-      relationships = types_attrs[serializer.type][:relationships]
+      relationships_names = types_attrs[serializer.type][:relationships]
 
-      relationships.each do |name|
-        attribute = serializer.attrs[name]
+      relationships_names.each do |name|
+        attribute = serializer.attributes[name]
         add_relationship(result, attribute)
       end
     end
