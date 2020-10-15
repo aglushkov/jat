@@ -17,15 +17,20 @@ class Jat
           private
 
           def string_to_hash(includes_string)
-            includes_string.split(COMMA).each_with_object({}) do |included, obj|
-              val = {}
-
-              included.split(DOT).reverse_each do |inc|
-                val = { inc.to_sym => val }
-              end
-
-              deep_merge!(obj, val)
+            includes_string.split(COMMA).each_with_object({}) do |part, obj|
+              includes = parse_part(part)
+              deep_merge!(obj, includes)
             end
+          end
+
+          def parse_part(part)
+            val = {}
+
+            part.split(DOT).reverse_each do |inc|
+              val = { inc.to_sym => val }
+            end
+
+            val
           end
 
           def deep_merge!(this_hash, other_hash)

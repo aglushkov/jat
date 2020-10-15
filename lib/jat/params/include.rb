@@ -14,20 +14,29 @@ class Jat
           includes = Parse.(includes_string)
           Validate.(serializer, includes)
 
-          typed_includes(serializer, includes)
+          typed_includes(serializer, includes, {})
         end
 
         private
 
-        def typed_includes(serializer, includes, result = {})
-          includes.each_with_object(result) do |(attr, nested_includes), obj|
-            type = serializer.type
-            obj[type] ||= []
-            obj[type] |= [attr]
+        def typed_includes(serializer, includes, result)
+          includes.each do |include_name, nested_includes|
+            add_include(result, serializer, include_name)
 
-            nested_serializer = serializer.attrs.fetch(attr).serializer
-            typed_includes(nested_serializer, nested_includes, obj)
+            nested_serializer = serializer.attrs.fetch(include_name).serializer
+            typed_includes(nested_serializer, nested_includes, result)
           end
+
+          result
+        end
+
+        def add_include(result, serializer, include_name)
+          type = serializer.type
+
+          includes = result[type] || []
+          includes |= [include_name]
+
+          result[type] = includes
         end
       end
     end

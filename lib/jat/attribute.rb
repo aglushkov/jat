@@ -23,6 +23,7 @@ class Jat
     end
 
     # rubocop:disable Metrics/AbcSize
+    # :reek:TooManyStatements
     # Some attributes options depends on serializer options, so when we change
     # options, we need to update stored attributes
     def refresh

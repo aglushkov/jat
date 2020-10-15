@@ -9,9 +9,9 @@ class Jat
     DELEGATE_ALLOWED_VALUES = [true, false].freeze
     EXPOSED_ALLOWED_VALUES = %i[all none default].freeze
 
-    def initialize(serializer, options = nil)
+    def initialize(serializer)
       @serializer = serializer
-      @config = (options || DEFAULTS).dup
+      @config = DEFAULTS.dup
     end
 
     def delegate
@@ -45,7 +45,11 @@ class Jat
     end
 
     def copy_to(subclass)
-      subclass.config = self.class.new(subclass, config)
+      config = self.class.new(subclass)
+      config.delegate = delegate
+      config.exposed = exposed
+
+      subclass.config = config
     end
 
     private

@@ -6,17 +6,8 @@ RSpec.describe Jat::Config do
   let(:config) { described_class.new(jat) }
 
   it 'has default options' do
-    config = described_class.new(jat)
-
     expect(config.delegate).to eq true
     expect(config.exposed).to eq :default
-  end
-
-  it 'allows to provide options when initialized' do
-    config = described_class.new(jat, delegate: false, exposed: :none)
-
-    expect(config.delegate).to eq false
-    expect(config.exposed).to eq :none
   end
 
   describe '#delegate=' do
@@ -68,6 +59,19 @@ RSpec.describe Jat::Config do
     it 'raises error when invalid value provided' do
       allow(jat).to receive(:refresh)
       expect { config.exposed = true }.to raise_error Jat::Error, /all.*none.*default/
+    end
+  end
+
+  describe '#copy_to' do
+    it 'copies options to another serializer' do
+      config.delegate = false
+      config.exposed = :all
+
+      subclass = Class.new(jat)
+      config.copy_to(subclass)
+
+      expect(subclass.config.delegate).to eq false
+      expect(subclass.config.exposed).to eq :all
     end
   end
 end

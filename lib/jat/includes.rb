@@ -22,34 +22,43 @@ class Jat
     end
 
     def add_attributes(result, serializer)
-      attributes = types_attrs[serializer.type][:attributes]
+      attributes_names = types_attrs[serializer.type][:attributes]
 
-      attributes.each do |attr|
-        includes = serializer.attrs[attr].includes
-        next unless include?(includes)
-
-        add_includes(result, includes)
+      attributes_names.each do |name|
+        attribute = serializer.attrs[name]
+        add_attribute(result, attribute)
       end
+    end
+
+    def add_attribute(result, attribute)
+      includes = attribute.includes
+      return unless include?(includes)
+
+      add_includes(result, includes)
     end
 
     def add_relationships(result, serializer)
       relationships = types_attrs[serializer.type][:relationships]
 
-      relationships.each do |attr|
-        opts = serializer.attrs[attr]
-        includes = opts.includes
-        next unless include?(includes)
-
-        add_nested_includes(result, includes, opts)
+      relationships.each do |name|
+        attribute = serializer.attrs[name]
+        add_relationship(result, attribute)
       end
     end
 
-    def add_nested_includes(result, includes, opts)
+    def add_relationship(result, attribute)
+      includes = attribute.includes
+      return unless include?(includes)
+
+      add_nested_includes(result, includes, attribute)
+    end
+
+    def add_nested_includes(result, includes, attribute)
       add_includes(result, includes)
 
       # nested includes can have only one key
       nested_result = result.fetch(includes.keys.first)
-      nested_serializer = opts.serializer
+      nested_serializer = attribute.serializer
 
       append(nested_result, nested_serializer)
     end

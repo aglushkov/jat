@@ -11,10 +11,7 @@ class Jat
           def call(serializer, fields)
             fields.each do |type, attrs|
               check_fields_type(serializer, type)
-
-              attrs.each do |attr|
-                check_attr(serializer, type, attr)
-              end
+              check_attrs(serializer, type, attrs)
             end
           end
 
@@ -23,6 +20,12 @@ class Jat
 
             message = "#{serializer} and its children have no requested type `#{type}`"
             raise Invalid, message
+          end
+
+          def check_attrs(serializer, type, attrs)
+            attrs.each do |attr|
+              check_attr(serializer, type, attr)
+            end
           end
 
           def check_attr(serializer, type, attr)
