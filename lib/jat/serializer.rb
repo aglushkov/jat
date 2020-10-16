@@ -4,21 +4,22 @@
 class Jat
   class Serializer
     class << self
-      def call(object, serializer, many: false, meta: nil)
+      def call(object, serializer, opts = {})
         includes = {}
-        data = data(object, serializer, many, includes)
 
-        response = {}
-        response[:data] = data if data
-        response[:included] = includes.values unless includes.empty?
-        response[:meta] = meta if meta
-        response
+        data = opts[:many] ? many(object, serializer, includes) : one(object, serializer, includes)
+
+        response(data, includes, opts[:meta])
       end
 
       private
 
-      def data(object, serializer, many, includes)
-        many ? many(object, serializer, includes) : one(object, serializer, includes)
+      def response(data, includes, meta)
+        result = {}
+        result[:data] = data if data
+        result[:included] = includes.values unless includes.empty?
+        result[:meta] = meta if meta
+        result
       end
 
       def uid(obj, serializer)
@@ -80,7 +81,7 @@ class Jat
 
       def add_relationship_data(obj, rel_serializer, includes)
         rel_uid = uid(obj, rel_serializer)
-        includes[rel_uid] ||= data(obj, rel_serializer, false, includes)
+        includes[rel_uid] ||= one(obj, rel_serializer, includes)
 
         rel_uid
       end

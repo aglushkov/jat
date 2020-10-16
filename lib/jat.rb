@@ -117,8 +117,8 @@ class Jat
       @_map = @_full_map.fetch(type)
     end
 
-    def to_h(obj, many: false, meta: nil)
-      Serializer.(obj, self, many: many, meta: meta)
+    def to_h(obj, opts = {})
+      Serializer.(obj, self, opts)
     end
 
     def id(obj)
