@@ -1,19 +1,10 @@
 detectors:
-  FeatureEnvy:
-    enabled: false
-
   UtilityFunction:
-    enabled: false
-
-  DataClump:
     enabled: false
 
   IrresponsibleModule:
     enabled: false
 
-  TooManyInstanceVariables:
-    exclude:
-      - Jat::Attribute
 
 directories:
   "spec":

@@ -17,9 +17,8 @@ class Jat
         return unless opts.key?(:serializer)
         return if includes.empty?
 
-        # serializer allowed include example: `{ foo: {} }`
-        includes = Jat::Services::IncludesToHash.(includes)
-        return if includes.keys.size == 1 && includes.values == [{}]
+        hash_includes = Jat::Utils::IncludesToHash.(includes)
+        return if hash_includes == { hash_includes.keys.first => {} }
 
         error 'Attribute option `includes` can only have single or no values when serializer provided'
       end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Jat::Serializer do
+RSpec.describe Jat::Response do
   it 'returns empty hash when nothing to serialize' do
     empty_serializer = Class.new(Jat) { type(:type) }
     result = empty_serializer.new.to_h(nil)

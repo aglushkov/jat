@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Jat::Services::ConstructMap do
+RSpec.describe Jat::Map::Construct do
   let(:a) do
     ser = Class.new(Jat)
     ser.type :a
@@ -43,7 +43,7 @@ RSpec.describe Jat::Services::ConstructMap do
   end
 
   it 'returns all attributes' do
-    result = described_class.new(:all).for(a)
+    result = described_class.new(a, :all).to_h
 
     expect(result).to eq(
       a: { serializer: a, attributes: %i[a1 a2 a3], relationships: %i[b c d] },
@@ -54,7 +54,7 @@ RSpec.describe Jat::Services::ConstructMap do
   end
 
   it 'returns exposed attributes' do
-    result = described_class.new(:exposed).for(a)
+    result = described_class.new(a, :exposed).to_h
 
     expect(result).to eq(
       a: { serializer: a, attributes: %i[a1 a2], relationships: %i[d] },
@@ -68,7 +68,7 @@ RSpec.describe Jat::Services::ConstructMap do
       c: %i[c2 c3],
       d: %i[d2 d3]
     }
-    result = described_class.new(:none, exposed_additionally: exposed).for(a)
+    result = described_class.new(a, :none, exposed_additionally: exposed).to_h
 
     expect(result).to eq(
       a: { serializer: a, attributes: %i[a2 a3], relationships: %i[c d] },
@@ -82,7 +82,7 @@ RSpec.describe Jat::Services::ConstructMap do
       a: %i[c],
       c: %i[c3]
     }
-    result = described_class.new(:exposed, exposed_additionally: exposed).for(a)
+    result = described_class.new(a, :exposed, exposed_additionally: exposed).to_h
 
     expect(result).to eq(
       a: { serializer: a, attributes: %i[a1 a2], relationships: %i[c d] },

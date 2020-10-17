@@ -4,6 +4,7 @@ class Jat
   class Opts
     class CheckNameFormat < CheckBase
       NAME_REGEXP = /\A[a-zA-Z0-9_-]+\z/.freeze
+      CHECK_CHARS = '-_'
 
       def validate
         check_type
@@ -33,15 +34,13 @@ class Jat
       end
 
       def check_first_char(name)
-        char = name[0]
-        return if char != '_' && char != '-'
+        return unless CHECK_CHARS.include?(name[0])
 
         error "Attribute name should not start with '-' or '_'"
       end
 
       def check_last_char(name)
-        char = name[-1]
-        return if char != '_' && char != '-'
+        return unless CHECK_CHARS.include?(name[-1])
 
         error "Attribute name should not end with '-' or '_'"
       end

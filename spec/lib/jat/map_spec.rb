@@ -19,21 +19,20 @@ RSpec.describe Jat::Map do
     let(:fields) { 'FIELDS' }
 
     it 'constructs map with only provided fields' do
-      constructor = instance_double(Jat::Services::ConstructMap)
+      constructor = instance_double(Jat::Map::Construct)
 
       allow(Jat::Params::Fields)
         .to receive(:call)
         .with(serializer, 'FIELDS')
         .and_return('PARSED_FIELDS')
 
-      allow(Jat::Services::ConstructMap)
+      allow(Jat::Map::Construct)
         .to receive(:new)
-        .with(:none, exposed_additionally: 'PARSED_FIELDS')
+        .with(serializer, :none, exposed_additionally: 'PARSED_FIELDS')
         .and_return(constructor)
 
       allow(constructor)
-        .to receive(:for)
-        .with(serializer)
+        .to receive(:to_h)
         .and_return('FIELDS_MAP')
 
       expect(map).to eq 'FIELDS_MAP'
@@ -44,21 +43,20 @@ RSpec.describe Jat::Map do
     let(:includes) { 'INCLUDES' }
 
     it 'constructs map with default and included fields' do
-      constructor = instance_double(Jat::Services::ConstructMap)
+      constructor = instance_double(Jat::Map::Construct)
 
       allow(Jat::Params::Include)
         .to receive(:call)
         .with(serializer, 'INCLUDES')
         .and_return('PARSED_INCLUDES')
 
-      allow(Jat::Services::ConstructMap)
+      allow(Jat::Map::Construct)
         .to receive(:new)
-        .with(:default, exposed_additionally: 'PARSED_INCLUDES')
+        .with(serializer, :default, exposed_additionally: 'PARSED_INCLUDES')
         .and_return(constructor)
 
       allow(constructor)
-        .to receive(:for)
-        .with(serializer)
+        .to receive(:to_h)
         .and_return('INCLUDES_MAP')
 
       expect(map).to eq 'INCLUDES_MAP'
@@ -70,21 +68,20 @@ RSpec.describe Jat::Map do
     let(:includes) { 'INCLUDES' }
 
     it 'constructs map with only provided fields (and does not use includes)' do
-      constructor = instance_double(Jat::Services::ConstructMap)
+      constructor = instance_double(Jat::Map::Construct)
 
       allow(Jat::Params::Fields)
         .to receive(:call)
         .with(serializer, 'FIELDS')
         .and_return('PARSED_FIELDS')
 
-      allow(Jat::Services::ConstructMap)
+      allow(Jat::Map::Construct)
         .to receive(:new)
-        .with(:none, exposed_additionally: 'PARSED_FIELDS')
+        .with(serializer, :none, exposed_additionally: 'PARSED_FIELDS')
         .and_return(constructor)
 
       allow(constructor)
-        .to receive(:for)
-        .with(serializer)
+        .to receive(:to_h)
         .and_return('FIELDS_MAP')
 
       expect(map).to eq 'FIELDS_MAP'

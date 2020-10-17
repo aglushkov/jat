@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Jat
+  # :reek:TooManyInstanceVariables
   class Attribute
     attr_reader :opts,
                 :block,

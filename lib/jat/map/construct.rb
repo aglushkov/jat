@@ -11,25 +11,26 @@
 #   },
 #
 class Jat
-  module Services
-    class ConstructMap
-      attr_reader :serializer, :exposed, :exposed_additionally
+  class Map
+    class Construct
+      attr_reader :serializer, :result, :exposed, :exposed_additionally
 
       # @exposed can be :all, :none, :default
-      def initialize(exposed, exposed_additionally: nil)
+      def initialize(serializer, exposed, exposed_additionally: nil)
+        @serializer = serializer
         @exposed = exposed
         @exposed_additionally = exposed_additionally
       end
 
-      def for(serializer)
-        result = {}
-        append(result, serializer)
+      def to_h
+        @result = {}
+        append(serializer)
         result
       end
 
       private
 
-      def append(result, serializer)
+      def append(serializer)
         type = serializer.type
         return result if result.key?(type)
 
@@ -39,28 +40,29 @@ class Jat
           relationships: []
         }
 
-        fill(result, serializer)
+        fill(serializer)
       end
 
-      def fill(result, serializer)
+      def fill(serializer)
         type = serializer.type
         type_result = result[type]
 
         serializer.attributes.each_value do |attribute|
           next if hidden?(type, attribute)
 
-          fill_attr(result, type_result, attribute)
+          fill_attr(type_result, attribute)
         end
       end
 
-      def fill_attr(result, type_result, attribute)
-        attribute_name = attribute.name
+      # :reek:FeatureEnvy
+      def fill_attr(type_result, attribute)
+        name = attribute.name
 
         if attribute.relation?
-          type_result[:relationships] << attribute_name
-          append(result, attribute.serializer)
+          type_result[:relationships] << name
+          append(attribute.serializer)
         else
-          type_result[:attributes] << attribute_name
+          type_result[:attributes] << name
         end
       end
 

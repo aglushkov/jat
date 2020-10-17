@@ -25,17 +25,17 @@ class Jat
       def requested_fields(serializer, fields)
         fields_types = Params::Fields.(serializer, fields)
 
-        Services::ConstructMap
-          .new(:none, exposed_additionally: fields_types)
-          .for(serializer)
+        Construct
+          .new(serializer, :none, exposed_additionally: fields_types)
+          .to_h
       end
 
       def requested_includes_fields(serializer, includes)
         include_types = Params::Include.(serializer, includes)
 
-        Services::ConstructMap
-          .new(:default, exposed_additionally: include_types)
-          .for(serializer)
+        Construct
+          .new(serializer, :default, exposed_additionally: include_types)
+          .to_h
       end
     end
   end

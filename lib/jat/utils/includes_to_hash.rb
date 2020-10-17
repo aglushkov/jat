@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Jat
-  module Services
+  module Utils
     class IncludesToHash
       METHODS = {
         Array => :array_to_hash,

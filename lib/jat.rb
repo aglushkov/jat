@@ -5,10 +5,10 @@ require 'jat/config'
 require 'jat/error'
 require 'jat/includes'
 require 'jat/map'
+require 'jat/map/construct'
 require 'jat/opts'
-require 'jat/serializer'
-require 'jat/services/construct_map'
-require 'jat/services/includes_to_hash'
+require 'jat/response'
+require 'jat/utils/includes_to_hash'
 
 # Main namespace
 class Jat
@@ -35,11 +35,11 @@ class Jat
     end
 
     def full_map
-      @full_map ||= Services::ConstructMap.new(:all).for(self)
+      @full_map ||= Map::Construct.new(self, :all).to_h
     end
 
     def exposed_map
-      @exposed_map ||= Services::ConstructMap.new(:exposed).for(self)
+      @exposed_map ||= Map::Construct.new(self, :exposed).to_h
     end
 
     def clear
@@ -79,10 +79,6 @@ class Jat
       add_attribute(name: name, opts: opts, block: block)
     end
 
-    def inherited_instance(serializer_instance)
-      new(serializer_instance._params, serializer_instance._full_map)
-    end
-
     private
 
     def add_attribute(params)
@@ -116,12 +112,12 @@ class Jat
       @_map = _full_map.fetch(type)
     end
 
-    def to_h(obj, opts = {})
-      Serializer.(obj, self, opts)
+    def to_h(object, opts = {})
+      Response.new(self, object, opts).to_h
     end
 
-    def id(obj)
-      obj.id
+    def id(object)
+      object.id
     end
 
     def _includes
@@ -134,6 +130,10 @@ class Jat
         includes = _params && (_params[:include] || _params['include'])
         Map.(self.class, fields, includes)
       end
+    end
+
+    def _copy_to(nested_serializer)
+      nested_serializer.new(_params, _full_map)
     end
   end
 

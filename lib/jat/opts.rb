@@ -48,7 +48,7 @@ class Jat
 
     def includes
       incl = relation? ? opts.fetch(:includes, key) : opts[:includes]
-      Services::IncludesToHash.(incl) if incl
+      Utils::IncludesToHash.(incl) if incl
     end
 
     def block
@@ -64,13 +64,10 @@ class Jat
     private
 
     def transform_original_block
-      block = original_block
+      return original_block if original_block.parameters.count == 2
 
-      if block.parameters.count == 1
-        ->(obj, _params) { block.(obj) }
-      else # parameters.count == 2
-        block
-      end
+      block = original_block
+      ->(obj, _params) { block.(obj) }
     end
 
     def delegate_block
@@ -79,10 +76,14 @@ class Jat
     end
 
     def proc_serializer(value)
-      value = value.()
-      return value if value.is_a?(Class) && (value < Jat)
+      serializer = value.()
+      return serializer if jat_subclass?(serializer)
 
-      raise Jat::Error, "Invalid serializer `#{value.inspect}`, must be a subclass of Jat"
+      raise Jat::Error, "Invalid serializer `#{serializer.inspect}`, must be a subclass of Jat"
+    end
+
+    def jat_subclass?(serializer)
+      serializer.is_a?(Class) && (serializer < Jat)
     end
   end
 end

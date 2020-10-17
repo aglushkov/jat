@@ -15,7 +15,7 @@ class Jat
       private
 
       def check_key_format(key)
-        return if key.is_a?(String) || key.is_a?(Symbol)
+        return if string?(key)
 
         error 'Attribute option `key` can be only string or symbol'
       end
@@ -24,6 +24,10 @@ class Jat
         return unless block
 
         error 'Attribute option `key` must be omitted when block provided'
+      end
+
+      def string?(key)
+        key.is_a?(String) || key.is_a?(Symbol)
       end
     end
   end

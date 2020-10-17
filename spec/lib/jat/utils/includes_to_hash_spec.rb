@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Jat::Services::IncludesToHash do
+RSpec.describe Jat::Utils::IncludesToHash do
   let(:hash) { described_class }
 
   it 'transforms nil to empty hash' do
