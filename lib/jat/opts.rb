@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'jat/check_opts'
+require 'jat/opts/check'
 
 class Jat
   class Opts
@@ -13,7 +13,7 @@ class Jat
     attr_reader :current_serializer, :name, :opts, :original_block
 
     def initialize(current_serializer, params)
-      CheckOpts.(params)
+      Check.(params)
 
       @current_serializer = current_serializer
       @name = params.fetch(:name).to_sym
