@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'jat/opts'
 require 'jat/attribute'
 
 class Jat

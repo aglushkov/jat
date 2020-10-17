@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'jat/attributes'
-
 require 'jat/config'
 require 'jat/error'
 require 'jat/includes'
@@ -56,13 +55,11 @@ class Jat
 
   module DSLClassMethods
     def type(new_type = nil)
-      if new_type
-        new_type = new_type.to_sym
-        define_method(:type) { new_type }
-        @type = new_type
-      else
-        @type || raise(Error, "#{self} has no defined type")
-      end
+      return @type || raise(Error, "#{self} has no defined type") unless new_type
+
+      new_type = new_type.to_sym
+      define_method(:type) { new_type }
+      @type = new_type
     end
 
     def id(key: nil, &block)
@@ -80,6 +77,10 @@ class Jat
     def relationship(name, serializer:, **opts, &block)
       opts[:serializer] = serializer
       add_attribute(name: name, opts: opts, block: block)
+    end
+
+    def inherited_instance(serializer_instance)
+      new(serializer_instance._params, serializer_instance._full_map)
     end
 
     private
@@ -107,7 +108,7 @@ class Jat
 
   # :reek:ModuleInitialize
   module DSLInstanceMethods
-    attr_reader :_params, :_full_map, :_map
+    attr_reader :_params, :_map
 
     def initialize(params = nil, full_map = nil)
       @_params = params

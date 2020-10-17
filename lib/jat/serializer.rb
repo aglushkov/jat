@@ -3,11 +3,82 @@
 # Serializes to JSON-API format
 class Jat
   class Serializer
+    attr_reader :includes
+
+    def initialize(includes)
+      @includes = includes
+    end
+
+    def data(serializer, object)
+      return unless object
+
+      result = uid(serializer, object)
+      result[:attributes] = attributes(serializer, object)
+      result[:relationships] = relationships(serializer, object)
+      result.compact
+    end
+
+    private
+
+    def uid(serializer, object)
+      { type: serializer.type, id: serializer.id(object) }
+    end
+
+    def attributes(serializer, object)
+      attributes_names = serializer._map[:attributes]
+      return if attributes_names.empty?
+
+      attributes_names.each_with_object({}) do |name, attrs|
+        attrs[name] = serializer.public_send(name, object, serializer._params)
+      end
+    end
+
+    def relationships(serializer, object)
+      relationships_names = serializer._map[:relationships]
+      return if relationships_names.empty?
+
+      relationships_names.each_with_object({}) do |name, rels|
+        rels[name] = { data: relationship_data(serializer, object, name) }
+      end
+    end
+
+    def relationship_data(serializer, object, name)
+      rel_object = serializer.public_send(name, object, serializer._params)
+      attribute = serializer.class.attributes[name]
+
+      if attribute.many?
+        many_relationships_data(serializer, rel_object, attribute)
+      else
+        one_relationship_data(serializer, rel_object, attribute)
+      end
+    end
+
+    def many_relationships_data(serializer, rel_objects, attribute)
+      return [] if rel_objects.empty?
+
+      rel_serializer = attribute.serializer.inherited_instance(serializer)
+
+      rel_objects.map { |rel_object| add_relationship_data(rel_serializer, rel_object) }
+    end
+
+    def one_relationship_data(serializer, rel_object, attribute)
+      return unless rel_object
+
+      rel_serializer = attribute.serializer.inherited_instance(serializer)
+      add_relationship_data(rel_serializer, rel_object)
+    end
+
+    def add_relationship_data(rel_serializer, rel_object)
+      rel_uid = uid(rel_serializer, rel_object)
+      includes[rel_uid] ||= data(rel_serializer, rel_object)
+      rel_uid
+    end
+
     class << self
       def call(object, serializer, opts = {})
         includes = {}
 
-        data = opts[:many] ? many(object, serializer, includes) : one(object, serializer, includes)
+        data = opts[:many] ? many(includes, serializer, object) : one(includes, serializer, object)
 
         response(data, includes, opts[:meta])
       end
@@ -17,73 +88,17 @@ class Jat
       def response(data, includes, meta)
         result = {}
         result[:data] = data if data
-        result[:included] = includes.values unless includes.empty?
+        result[:included] = includes.values unless includes == {}
         result[:meta] = meta if meta
         result
       end
 
-      def uid(obj, serializer)
-        { type: serializer.type, id: serializer.id(obj) }
+      def many(includes, serializer, objects)
+        objects.map { |object| one(includes, serializer, object) }
       end
 
-      def one(obj, serializer, includes)
-        return unless obj
-
-        result = uid(obj, serializer)
-        assign_attributes(result, obj, serializer)
-        assign_relationships(result, obj, serializer, includes)
-        result
-      end
-
-      def many(objects, serializer, includes)
-        objects.map { |obj| one(obj, serializer, includes) }
-      end
-
-      def assign_attributes(result, obj, serializer)
-        attributes = serializer._map[:attributes]
-        return if attributes.empty?
-
-        result[:attributes] = attributes.each_with_object({}) do |attr, attrs|
-          attrs[attr] = serializer.public_send(attr, obj, serializer._params)
-        end
-      end
-
-      def assign_relationships(result, obj, serializer, includes)
-        relationships = serializer._map[:relationships]
-        return if relationships.empty?
-
-        result[:relationships] = relationships.each_with_object({}) do |name, rels|
-          rels[name] = { data: relationship_data(obj, serializer, name, includes) }
-        end
-      end
-
-      def relationship_data(obj, serializer, name, includes)
-        rel_object = serializer.public_send(name, obj, serializer._params)
-        opts = serializer.class.attributes[name]
-
-        if opts.many?
-          return [] if rel_object.empty?
-
-          add_relationships_data(rel_object, serializer, opts, includes)
-        else
-          return unless rel_object
-
-          rel_serializer = opts.serializer.new(serializer._params, serializer._full_map)
-          add_relationship_data(rel_object, rel_serializer, includes)
-        end
-      end
-
-      def add_relationships_data(objects, serializer, opts, includes)
-        rel_serializer = opts.serializer.new(serializer._params, serializer._full_map)
-
-        objects.map { |obj| add_relationship_data(obj, rel_serializer, includes) }
-      end
-
-      def add_relationship_data(obj, rel_serializer, includes)
-        rel_uid = uid(obj, rel_serializer)
-        includes[rel_uid] ||= one(obj, rel_serializer, includes)
-
-        rel_uid
+      def one(includes, initial_serializer, initial_object)
+        new(includes).data(initial_serializer, initial_object)
       end
     end
   end
