@@ -4,12 +4,6 @@ require 'jat/opts/check'
 
 class Jat
   class Opts
-    EXPOSED = {
-      all: :exposed_all,
-      none: :exposed_none,
-      default: :exposed_default
-    }.freeze
-
     attr_reader :current_serializer, :name, :opts, :original_block
 
     def initialize(current_serializer, params)
@@ -30,8 +24,11 @@ class Jat
     end
 
     def exposed?
-      exposed_method = EXPOSED.fetch(current_serializer.config.exposed)
-      __send__(exposed_method)
+      case current_serializer.config.exposed
+      when :all then opts.fetch(:exposed, true)
+      when :none then opts.fetch(:exposed, false)
+      else opts.fetch(:exposed, !relation?)
+      end
     end
 
     def many?
@@ -65,18 +62,6 @@ class Jat
     end
 
     private
-
-    def exposed_all
-      opts.fetch(:exposed, true)
-    end
-
-    def exposed_none
-      opts.fetch(:exposed, false)
-    end
-
-    def exposed_default
-      opts.fetch(:exposed, !relation?)
-    end
 
     def transform_original_block
       block = original_block

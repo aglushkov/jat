@@ -58,6 +58,18 @@ RSpec.describe Jat::Opts::CheckOptsIncludes do
     opts[:includes] = [:a, { b: %i[c d] }]
     expect { check.(params) }.not_to raise_error
 
+    opts[:includes] = ''
+    expect { check.(params) }.to raise_error Jat::Error, /includes/
+
+    opts[:includes] = :''
+    expect { check.(params) }.to raise_error Jat::Error, /includes/
+
+    opts[:includes] = { '' => :b }
+    expect { check.(params) }.to raise_error Jat::Error, /includes/
+
+    opts[:includes] = { '': :b }
+    expect { check.(params) }.to raise_error Jat::Error, /includes/
+
     opts[:includes] = [1]
     expect { check.(params) }.to raise_error Jat::Error, /includes/
 

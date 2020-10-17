@@ -21,5 +21,8 @@ RSpec.describe Jat::Opts::CheckOptsSerializer do
 
     opts[:serializer] = nil
     expect { check.(params) }.to raise_error Jat::Error, /Jat.*proc/
+
+    opts[:serializer] = Class.new
+    expect { check.(params) }.to raise_error Jat::Error, /Jat subclass/
   end
 end
