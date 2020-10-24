@@ -54,6 +54,10 @@ class Jat
   end
 
   module DSLClassMethods
+    def call
+      self
+    end
+
     def type(new_type = nil)
       return @type || raise(Error, "#{self} has no defined type") unless new_type
 
@@ -133,7 +137,7 @@ class Jat
     end
 
     def _copy_to(nested_serializer)
-      nested_serializer.new(_params, _full_map)
+      nested_serializer.().new(_params, _full_map)
     end
   end
 

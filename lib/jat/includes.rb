@@ -59,7 +59,7 @@ class Jat
       nested_result = deep_nested_result(result, includes)
       nested_serializer = attribute.serializer
 
-      append(nested_result, nested_serializer)
+      append(nested_result, nested_serializer.())
     end
 
     def add_includes(res, includes)
@@ -68,15 +68,21 @@ class Jat
       end
     end
 
-    def deep_nested_result(result, includes)
+    def deep_nested_result(result, includes, cross_refs = [])
+      check_cross_refs(cross_refs, result)
+
       key, nested_includes = includes.to_a.first
       result = result.fetch(key)
+      return result if nested_includes.empty?
 
-      if nested_includes.any?
-        deep_nested_result(result, nested_includes)
-      else
-        result
-      end
+      deep_nested_result(result, nested_includes, cross_refs)
+    end
+
+    # :reek:FeatureEnvy
+    def check_cross_refs(cross_refs, current_result)
+      raise Error, "Cross referenced includes #{cross_refs}" if cross_refs.include?(current_result)
+
+      cross_refs << current_result
     end
 
     def include?(includes)

@@ -13,6 +13,12 @@ RSpec.describe Jat::Includes do
     ser
   end
 
+  let(:email_serializer) do
+    ser = Class.new(Jat)
+    ser.type :email
+    ser
+  end
+
   it 'returns empty hash when no attributes requested' do
     types_keys = { user: { attributes: [], relationships: [] } }
 
@@ -96,5 +102,33 @@ RSpec.describe Jat::Includes do
 
     result = described_class.new(types_keys).for(user_serializer)
     expect(result).to eq(company: { profile: { confirmed_email: {}, unconfirmed_email: {} } })
+  end
+
+  it 'raises error if with 2 serializers have cross reference' do
+    user_serializer.relationship :profile, serializer: profile_serializer, includes: :profile
+    profile_serializer.relationship :user, serializer: user_serializer, includes: :user
+
+    types_keys = {
+      user: { attributes: [], relationships: %i[profile] },
+      profile: { attributes: [], relationships: %i[user] }
+    }
+
+    expect { described_class.new(types_keys).for(user_serializer) }
+      .to raise_error Jat::Error, /Cross referenced includes/
+  end
+
+  it 'raises error if 3 serializers have cross reference' do
+    user_serializer.relationship :profile, serializer: profile_serializer, includes: :profile
+    profile_serializer.relationship :email, serializer: email_serializer, includes: :email
+    email_serializer.relationship :user, serializer: user_serializer, includes: :user
+
+    types_keys = {
+      user: { attributes: [], relationships: %i[profile] },
+      profile: { attributes: [], relationships: %i[email] },
+      email: { attributes: [], relationships: %i[user] }
+    }
+
+    expect { described_class.new(types_keys).for(user_serializer) }
+      .to raise_error Jat::Error, /Cross referenced includes/
   end
 end

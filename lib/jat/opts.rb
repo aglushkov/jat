@@ -75,15 +75,17 @@ class Jat
       ->(obj, _params) { obj.public_send(delegate_field) }
     end
 
+    # :reek:FeatureEnvy
     def proc_serializer(value)
-      serializer = value.()
-      return serializer if jat_subclass?(serializer)
+      lambda do
+        serializer = value.()
 
-      raise Jat::Error, "Invalid serializer `#{serializer.inspect}`, must be a subclass of Jat"
-    end
+        if !serializer.is_a?(Class) || !(serializer < Jat)
+          raise Jat::Error, "Invalid serializer `#{serializer.inspect}`, must be a subclass of Jat"
+        end
 
-    def jat_subclass?(serializer)
-      serializer.is_a?(Class) && (serializer < Jat)
+        serializer
+      end
     end
   end
 end

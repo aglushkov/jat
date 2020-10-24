@@ -8,7 +8,7 @@ module CrossRef
 
     relationship :comments,
                  exposed: true,
-                 serializer: CrossRef::CommentSerializer,
+                 serializer: -> { CrossRef::CommentSerializer },
                  many: true
   end
 end

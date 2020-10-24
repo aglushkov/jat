@@ -17,7 +17,7 @@ class Jat
 
       # @exposed can be :all, :none, :default
       def initialize(serializer, exposed, exposed_additionally: nil)
-        @serializer = serializer
+        @serializer = serializer.call
         @exposed = exposed
         @exposed_additionally = exposed_additionally
       end
@@ -60,7 +60,7 @@ class Jat
 
         if attribute.relation?
           type_result[:relationships] << name
-          append(attribute.serializer)
+          append(attribute.serializer.call)
         else
           type_result[:attributes] << name
         end
