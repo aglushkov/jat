@@ -17,10 +17,10 @@ class Jat
         return unless opts.key?(:serializer)
         return if includes.empty?
 
-        hash_includes = Jat::Utils::IncludesToHash.(includes)
-        return if hash_includes == { hash_includes.keys.first => {} }
+        includes_hash = Jat::Utils::IncludesToHash.(includes)
+        return if no_branches?(includes_hash)
 
-        error 'Attribute option `includes` can only have single or no values when serializer provided'
+        error 'Attribute option `includes` can not include branches when serializer provided'
       end
 
       def check_object(includes)
@@ -60,6 +60,12 @@ class Jat
 
       def string?(value)
         value.is_a?(String) || value.is_a?(Symbol)
+      end
+
+      # :reek:FeatureEnvy
+      def no_branches?(includes_hash)
+        includes_hash.length <= 1 &&
+          includes_hash.each_value.all? { |value| no_branches?(value) }
       end
     end
   end

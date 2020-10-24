@@ -56,8 +56,7 @@ class Jat
     def add_nested_includes(result, includes, attribute)
       add_includes(result, includes)
 
-      # nested includes can have only one key
-      nested_result = result.fetch(includes.keys.first)
+      nested_result = deep_nested_result(result, includes)
       nested_serializer = attribute.serializer
 
       append(nested_result, nested_serializer)
@@ -66,6 +65,17 @@ class Jat
     def add_includes(res, includes)
       res.merge!(includes) do |_key, current_value, new_value|
         current_value.merge(new_value)
+      end
+    end
+
+    def deep_nested_result(result, includes)
+      key, nested_includes = includes.to_a.first
+      result = result.fetch(key)
+
+      if nested_includes.any?
+        deep_nested_result(result, nested_includes)
+      else
+        result
       end
     end
 

@@ -85,14 +85,16 @@ RSpec.describe Jat::Includes do
     expect(result).to eq(profile: { confirmed_email: {}, unconfirmed_email: {} })
   end
 
-  # it 'returns all exposed includes' do
-  #   comment_serializer.relationship :user, many: false, serializer: user_serializer, includes: :user, exposed: false
+  it 'returns deeply nested includes for relationships' do
+    user_serializer.relationship :profile, serializer: profile_serializer, includes: { company: :profile }
+    profile_serializer.attribute :email, includes: %i[confirmed_email unconfirmed_email]
 
-  #   expect(user_serializer.new._includes).to eq(
-  #     confirmed_email: {},
-  #     unconfirmed_email: {},
-  #     profile: {},
-  #     comments: { hashtags: {} }
-  #   )
-  # end
+    types_keys = {
+      user: { attributes: [], relationships: %i[profile] },
+      profile: { attributes: %i[email], relationships: [] }
+    }
+
+    result = described_class.new(types_keys).for(user_serializer)
+    expect(result).to eq(company: { profile: { confirmed_email: {}, unconfirmed_email: {} } })
+  end
 end
