@@ -110,12 +110,14 @@ RSpec.describe Jat do
       expect(parent.config.exposed).to eq :all
     end
 
-    it 'inherits attributes' do
+    it 'inherits type and attributes' do
       parent = jat
+      parent.type :parent
       parent.attribute :foo, exposed: true
       parent.relationship :bar, serializer: -> { parent }, exposed: false
 
       child = Class.new(parent)
+      expect(child.type).to eq :parent
       expect(child.attributes[:foo].exposed).to eq true
       expect(child.attributes[:bar].exposed).to eq false
     end

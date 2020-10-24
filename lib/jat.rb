@@ -16,8 +16,7 @@ class Jat
     def inherited(subclass)
       subclass.extend DSLClassMethods
       subclass.include DSLInstanceMethods
-      config.copy_to(subclass)
-      attributes.copy_to(subclass)
+      copy_to(subclass)
 
       super
     end
@@ -50,6 +49,12 @@ class Jat
     def refresh
       attributes.refresh
       clear
+    end
+
+    def copy_to(subclass)
+      subclass.type(@type) if defined?(@type)
+      config.copy_to(subclass)
+      attributes.copy_to(subclass)
     end
   end
 
