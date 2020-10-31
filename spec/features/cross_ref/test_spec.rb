@@ -27,21 +27,13 @@ RSpec.describe 'Cross reference of serializers' do
     comment.user = user
   end
 
-  it 'serializes when referenced param in not exposed' do
-    CrossRef::CommentSerializer.relationship(
-      :user,
-      serializer: CrossRef::UserSerializer, exposed: false
-    )
-
-    serializer = CrossRef::UserSerializer.new
-
-    expect { serializer.to_h(user, many: false) }.not_to raise_error
-  end
-
   it 'serializes when fields make cross referenced param not exposed' do
-    params = { fields: { user: 'comments' } }
-    serializer = CrossRef::UserSerializer.new(params)
+    params = { fields: { comment: 'user', user: '' } }
+    serializer = CrossRef::CommentSerializer.new(params)
+    expect { serializer.to_h(comment, many: false) }.not_to raise_error
 
+    params = { fields: { user: 'comments', comment: '' } }
+    serializer = CrossRef::UserSerializer.new(params)
     expect { serializer.to_h(user, many: false) }.not_to raise_error
   end
 end

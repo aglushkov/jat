@@ -151,7 +151,7 @@ RSpec.describe Jat::Opts do
       it 'returns Proc' do
         params[:opts] = { serializer: -> { jat } }
         expect(serializer).to be_a Proc
-        expect(serializer.call).to eq jat
+        expect(serializer.()).to eq jat
       end
     end
 
@@ -159,7 +159,7 @@ RSpec.describe Jat::Opts do
       it 'raises error' do
         params[:opts] = { serializer: -> { nil } }
         expect(serializer).to be_a Proc
-        expect { serializer.call }.to raise_error Jat::Error, /must be a subclass of Jat/
+        expect { serializer.() }.to raise_error Jat::Error, /must be a subclass of Jat/
       end
     end
   end

@@ -13,13 +13,14 @@
 class Jat
   class Map
     class Construct
-      attr_reader :serializer, :result, :exposed, :exposed_additionally
+      attr_reader :serializer, :result, :exposed, :manually_exposed
 
-      # @exposed can be :all, :none, :default
-      def initialize(serializer, exposed, exposed_additionally: nil)
-        @serializer = serializer.call
-        @exposed = exposed
-        @exposed_additionally = exposed_additionally
+      EXPOSED_VALUES = { all: :all, exposed: :exposed, manual: :manual }.freeze
+
+      def initialize(serializer, exposed, manually_exposed: {})
+        @serializer = serializer.()
+        @exposed = EXPOSED_VALUES.fetch(exposed)
+        @manually_exposed = manually_exposed
       end
 
       def to_h
@@ -48,7 +49,7 @@ class Jat
         type_result = result[type]
 
         serializer.attributes.each_value do |attribute|
-          next if hidden?(type, attribute)
+          next unless expose?(type, attribute)
 
           fill_attr(type_result, attribute)
         end
@@ -60,25 +61,27 @@ class Jat
 
         if attribute.relation?
           type_result[:relationships] << name
-          append(attribute.serializer.call)
+          append(attribute.serializer.())
         else
           type_result[:attributes] << name
         end
       end
 
-      def hidden?(type, attribute)
-        return false if exposed == :all || manually_exposed?(type, attribute)
-        return true if exposed == :none
-
-        !attribute.exposed?
+      # :reek:DuplicateMethodCall
+      def expose?(type, attribute)
+        case exposed
+        when :all then true
+        when :manual then manually_exposed?(type, attribute)
+        else attribute.exposed? || manually_exposed?(type, attribute)
+        end
       end
 
+      # Return `attribute.exposed?` when type is not provided
+      # Checks type is in exposed attributes
       def manually_exposed?(type, attribute)
-        return false unless exposed_additionally
+        return attribute.exposed? unless manually_exposed.key?(type)
 
-        exposed_attrs = exposed_additionally[type]
-        return false unless exposed_attrs
-
+        exposed_attrs = manually_exposed[type]
         exposed_attrs.include?(attribute.name)
       end
     end

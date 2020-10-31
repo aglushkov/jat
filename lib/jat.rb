@@ -33,6 +33,7 @@ class Jat
       @attributes ||= Attributes.new
     end
 
+    # Used to validate provided params (fields, include)
     def full_map
       @full_map ||= Map::Construct.new(self, :all).to_h
     end

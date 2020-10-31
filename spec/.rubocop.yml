@@ -14,6 +14,9 @@ RSpec/ExampleLength:
 RSpec/MultipleExpectations:
   Enabled: false
 
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
 RSpec/DescribeClass:
   Exclude:
     - features/**/*_spec.rb

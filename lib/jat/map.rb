@@ -14,27 +14,30 @@ class Jat
     # }
     class << self
       def call(serializer, fields, includes)
-        return requested_fields(serializer, fields) if fields
-        return requested_includes_fields(serializer, includes) if includes
+        default_attrs = serializer.exposed_map
+        includes_attrs = requested_includes_fields(serializer, includes)
+        fields_attrs = requested_fields(serializer, fields)
 
-        serializer.exposed_map
+        default_attrs.merge!(includes_attrs).merge!(fields_attrs)
       end
 
       private
 
       def requested_fields(serializer, fields)
-        fields_types = Params::Fields.(serializer, fields)
+        return {} unless fields
 
+        fields_types = Params::Fields.(serializer, fields)
         Construct
-          .new(serializer, :none, exposed_additionally: fields_types)
+          .new(serializer, :manual, manually_exposed: fields_types)
           .to_h
       end
 
       def requested_includes_fields(serializer, includes)
-        include_types = Params::Include.(serializer, includes)
+        return {} unless includes
 
+        include_types = Params::Include.(serializer, includes)
         Construct
-          .new(serializer, :default, exposed_additionally: include_types)
+          .new(serializer, :exposed, manually_exposed: include_types)
           .to_h
       end
     end

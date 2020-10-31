@@ -62,13 +62,13 @@ RSpec.describe Jat::Map::Construct do
     )
   end
 
-  it 'returns only manually exposed per-type attributes' do
+  it 'returns only manually exposed per-type attributes or exposed by default when no manual type provided' do
     exposed = {
       a: %i[a2 a3 c d],
       c: %i[c2 c3],
       d: %i[d2 d3]
     }
-    result = described_class.new(a, :none, exposed_additionally: exposed).to_h
+    result = described_class.new(a, :manual, manually_exposed: exposed).to_h
 
     expect(result).to eq(
       a: { serializer: a, attributes: %i[a2 a3], relationships: %i[c d] },
@@ -77,12 +77,26 @@ RSpec.describe Jat::Map::Construct do
     )
   end
 
+  it 'returns manually exposed per-type attributes or exposed by default when no manual type provided' do
+    exposed = {
+      a: %i[a2 a3 b c],
+      c: %i[c2 c3]
+    }
+    result = described_class.new(a, :manual, manually_exposed: exposed).to_h
+
+    expect(result).to eq(
+      a: { serializer: a, attributes: %i[a2 a3], relationships: %i[b c] },
+      b: { serializer: b, attributes: %i[b1 b2], relationships: [] },
+      c: { serializer: c, attributes: %i[c2 c3], relationships: [] }
+    )
+  end
+
   it 'returns combined auto-exposed and manualy exposed attributes' do
     exposed = {
       a: %i[c],
       c: %i[c3]
     }
-    result = described_class.new(a, :exposed, exposed_additionally: exposed).to_h
+    result = described_class.new(a, :exposed, manually_exposed: exposed).to_h
 
     expect(result).to eq(
       a: { serializer: a, attributes: %i[a1 a2], relationships: %i[c d] },
