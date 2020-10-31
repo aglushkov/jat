@@ -105,7 +105,7 @@ class Jat
       block = attribute.block
       return unless block
 
-      name = attribute.name
+      name = attribute.original_name
       # Warning-free method redefinition
       remove_method(name) if method_defined?(name)
       define_method(name, &block)

@@ -11,6 +11,7 @@ class Jat
                 :key,
                 :many,
                 :name,
+                :original_name,
                 :relation,
                 :serializer
 
@@ -36,6 +37,7 @@ class Jat
       @key = opts.key
       @many = opts.many?
       @name = opts.name
+      @original_name = opts.original_name
       @relation = opts.relation?
       @serializer = opts.serializer
     end

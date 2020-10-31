@@ -2,46 +2,32 @@
 
 class Jat
   class Config
-    DEFAULTS = {
-      delegate: true, # false
-      exposed: :default # all, none
+    ALLOWED_OPTIONS = {
+      delegate: { default: true, allowed: [true, false] },
+      exposed: { default: :default, allowed: %i[all none default] },
+      key_transform: { default: :none, allowed: %i[none camel_lower] }
     }.freeze
-    DELEGATE_ALLOWED_VALUES = [true, false].freeze
-    EXPOSED_ALLOWED_VALUES = %i[all none default].freeze
 
     def initialize(serializer)
       @serializer = serializer
-      @config = DEFAULTS.dup
+      @config = ALLOWED_OPTIONS.transform_values { |value| value[:default] }
     end
 
-    def delegate
-      config.fetch(:delegate)
-    end
-
-    def exposed
-      config.fetch(:exposed)
-    end
-
-    def delegate=(value)
-      return if delegate == value
-
-      unless DELEGATE_ALLOWED_VALUES.include?(value)
-        raise Jat::Error, "Delegate option must be boolean, #{value.inspect} was given"
+    ALLOWED_OPTIONS.each do |key, data|
+      define_method(key) do
+        config.fetch(key)
       end
 
-      config[:delegate] = value
-      serializer.refresh
-    end
+      define_method("#{key}=") do |value|
+        return if public_send(key) == value
 
-    def exposed=(value)
-      return if exposed == value
+        unless data[:allowed].include?(value)
+          raise Jat::Error, "#{key.capitalize} option can be only #{data[:allowed]}, #{value.inspect} was given"
+        end
 
-      unless EXPOSED_ALLOWED_VALUES.include?(value)
-        raise Jat::Error, "Exposed option can be only :all, :none, :default, #{value.inspect} was given"
+        config[key] = value
+        serializer.refresh
       end
-
-      config[:exposed] = value
-      serializer.refresh
     end
 
     def copy_to(subclass)

@@ -4,19 +4,27 @@ require 'jat/opts/check'
 
 class Jat
   class Opts
-    attr_reader :current_serializer, :name, :opts, :original_block
+    attr_reader :current_serializer, :original_name, :opts, :original_block
 
     def initialize(current_serializer, params)
       Check.(params)
 
       @current_serializer = current_serializer
-      @name = params.fetch(:name).to_sym
+      @original_name = params.fetch(:name).to_sym
+
       @opts = params.fetch(:opts).freeze
       @original_block = params.fetch(:block)
     end
 
     def key
-      opts.key?(:key) ? opts[:key].to_sym : name
+      opts.key?(:key) ? opts[:key].to_sym : original_name
+    end
+
+    def name
+      case current_serializer.config.key_transform
+      when :camel_lower then camel_lower(original_name)
+      else original_name
+      end
     end
 
     def delegate?
@@ -86,6 +94,13 @@ class Jat
 
         serializer
       end
+    end
+
+    def camel_lower(string)
+      first_word, *other = string.to_s.split('_')
+      last_words = other.map!(&:capitalize).join
+
+      "#{first_word}#{last_words}".to_sym
     end
   end
 end
