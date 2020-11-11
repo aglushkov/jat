@@ -85,6 +85,15 @@ RSpec.describe Jat::Config do
     end
   end
 
+  describe '#to_json=' do
+    it 'changes to_json option' do
+      new_to_json = -> {}
+      config.to_json = new_to_json
+
+      expect(config.to_json).to eq new_to_json
+    end
+  end
+
   describe '#copy_to' do
     it 'copies options to another serializer' do
       config.delegate = false

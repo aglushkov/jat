@@ -78,6 +78,34 @@ RSpec.describe Jat do
     end
   end
 
+  describe '#to_h' do
+    it 'returns serialized response' do
+      jat.type :jat
+      jat.id key: :itself
+
+      result = jat.new.to_h('OBJECT', meta: { foo: :bar })
+      expect(result).to eq(
+        data: { type: :jat, id: 'OBJECT' },
+        meta: { foo: :bar }
+      )
+    end
+  end
+
+  describe '#to_s' do
+    it 'returns json string' do
+      jat.type :jat
+      jat.id key: :itself
+
+      result = jat.new.to_s('OBJECT', meta: { foo: :bar })
+      expect(result).to eq(
+        JSON.dump(
+          data: { type: :jat, id: 'OBJECT' },
+          meta: { foo: :bar }
+        )
+      )
+    end
+  end
+
   describe '#_includes' do
     it 'delegates to Jat::Include with correct params' do
       jat.type :jat

@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
+require 'json'
+
 class Jat
   class Config
     ALLOWED_OPTIONS = {
+      to_json: { default: ->(hash) { JSON.dump(hash) } },
       delegate: { default: true, allowed: [true, false] },
       exposed: { default: :default, allowed: %i[all none default] },
       key_transform: { default: :none, allowed: %i[none camel_lower] }
@@ -21,8 +24,9 @@ class Jat
       define_method("#{key}=") do |value|
         return if public_send(key) == value
 
-        unless data[:allowed].include?(value)
-          raise Jat::Error, "#{key.capitalize} option can be only #{data[:allowed]}, #{value.inspect} was given"
+        allowed = data[:allowed]
+        if allowed && !allowed.include?(value)
+          raise Jat::Error, "#{key.capitalize} option can be only #{allowed}, #{value.inspect} was given"
         end
 
         config[key] = value

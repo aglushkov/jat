@@ -126,6 +126,11 @@ class Jat
       Response.new(self, object, opts).to_h
     end
 
+    def to_s(object, opts = {})
+      response = to_h(object, opts)
+      self.class.config.to_json.(response)
+    end
+
     def id(object)
       object.id
     end
