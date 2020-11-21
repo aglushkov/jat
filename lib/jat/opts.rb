@@ -22,7 +22,7 @@ class Jat
 
     def name
       case current_serializer.config.key_transform
-      when :camel_lower then camel_lower(original_name)
+      when :camelLower then camel_lower(original_name)
       else original_name
       end
     end

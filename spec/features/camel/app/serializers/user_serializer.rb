@@ -2,7 +2,7 @@
 
 module Camel
   class UserSerializer < Jat
-    config.key_transform = :camel_lower
+    config.key_transform = :camelLower
 
     type :user
 

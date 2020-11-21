@@ -128,18 +128,17 @@ class Jat
 
   # :reek:ModuleInitialize
   module DSLInstanceMethods
-    attr_reader :_params, :_map
+    attr_reader :_params
 
     def initialize(params = nil, full_map = nil)
       @_params = params
       @_full_map = full_map
-      @_map = _full_map.fetch(type)
     end
 
     def to_h(object, opts = {})
       _reinitialize(opts)
 
-      _cached(opts[:cache], object, :hash) do
+      _cached(object, opts, :hash) do
         Response.new(self, object, opts).to_h
       end
     end
@@ -147,7 +146,7 @@ class Jat
     def to_str(object, opts = {})
       _reinitialize(opts)
 
-      _cached(opts[:cache], object, :string) do
+      _cached(object, opts, :string) do
         response = Response.new(self, object, opts).to_h
         self.class.config.to_str.(response)
       end
@@ -173,12 +172,17 @@ class Jat
       end
     end
 
+    def _map
+      @_map ||= _full_map.fetch(type)
+    end
+
     private
 
-    def _cached(cache, object, format, &block)
+    def _cached(object, opts, format, &block)
+      cache = opts[:cache]
       return yield unless cache
 
-      cache.(object, _params, format, &block)
+      cache.(object, _params, opts, format, &block) || yield
     end
 
     def _reinitialize(opts)

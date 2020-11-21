@@ -14,8 +14,8 @@ RSpec.describe Jat::Opts do
       expect(new_name).to eq :foo_bar
     end
 
-    it 'make lowerCamelCase with config key_transform=camel_lower' do
-      jat.config.key_transform = :camel_lower
+    it 'make lowerCamelCase with config key_transform=camelLower' do
+      jat.config.key_transform = :camelLower
       params[:name] = 'foo_bar_bazz'
       expect(new_name).to eq :fooBarBazz
     end
@@ -30,8 +30,8 @@ RSpec.describe Jat::Opts do
         expect(key).to eq :foo
       end
 
-      it 'defaults to original name with config key_transform=camel_lower' do
-        jat.config.key_transform = :camel_lower
+      it 'defaults to original name with config key_transform=camelLower' do
+        jat.config.key_transform = :camelLower
         params[:name] = 'foo_bar'
         expect(key).to eq :foo_bar
       end

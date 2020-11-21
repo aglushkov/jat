@@ -8,7 +8,7 @@ class Jat
       to_str: { default: ->(data) { Jat::JSON.dump(data) } },
       delegate: { default: true, allowed: [true, false] },
       exposed: { default: :default, allowed: %i[all none default] },
-      key_transform: { default: :none, allowed: %i[none camel_lower] }
+      key_transform: { default: :none, allowed: %i[none camelLower] }
     }.freeze
 
     def initialize(serializer)

@@ -9,14 +9,24 @@ Serialization format is almost like original [JSON-API](https://jsonapi.org/form
 
 ## Features
 1. Simple DSL.
+  - Quick example
+  - Redefine how to get attribute
+  - Exposing attributes
+  - Defining has_many relationship
+
 2. Showing associations to preload.
 3. Configurable response fields.
 4. Global config.
+  - Exposed
+  - Delegate
+  - Camel Lower Keys
+  - JSON encoder
 5. Inheritance.
+6. Caching
 
 ## 1. Simple DSL
 
-### 1.1. Define type, attributes, relationships.
+### 1.1. Quick example
 Each serializer must have *type*.
 Also we can add attributes and relationships.
 
@@ -29,9 +39,31 @@ Also we can add attributes and relationships.
     relationship :roles, serializer: RolesSerializer, many: true
   end
 
-  serializer = UsersSerializer.new
-  serializer.to_h(user)
-  serializer.to_h(users, many: true)
+  # Serializes single object without params
+  UsersSerializer.to_h(user)
+  UsersSerializer.to_str(user)
+
+  # Serializes multiple objects without params
+  UsersSerializer.to_h(users, many: true)
+  UsersSerializer.to_str(users, many: true)
+
+ # Serializes single object with params
+  UsersSerializer.to_h(user, params: params)
+  UsersSerializer.to_str(user, params: params)
+
+  # Serializes multiple objects with params
+  UsersSerializer.to_h(users, params: params, many: true)
+  UsersSerializer.to_str(users, params: params, many: true)
+
+  # Add some meta
+  UsersSerializer.to_h(user, params: params, meta: { some: :thing })
+  UsersSerializer.to_str(user, params: params, meta: { some: :thing })
+
+  # We can save a little time on parsing params by creating serializer instance
+  # and reusing it. No sence to do it with single serialization for single request.
+  serializer = UsersSerializer.new(params)
+  serializer.to_h(user1, opts_without_params) # { many: ..., meta: ..., cache: ...}
+  serializer.to_h(user2, opts_without_params)
 ```
 
 ### 1.2. Redefine how to get attribute
@@ -72,7 +104,7 @@ can change this on per-attribute basis
 ```
 
 ### 1.4. Defining has_many relationship
-Any relationship be default has option `many: false`, we should redefine it:
+Any relationship by default has option `many: false`, we should redefine it:
 ```ruby
   class UsersSerializer < Jat
     relationship :roles, serializer: RolesSerializer, many: true
@@ -137,7 +169,7 @@ We can set all attributes to be exposed or not by config
   end
 ```
 
-### 4.1 Delegate
+### 4.2 Delegate
 We can set all attributes are delegated to object or not. By default they are delegated, but disabling can be usefull when
 you know object has no same name methods.
 ```ruby
@@ -148,6 +180,67 @@ you know object has no same name methods.
   end
 ```
 
+### 4.3 Camel Lower Keys
+We can transfrom all keys to `camelLower` case
+```ruby
+  class UsersSerializer < Jat
+    config.key_transform = :camelLower
+    # or
+    config.key_transform = :none # default
+  end
+```
+
+### 4.4 JSON encoder
+Default encoder is standard JSON module. You can change this for your favourite encoder
+by adding config globally or per-serializer.
+
+```ruby
+  Jat.config.to_str = ->(data) { Oj.dump(data) } # change to Oj
+```
+
+Serialization to string will be best choice together with *caching* to not
+re-encode same response for each request.
+
+
 ## 5. Inheritance
 When you inherit serializer, child copies parent config, type, attributes and
 relationships.
+
+## 6. Caching
+Its very unpredictable which caching algorithm is needed in specific use case, so
+we decided to remove all responsobility from us.
+You have full controll over caching on a per-request basis.
+First of all you need to specify callable cache instance.
+We will send all params we have to it.
+
+Performance tips:
+- use `to_str` method when caching to save time for contructing and re-encoding hash
+- change JSON adapter to dump json by `Jat.config.to_str = ->(data) { Oj.dump(data) }`
+
+Example
+```ruby
+  # objects - Currently serialized object(s).
+  # params - We can get `fields` and `include` params here to construct cache key.
+  # opts   - We can use some opts to construct cache key or skip caching.
+  # format - contains `:hash` or `:string` depending on serialization method.
+  # &block - you should call it without arguments to generate response.
+  cache = ->(objects, params, opts, format, &block) do # It can be some callable class
+    break if opts.dig(:meta, 'some') # We can return falsey value to skip caching
+
+    cache_key = [
+      objects.cache_key,
+      *['fields', *params[:fields].to_a.flatten],
+      *['include', params[:include]],
+      meta.to_s,
+      format,
+    ].join('.')
+
+    Rails.cache.fetch(cache_key, expires_in: 1.week) { block.() }
+  end
+
+  opts = { many: true, meta: { 'some' => 'thing' } }
+
+  UserSerializer.to_str(users, cache: cache, params: params, **opts)
+  # or
+  UserSerializer.to_h(users, cache: cache, params: params, **opts)
+```

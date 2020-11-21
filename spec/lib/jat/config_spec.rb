@@ -61,13 +61,13 @@ RSpec.describe Jat::Config do
 
   describe '#key_transform=' do
     it 'changes delegate option' do
-      config.key_transform = :camel_lower
-      expect(config.key_transform).to eq :camel_lower
+      config.key_transform = :camelLower
+      expect(config.key_transform).to eq :camelLower
     end
 
     it 'calls serializer #refresh' do
       allow(jat).to receive(:refresh)
-      config.key_transform = :camel_lower
+      config.key_transform = :camelLower
 
       expect(jat).to have_received(:refresh)
     end
@@ -80,7 +80,7 @@ RSpec.describe Jat::Config do
     end
 
     it 'raises error when invalid value provided' do
-      expect { config.key_transform = 1 }.to raise_error Jat::Error, /none.*camel_lower/
+      expect { config.key_transform = 1 }.to raise_error Jat::Error, /none.*camelLower/
     end
   end
 
