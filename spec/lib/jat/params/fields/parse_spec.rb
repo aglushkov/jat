@@ -12,4 +12,10 @@ RSpec.describe Jat::Params::Fields::Parse do
 
     expect(result).to eq(a: %i[a1 a2], b: %i[b1])
   end
+
+  it 'symbolizes types' do
+    result = described_class.('a' => 'a1,a2', 'b' => 'b1')
+
+    expect(result).to eq(a: %i[a1 a2], b: %i[b1])
+  end
 end

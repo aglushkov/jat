@@ -14,6 +14,11 @@ RSpec.describe Jat do
       jat.type :users
       expect(jat.type).to eq :users
     end
+
+    it 'symbolizes type' do
+      jat.type 'users'
+      expect(jat.type).to eq :users
+    end
   end
 
   describe '.id' do

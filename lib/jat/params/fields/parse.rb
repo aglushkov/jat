@@ -13,7 +13,7 @@ class Jat
 
             fields.each_with_object({}) do |(type, attrs_string), obj|
               attrs = attrs_string.split(COMMA).map!(&:to_sym)
-              obj[type] = attrs
+              obj[type.to_sym] = attrs
             end
           end
         end
