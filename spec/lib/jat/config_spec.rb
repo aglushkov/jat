@@ -2,7 +2,6 @@
 
 RSpec.describe Jat::Config do
   let(:jat) { Class.new(Jat) }
-
   let(:config) { described_class.new(jat) }
 
   it 'has default options' do
@@ -85,12 +84,12 @@ RSpec.describe Jat::Config do
     end
   end
 
-  describe '#to_json=' do
-    it 'changes to_json option' do
-      new_to_json = -> {}
-      config.to_json = new_to_json
+  describe '#to_str=' do
+    it 'changes to_str option' do
+      new_to_str = -> {}
+      config.to_str = new_to_str
 
-      expect(config.to_json).to eq new_to_json
+      expect(config.to_str).to eq new_to_str
     end
   end
 

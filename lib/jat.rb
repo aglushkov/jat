@@ -64,6 +64,20 @@ class Jat
       self
     end
 
+    # :reek:FeatureEnvy (refers to 'opts' more than self)
+    def to_h(object, opts)
+      opts = opts.dup
+      params = opts.delete(:params)
+      new(params).to_h(object, opts)
+    end
+
+    # :reek:FeatureEnvy (refers to 'opts' more than self)
+    def to_str(object, opts)
+      opts = opts.dup
+      params = opts.delete(:params)
+      new(params).to_str(object, opts)
+    end
+
     def type(new_type = nil)
       return @type || raise(Error, "#{self} has no defined type") unless new_type
 
@@ -123,12 +137,20 @@ class Jat
     end
 
     def to_h(object, opts = {})
-      Response.new(self, object, opts).to_h
+      _reinitialize(opts)
+
+      _cached(opts[:cache], object, :hash) do
+        Response.new(self, object, opts).to_h
+      end
     end
 
-    def to_s(object, opts = {})
-      response = to_h(object, opts)
-      self.class.config.to_json.(response)
+    def to_str(object, opts = {})
+      _reinitialize(opts)
+
+      _cached(opts[:cache], object, :string) do
+        response = Response.new(self, object, opts).to_h
+        self.class.config.to_str.(response)
+      end
     end
 
     def id(object)
@@ -139,6 +161,10 @@ class Jat
       Includes.new(_full_map).for(self.class)
     end
 
+    def _copy_to(nested_serializer)
+      nested_serializer.().new(_params, _full_map)
+    end
+
     def _full_map
       @_full_map ||= begin
         fields = _params && (_params[:fields] || _params['fields'])
@@ -147,8 +173,21 @@ class Jat
       end
     end
 
-    def _copy_to(nested_serializer)
-      nested_serializer.().new(_params, _full_map)
+    private
+
+    def _cached(cache, object, format, &block)
+      return yield unless cache
+
+      cache.(object, _params, format, &block)
+    end
+
+    def _reinitialize(opts)
+      new_params = opts[:params]
+      return if !new_params || (_params == new_params)
+
+      @_params = opts.fetch(:params)
+      @_full_map = nil
+      @_map = _full_map.fetch(type)
     end
   end
 

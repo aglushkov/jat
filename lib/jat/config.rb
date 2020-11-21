@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'json'
+require 'jat/json'
 
 class Jat
   class Config
     ALLOWED_OPTIONS = {
-      to_json: { default: ->(hash) { JSON.dump(hash) } },
+      to_str: { default: ->(data) { Jat::JSON.dump(data) } },
       delegate: { default: true, allowed: [true, false] },
       exposed: { default: :default, allowed: %i[all none default] },
       key_transform: { default: :none, allowed: %i[none camel_lower] }
@@ -24,10 +24,7 @@ class Jat
       define_method("#{key}=") do |value|
         return if public_send(key) == value
 
-        allowed = data[:allowed]
-        if allowed && !allowed.include?(value)
-          raise Jat::Error, "#{key.capitalize} option can be only #{allowed}, #{value.inspect} was given"
-        end
+        check_value_allowed(key, value, data[:allowed])
 
         config[key] = value
         serializer.refresh
@@ -45,5 +42,14 @@ class Jat
     private
 
     attr_reader :config, :serializer
+
+    # :reek:FeatureEnvy
+    def check_value_allowed(key, value, allowed_values)
+      return unless allowed_values
+      return if allowed_values.include?(value)
+
+      list = allowed_values.join(', ')
+      raise Jat::Error, "#{key.capitalize} option can be only #{list} (#{value.inspect} was given)"
+    end
   end
 end

@@ -7,7 +7,7 @@ RSpec.describe Jat do
 
   describe '.type' do
     it 'does not allows to ask for type before type is defined' do
-      expect { jat.type }.to raise_error Jat::Error, /has no defined type/
+      expect { jat.type }.to raise_error(Jat::Error, /has no defined type/)
     end
 
     it 'saves and returns current type' do
@@ -78,6 +78,30 @@ RSpec.describe Jat do
     end
   end
 
+  describe '.to_h' do
+    it 'returns serialized to hash response' do
+      opts = { params: { fields: { jat: 'first' } }, meta: { foo: :bar } }
+
+      ser = instance_double(jat)
+      allow(jat).to receive(:new).with(opts[:params]).and_return(ser)
+      allow(ser).to receive(:to_h).with('OBJ', meta: { foo: :bar }).and_return('HASH')
+
+      expect(jat.to_h('OBJ', opts)).to eq 'HASH'
+    end
+  end
+
+  describe '.to_str' do
+    it 'returns serialized to string response' do
+      opts = { params: { fields: { jat: 'first' } }, meta: { foo: :bar } }
+
+      ser = instance_double(jat)
+      allow(jat).to receive(:new).with(opts[:params]).and_return(ser)
+      allow(ser).to receive(:to_str).with('OBJ', meta: { foo: :bar }).and_return('STRING')
+
+      expect(jat.to_str('OBJ', opts)).to eq 'STRING'
+    end
+  end
+
   describe '#to_h' do
     it 'returns serialized response' do
       jat.type :jat
@@ -91,18 +115,110 @@ RSpec.describe Jat do
     end
   end
 
-  describe '#to_s' do
+  describe '#to_str' do
     it 'returns json string' do
       jat.type :jat
       jat.id key: :itself
 
-      result = jat.new.to_s('OBJECT', meta: { foo: :bar })
-      expect(result).to eq(
-        JSON.dump(
-          data: { type: :jat, id: 'OBJECT' },
-          meta: { foo: :bar }
-        )
+      result = jat.new.to_str('OBJECT', meta: { foo: :bar })
+      expect(result).to eq JSON.dump(
+        data: { type: :jat, id: 'OBJECT' },
+        meta: { foo: :bar }
       )
+    end
+  end
+
+  describe 'caching' do
+    let(:opts) { { cache: hash_cache } }
+    let(:hash_storage) { {} }
+    let(:hash_cache) do
+      hash_storage
+      lambda do |object, params, format, &block|
+        key = [object, :fields, *params[:fields].to_a.flatten, format].join('.').freeze
+        hash_storage[key] ||= block.()
+      end
+    end
+    let(:serializer) { jat.new(fields: { jat: 'number' }) }
+
+    before do
+      jat.type :jat
+      jat.id key: :itself
+      jat.attribute(:number) { |obj| obj[-1] }
+    end
+
+    it 'caches #to_h' do
+      allow(Jat::Response).to receive(:new).twice.and_call_original
+
+      result1 = serializer.to_h('OBJECT_1', opts) # this should construct response
+      result2 = serializer.to_h('OBJECT_1', opts) # this should be taken from cache
+      result3 = serializer.to_h('OBJECT_2', opts) # this should construct response
+
+      expect(result1).to eq(data: { type: :jat, id: 'OBJECT_1', attributes: { number: '1' } })
+      expect(result2).to eq(data: { type: :jat, id: 'OBJECT_1', attributes: { number: '1' } })
+      expect(result3).to eq(data: { type: :jat, id: 'OBJECT_2', attributes: { number: '2' } })
+
+      # Tests that we can use object, params and current format (hash) as cache key
+      expect(hash_storage).to eq(
+        'OBJECT_1.fields.jat.number.hash' => { data: { type: :jat, id: 'OBJECT_1', attributes: { number: '1' } } },
+        'OBJECT_2.fields.jat.number.hash' => { data: { type: :jat, id: 'OBJECT_2', attributes: { number: '2' } } }
+      )
+
+      expect(Jat::Response).to have_received(:new).twice
+    end
+
+    it 'caches #to_str' do
+      allow(Jat::Response).to receive(:new).twice.and_call_original
+
+      result1 = serializer.to_str('OBJECT_1', opts) # this should construct response
+      result2 = serializer.to_str('OBJECT_1', opts) # this should be taken from cache
+      result3 = serializer.to_str('OBJECT_2', opts) # this should construct response
+
+      expect(result1).to eq JSON.dump(data: { type: :jat, id: 'OBJECT_1', attributes: { number: '1' } })
+      expect(result2).to eq JSON.dump(data: { type: :jat, id: 'OBJECT_1', attributes: { number: '1' } })
+      expect(result3).to eq JSON.dump(data: { type: :jat, id: 'OBJECT_2', attributes: { number: '2' } })
+
+      # Tests that we can use object, params and current format (string) as cache key
+      expect(hash_storage).to eq(
+        'OBJECT_1.fields.jat.number.string' =>
+          JSON.dump(data: { type: :jat, id: 'OBJECT_1', attributes: { number: '1' } }),
+
+        'OBJECT_2.fields.jat.number.string' =>
+          JSON.dump(data: { type: :jat, id: 'OBJECT_2', attributes: { number: '2' } })
+      )
+
+      expect(Jat::Response).to have_received(:new).twice
+    end
+  end
+
+  describe 'redefining params' do
+    let(:serializer) { jat.new(params) }
+
+    before do
+      children_serializer = Class.new(described_class)
+      children_serializer.type(:jat2)
+      children_serializer.id key: :itself
+
+      jat.type :jat
+      jat.id key: :itself
+      jat.attribute(:size, exposed: false)
+      jat.relationship(:children, serializer: children_serializer) { 'jat2' }
+    end
+
+    it 'redefines params with #to_h' do
+      ser = jat.new(fields: { jat: 'size' }) # response should not include `size` field defined here
+      resp = ser.to_h('OBJECT', params: { include: 'children' }) # response should include `children` relation
+
+      data = resp[:data]
+      expect(data).to include(:relationships)
+      expect(data).not_to include(:attributes)
+    end
+
+    it 'redefines params with #to_str' do
+      ser = jat.new(fields: { jat: 'size' }) # response should not include `size` field defined here
+      data = ser.to_str('OBJECT', params: { include: 'children' }) # response should include `children` relation
+
+      expect(data).to include('relationships')
+      expect(data).not_to include('attributes')
     end
   end
 
@@ -112,7 +228,7 @@ RSpec.describe Jat do
       serializer = jat.new
 
       includes = instance_double(Jat::Includes)
-      allow(Jat::Includes).to receive(:new).with(serializer._full_map).and_return(includes)
+      allow(Jat::Includes).to receive(:new).with(serializer.send(:_full_map)).and_return(includes)
       allow(includes).to receive(:for).with(serializer.class).and_return('RES')
 
       expect(serializer._includes).to eq 'RES'
