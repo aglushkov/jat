@@ -85,25 +85,25 @@ RSpec.describe Jat do
 
   describe '.to_h' do
     it 'returns serialized to hash response' do
-      opts = { params: { fields: { jat: 'first' } }, meta: { foo: :bar } }
+      context = { some: 'CONTEXT' }
 
       ser = instance_double(jat)
-      allow(jat).to receive(:new).with(opts[:params]).and_return(ser)
-      allow(ser).to receive(:to_h).with('OBJ', meta: { foo: :bar }).and_return('HASH')
+      allow(jat).to receive(:new).with(no_args).and_return(ser)
+      allow(ser).to receive(:to_h).with('OBJ', context).and_return('HASH')
 
-      expect(jat.to_h('OBJ', opts)).to eq 'HASH'
+      expect(jat.to_h('OBJ', context)).to eq 'HASH'
     end
   end
 
   describe '.to_str' do
     it 'returns serialized to string response' do
-      opts = { params: { fields: { jat: 'first' } }, meta: { foo: :bar } }
+      context = { some: 'CONTEXT' }
 
       ser = instance_double(jat)
-      allow(jat).to receive(:new).with(opts[:params]).and_return(ser)
-      allow(ser).to receive(:to_str).with('OBJ', meta: { foo: :bar }).and_return('STRING')
+      allow(jat).to receive(:new).with(no_args).and_return(ser)
+      allow(ser).to receive(:to_str).with('OBJ', context).and_return('STRING')
 
-      expect(jat.to_str('OBJ', opts)).to eq 'STRING'
+      expect(jat.to_str('OBJ', context)).to eq 'STRING'
     end
   end
 
@@ -134,18 +134,19 @@ RSpec.describe Jat do
   end
 
   describe 'caching' do
-    let(:opts) { { cache: hash_cache } }
+    let(:context) { { cache: hash_cache } }
     let(:hash_storage) { {} }
     let(:hash_cache) do
       hash_storage
-      lambda do |object, params, opts, format, &block|
-        break nil if opts.dig(:meta, :foo)
+      lambda do |object, context, &block|
+        break nil if context[:no_cache]
 
-        key = [object, :fields, *params[:fields].to_a.flatten, format].join('.').freeze
+        params = context[:params]
+        key = [object, :fields, *params[:fields].to_a.flatten, context[:format]].join('.').freeze
         hash_storage[key] ||= block.()
       end
     end
-    let(:serializer) { jat.new(fields: { jat: 'number' }) }
+    let(:serializer) { jat.new(params: { fields: { jat: 'number' } }) }
 
     before do
       jat.type :jat
@@ -154,54 +155,49 @@ RSpec.describe Jat do
     end
 
     it 'caches #to_h' do
-      allow(Jat::Response).to receive(:new).thrice.and_call_original
+      result1 = serializer.to_h('OBJECT_1', context) # this should be cached
+      result2 = serializer.to_h('OBJECT_1', context) # this should be taken from cache
+      result3 = serializer.to_h('OBJECT_2', context) # this should be cached
+      result4 = serializer.to_h('OBJECT_3', context.merge(no_cache: true)) # this should not be cached
 
-      result1 = serializer.to_h('OBJECT_1', opts) # this should construct response
-      result2 = serializer.to_h('OBJECT_1', opts) # this should be taken from cache
-      result3 = serializer.to_h('OBJECT_2', opts) # this should construct response
-      result4 = serializer.to_h('OBJECT_3', opts.merge(meta: { foo: :bar })) # this should skip adding to cache
+      # Check results refer to same object
+      expect(result1).to be_equal(result2)
 
+      # Check results are correct
       expect(result1).to eq(data: { type: :jat, id: 'OBJECT_1', attributes: { number: '1' } })
       expect(result2).to eq(data: { type: :jat, id: 'OBJECT_1', attributes: { number: '1' } })
       expect(result3).to eq(data: { type: :jat, id: 'OBJECT_2', attributes: { number: '2' } })
-      expect(result4).to eq(data: { type: :jat, id: 'OBJECT_3', attributes: { number: '3' } }, meta: { foo: :bar })
+      expect(result4).to eq(data: { type: :jat, id: 'OBJECT_3', attributes: { number: '3' } })
 
-      # Tests that we can use `object`, `params`, `opts` and current `format` (hash)
-      # when constructing cache key and checking if we want to use cache.
+      # Check we can use `object`, `context` and current `format` in cache keys
+      # We have no OBJECT_3 here as we skipped his caching
       expect(hash_storage).to eq(
-        'OBJECT_1.fields.jat.number.hash' => { data: { type: :jat, id: 'OBJECT_1', attributes: { number: '1' } } },
-        'OBJECT_2.fields.jat.number.hash' => { data: { type: :jat, id: 'OBJECT_2', attributes: { number: '2' } } }
+        'OBJECT_1.fields.jat.number.hash' => result1,
+        'OBJECT_2.fields.jat.number.hash' => result3
       )
-
-      expect(Jat::Response).to have_received(:new).thrice
     end
 
     it 'caches #to_str' do
-      allow(Jat::Response).to receive(:new).thrice.and_call_original
+      result1 = serializer.to_str('OBJECT_1', context) # this should be cached
+      result2 = serializer.to_str('OBJECT_1', context) # this should be taken from cache
+      result3 = serializer.to_str('OBJECT_2', context) # this should be cached
+      result4 = serializer.to_str('OBJECT_3', context.merge(no_cache: true)) # this should not be cached
 
-      result1 = serializer.to_str('OBJECT_1', opts) # this should construct response
-      result2 = serializer.to_str('OBJECT_1', opts) # this should be taken from cache
-      result3 = serializer.to_str('OBJECT_2', opts) # this should construct response
-      result4 = serializer.to_str('OBJECT_3', opts.merge(meta: { foo: :bar })) # this should skip adding to cache
+      # Check results refer to same object
+      expect(result1).to be_equal(result2)
 
+      # Check results are correct
       expect(result1).to eq JSON.dump(data: { type: :jat, id: 'OBJECT_1', attributes: { number: '1' } })
       expect(result2).to eq JSON.dump(data: { type: :jat, id: 'OBJECT_1', attributes: { number: '1' } })
       expect(result3).to eq JSON.dump(data: { type: :jat, id: 'OBJECT_2', attributes: { number: '2' } })
-      expect(result4).to eq JSON.dump(
-        data: { type: :jat, id: 'OBJECT_3', attributes: { number: '3' } },
-        meta: { foo: :bar }
-      )
+      expect(result4).to eq JSON.dump(data: { type: :jat, id: 'OBJECT_3', attributes: { number: '3' } })
 
-      # Tests that we can use object, params and current format (string) as cache key
+      # Check we can use `object`, `context` and current `format` in cache keys
+      # We have no OBJECT_3 here as we skipped his caching
       expect(hash_storage).to eq(
-        'OBJECT_1.fields.jat.number.string' =>
-          JSON.dump(data: { type: :jat, id: 'OBJECT_1', attributes: { number: '1' } }),
-
-        'OBJECT_2.fields.jat.number.string' =>
-          JSON.dump(data: { type: :jat, id: 'OBJECT_2', attributes: { number: '2' } })
+        'OBJECT_1.fields.jat.number.string' => result1,
+        'OBJECT_2.fields.jat.number.string' => result3
       )
-
-      expect(Jat::Response).to have_received(:new).thrice
     end
   end
 
@@ -261,12 +257,12 @@ RSpec.describe Jat do
 
     it 'does not overwrites parent config' do
       parent = jat
-      parent.config.exposed = :all
+      parent.config.meta[:version] = '1'
 
       child = Class.new(parent)
-      child.config.exposed = :none
+      child.config.meta[:version] = '2'
 
-      expect(parent.config.exposed).to eq :all
+      expect(parent.config.meta).to eq(version: '1')
     end
 
     it 'inherits type and attributes' do

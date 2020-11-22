@@ -7,6 +7,9 @@ RSpec.describe Jat::Config do
   it 'has default options' do
     expect(config.delegate).to eq true
     expect(config.exposed).to eq :default
+    expect(config.key_transform).to eq :none
+    expect(config.meta).to eq({})
+    expect(config.to_str).to be_a Proc
   end
 
   describe '#delegate=' do
@@ -97,12 +100,19 @@ RSpec.describe Jat::Config do
     it 'copies options to another serializer' do
       config.delegate = false
       config.exposed = :all
+      config.meta = { version: '1.2.3' }
 
       subclass = Class.new(jat)
       config.copy_to(subclass)
 
-      expect(subclass.config.delegate).to eq false
-      expect(subclass.config.exposed).to eq :all
+      subconfig = subclass.config
+      expect(subconfig.delegate).to eq false
+      expect(subconfig.exposed).to eq :all
+      expect(subconfig.to_str).to eq config.to_str
+
+      # Check meta are different objects with same values
+      expect(subconfig.meta).to eq(config.meta)
+      expect(subconfig.meta).not_to be_equal(config.meta)
     end
   end
 end

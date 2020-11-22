@@ -233,7 +233,7 @@ RSpec.describe Jat::Response do
       relationship :chars, serializer: chr_serializer, many: true, exposed: false
     end
 
-    result = str_serializer.new(include: 'chars').to_h('ab')
+    result = str_serializer.new(params: { include: 'chars' }).to_h('ab')
 
     expect(result).to eq(
       data: {
@@ -260,7 +260,7 @@ RSpec.describe Jat::Response do
       relationship :chars, serializer: chr_serializer, many: true, exposed: false
     end
 
-    result = str_serializer.new(fields: { str: 'chars' }).to_h('ab')
+    result = str_serializer.new(params: { fields: { str: 'chars' } }).to_h('ab')
 
     expect(result).to eq(
       data: {
@@ -273,5 +273,56 @@ RSpec.describe Jat::Response do
         { type: :chr, id: 'a' }, { type: :chr, id: 'b' }
       ]
     )
+  end
+
+  describe 'meta' do
+    it 'adds static and dynamic meta defined in serializer config' do
+      serializer = Class.new(Jat) do
+        type :foo
+        id { |obj| obj }
+
+        config.meta = { version: '1.2.3' }
+        # config.meta[:version] = '1.2.3'
+        config.meta[:uid] = ->(obj, context) { [obj, context[:time]] }
+      end
+
+      result = serializer.to_h('bar', time: '12:00')
+
+      expect(result).to eq(
+        data: { type: :foo, id: 'bar' },
+        meta: {
+          version: '1.2.3',
+          uid: ['bar', '12:00']
+        }
+      )
+    end
+
+    it 'does not overwrites manually added meta' do
+      serializer = Class.new(Jat) do
+        type :foo
+        id { |obj| obj }
+
+        config.meta[:version] = '1.2.3'
+      end
+
+      result = serializer.to_h('bar', meta: { version: '1.2.4' })
+
+      expect(result).to eq(
+        data: { type: :foo, id: 'bar' },
+        meta: { version: '1.2.4' }
+      )
+    end
+
+    it 'does not add meta with nil values' do
+      serializer = Class.new(Jat) do
+        type :foo
+        id { |obj| obj }
+        config.meta[:foo] = nil
+        config.meta[:bar] = proc {}
+      end
+
+      result = serializer.to_h('bar')
+      expect(result).to eq(data: { type: :foo, id: 'bar' })
+    end
   end
 end

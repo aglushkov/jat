@@ -64,18 +64,12 @@ class Jat
       self
     end
 
-    # :reek:FeatureEnvy (refers to 'opts' more than self)
-    def to_h(object, opts)
-      opts = opts.dup
-      params = opts.delete(:params)
-      new(params).to_h(object, opts)
+    def to_h(object, context = {})
+      new.to_h(object, context)
     end
 
-    # :reek:FeatureEnvy (refers to 'opts' more than self)
-    def to_str(object, opts)
-      opts = opts.dup
-      params = opts.delete(:params)
-      new(params).to_str(object, opts)
+    def to_str(object, context = {})
+      new.to_str(object, context)
     end
 
     def type(new_type = nil)
@@ -128,28 +122,21 @@ class Jat
 
   # :reek:ModuleInitialize
   module DSLInstanceMethods
-    attr_reader :_params
+    attr_reader :_context
 
-    def initialize(params = nil, full_map = nil)
-      @_params = params
+    def initialize(context = {}, full_map = nil)
+      @_context = context.dup
       @_full_map = full_map
     end
 
-    def to_h(object, opts = {})
-      _reinitialize(opts)
-
-      _cached(object, opts, :hash) do
-        Response.new(self, object, opts).to_h
-      end
+    def to_h(object, context = {})
+      _reinitialize(context)
+      Response.new(self, object).to_h
     end
 
-    def to_str(object, opts = {})
-      _reinitialize(opts)
-
-      _cached(object, opts, :string) do
-        response = Response.new(self, object, opts).to_h
-        self.class.config.to_str.(response)
-      end
+    def to_str(object, context = {})
+      _reinitialize(context)
+      Response.new(self, object).to_str
     end
 
     def id(object)
@@ -161,13 +148,14 @@ class Jat
     end
 
     def _copy_to(nested_serializer)
-      nested_serializer.().new(_params, _full_map)
+      nested_serializer.().new(_context, _full_map)
     end
 
     def _full_map
       @_full_map ||= begin
-        fields = _params && (_params[:fields] || _params['fields'])
-        includes = _params && (_params[:include] || _params['include'])
+        params = _context[:params]
+        fields = params && (params[:fields] || params['fields'])
+        includes = params && (params[:include] || params['include'])
         Map.(self.class, fields, includes)
       end
     end
@@ -178,20 +166,17 @@ class Jat
 
     private
 
-    def _cached(object, opts, format, &block)
-      cache = opts[:cache]
-      return yield unless cache
+    def _reinitialize(context)
+      new_params = context[:params]
+      old_params = _context[:params]
 
-      cache.(object, _params, opts, format, &block) || yield
-    end
+      # maps depend on params, so we should clear them when params changed
+      if new_params != old_params
+        @_full_map = nil
+        @_map = nil
+      end
 
-    def _reinitialize(opts)
-      new_params = opts[:params]
-      return if !new_params || (_params == new_params)
-
-      @_params = opts.fetch(:params)
-      @_full_map = nil
-      @_map = _full_map.fetch(type)
+      @_context = _context.merge!(context)
     end
   end
 

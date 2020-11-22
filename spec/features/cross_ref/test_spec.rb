@@ -28,11 +28,11 @@ RSpec.describe 'Cross reference of serializers' do
   end
 
   it 'serializes when fields make cross referenced param not exposed' do
-    params = { fields: { comment: 'user', user: '' } }
+    params = { params: { fields: { comment: 'user', user: '' } } }
     serializer = CrossRef::CommentSerializer.new(params)
     expect { serializer.to_h(comment, many: false) }.not_to raise_error
 
-    params = { fields: { user: 'comments', comment: '' } }
+    params = { params: { fields: { user: 'comments', comment: '' } } }
     serializer = CrossRef::UserSerializer.new(params)
     expect { serializer.to_h(user, many: false) }.not_to raise_error
   end

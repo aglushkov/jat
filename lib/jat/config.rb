@@ -5,15 +5,18 @@ require 'jat/json'
 class Jat
   class Config
     ALLOWED_OPTIONS = {
-      to_str: { default: ->(data) { Jat::JSON.dump(data) } },
       delegate: { default: true, allowed: [true, false] },
       exposed: { default: :default, allowed: %i[all none default] },
-      key_transform: { default: :none, allowed: %i[none camelLower] }
+      key_transform: { default: :none, allowed: %i[none camelLower] },
+      meta: { callable_default: -> { {} } },
+      to_str: { default: proc { |data, _context| Jat::JSON.dump(data) } }
     }.freeze
 
     def initialize(serializer)
       @serializer = serializer
-      @config = ALLOWED_OPTIONS.transform_values { |value| value[:default] }
+      @config = ALLOWED_OPTIONS.transform_values do |value|
+        value[:default] || value.fetch(:callable_default).()
+      end
     end
 
     ALLOWED_OPTIONS.each do |key, data|
@@ -31,12 +34,17 @@ class Jat
       end
     end
 
+    # :reek:TooManyStatements
     def copy_to(subclass)
-      config = self.class.new(subclass)
-      config.delegate = delegate
-      config.exposed = exposed
+      subconfig = self.class.new(subclass)
 
-      subclass.config = config
+      subconfig.delegate = delegate
+      subconfig.exposed = exposed
+      subconfig.key_transform = key_transform
+      subconfig.meta = meta.dup
+      subconfig.to_str = to_str
+
+      subclass.config = subconfig
     end
 
     private

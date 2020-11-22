@@ -31,27 +31,29 @@ Each serializer must have *type*.
 Also we can add attributes and relationships.
 
 ```ruby
-  class UsersSerializer < Jat
-    type :users
+  class UserSerializer < Jat
+    type :user
+
     attribute :first_name
     attribute :last_name
+
     relationship :profile, serializer: ProfileSerializer
-    relationship :roles, serializer: RolesSerializer, many: true
+    relationship :roles, serializer: RoleSerializer, many: true
   end
 
-  # Serializes single object without params
+  # Serializes single object
   UsersSerializer.to_h(user)
   UsersSerializer.to_str(user)
 
-  # Serializes multiple objects without params
+  # Serializes multiple objects
   UsersSerializer.to_h(users, many: true)
   UsersSerializer.to_str(users, many: true)
 
- # Serializes single object with params
+ # Serializes single object with params context
   UsersSerializer.to_h(user, params: params)
   UsersSerializer.to_str(user, params: params)
 
-  # Serializes multiple objects with params
+  # Serializes multiple objects with params context
   UsersSerializer.to_h(users, params: params, many: true)
   UsersSerializer.to_str(users, params: params, many: true)
 
@@ -59,14 +61,13 @@ Also we can add attributes and relationships.
   UsersSerializer.to_h(user, params: params, meta: { some: :thing })
   UsersSerializer.to_str(user, params: params, meta: { some: :thing })
 
-  # We can save a little time on parsing params by creating serializer instance
-  # and reusing it. No sence to do it with single serialization for single request.
-  serializer = UsersSerializer.new(params)
-  serializer.to_h(user1, opts_without_params) # { many: ..., meta: ..., cache: ...}
-  serializer.to_h(user2, opts_without_params)
+  # We also can initialize serializer and reuse it
+  serializer = UsersSerializer.new(context)
+  serializer.to_h(user1)
+  serializer.to_h(user2)
 ```
 
-### 1.2. Redefine how to get attribute
+### 1.2. Redefine attribute
 All attributes and relationships are delegated to serialized object.
 This can be changed by providing a new key, new method or a block.
 
@@ -80,15 +81,15 @@ This can be changed by providing a new key, new method or a block.
     # by block
     attribute(:email) { |user| user.confirmed_email }
 
-    # by block with params
-    attribute(:email) do |user, params|
-      user.confirmed_email if params[:controller_name] == 'CurrentUserController'
+    # by block with context
+    attribute(:email) do |user, context|
+      user.confirmed_email if context[:controller_name] == 'CurrentUserController'
     end
 
     # by new method
     attribute :email, delegate: false # `delegate: false` is optional, but it fixes low-level ruby warning about next method redefining.
-    def email(user, params)
-      user.confirmed_email || params[:email]
+    def email(user, context)
+      user.confirmed_email || context[:email]
     end
   end
 ```
@@ -146,14 +147,14 @@ Code example:
     relationship :profile, serializer: ProfileSerializer # relationships are not exposed by default
   end
 
-  params = nil
-  serializer.new(params).to_h(user) # will return only first_name and last_name
+  context = nil
+  UsersSerializer.to_h(user, context) # will return only first_name and last_name
 
-  params = { fields: { users: 'first_name,profile' } }
-  serializer.new(params).to_h(user) # will return only first_name and profile
+  context = { params: { fields: { users: 'first_name,profile' } } }
+  UsersSerializer.to_h(user, context) # will return only first_name and profile
 
-  params = { include: 'profile' }
-  serializer.new(params).to_h(user) # will return first_name, last_name and profile
+  params = { params: { include: 'profile' } }
+  UsersSerializer.to_h(user, context) # will return first_name, last_name and profile
 ```
 
 ## 4. Global config
@@ -161,20 +162,20 @@ Code example:
 We can set all attributes to be exposed or not by config
 ```ruby
   class UsersSerializer < Jat
-    config.exposed = :default # this is default - attributes are exposed, relationships - not
+    config.exposed = :default # (default) attributes are exposed, relationships are not
     # or
-    config.exposed = :all # all attributes and relationships are exposed
+    config.exposed = :all # everything is exposed
     # or
     config.exposed = :none # nothing is exposed
   end
 ```
 
 ### 4.2 Delegate
-We can set all attributes are delegated to object or not. By default they are delegated, but disabling can be usefull when
-you know object has no same name methods.
+We can set if we need delegation or not.
+By default all keys are delegated to same object attribute.
 ```ruby
   class UsersSerializer < Jat
-    config.delegate = true # this is default - all attributes and relationships are delegated
+    config.delegate = true # (default) all keys are delegated to serialized object attributes
     # or
     config.delegate = false # nothing is delegated
   end
@@ -191,27 +192,42 @@ We can transfrom all keys to `camelLower` case
 ```
 
 ### 4.4 JSON encoder
-Default encoder is standard JSON module. You can change this for your favourite encoder
-by adding config globally or per-serializer.
+Default encoder is standard JSON module. You can change this for your favourite encoder by adding config globally or per-serializer.
 
 ```ruby
   Jat.config.to_str = ->(data) { Oj.dump(data) } # change to Oj
 ```
 
-Serialization to string will be best choice together with *caching* to not
-re-encode same response for each request.
+Serialization to string via `serializer#to_str` method will be best choice together with *caching* to not re-encode each cached response.
 
+### 4.4 Meta
+We can configure meta globally to be added to all responses.
+We will not add meta when it has `nil` value. This way we can skip adding meta when conditions were not met.
+
+```ruby
+  # We can add static value
+  Jat.config.meta[:version] = '1.2.3'
+
+  # We can add dynamic value
+  Jat.config.meta[:paging] = ->(records, context) do
+    break unless context[:many]
+    break unless records.respond_to?(:total_count)
+
+    {
+      total_count: records.total_count
+      size: records.size,
+      offset_value: records.offset_value,
+    }
+  end
+```
 
 ## 5. Inheritance
 When you inherit serializer, child copies parent config, type, attributes and
 relationships.
 
 ## 6. Caching
-Its very unpredictable which caching algorithm is needed in specific use case, so
-we decided to remove all responsobility from us.
 You have full controll over caching on a per-request basis.
 First of all you need to specify callable cache instance.
-We will send all params we have to it.
 
 Performance tips:
 - use `to_str` method when caching to save time for contructing and re-encoding hash
@@ -224,23 +240,20 @@ Example
   # opts   - We can use some opts to construct cache key or skip caching.
   # format - contains `:hash` or `:string` depending on serialization method.
   # &block - you should call it without arguments to generate response.
-  cache = ->(objects, params, opts, format, &block) do # It can be some callable class
-    break if opts.dig(:meta, 'some') # We can return falsey value to skip caching
+  cache = ->(objects, context, &block) do
+    break if context[:no_cache] # We can return falsey value to skip caching
 
-    cache_key = [
-      objects.cache_key,
-      *['fields', *params[:fields].to_a.flatten],
-      *['include', params[:include]],
-      meta.to_s,
-      format,
-    ].join('.')
+    # Some code to construct cache key, usually we will use:
+    # - objects.cache_key (for ActiveRecord)
+    # - context[:params][:fields]
+    # - context[:params][:include]
+    # - context[:format] # added by Jat - can be `:hash` or `:string`
+    cache_key = '...'
 
-    Rails.cache.fetch(cache_key, expires_in: 1.week) { block.() }
+    Rails.cache.fetch(cache_key, expires_in: 5.minutes) { block.() }
   end
 
-  opts = { many: true, meta: { 'some' => 'thing' } }
-
-  UserSerializer.to_str(users, cache: cache, params: params, **opts)
+  UserSerializer.to_str(users, cache: cache, **context)
   # or
-  UserSerializer.to_h(users, cache: cache, params: params, **opts)
+  UserSerializer.to_h(users, cache: cache, **context)
 ```

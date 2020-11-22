@@ -2,12 +2,13 @@
 
 class Jat
   class ResponseData
-    attr_reader :serializer, :object, :includes
+    attr_reader :serializer, :object, :includes, :context
 
     def initialize(serializer, object, includes)
       @serializer = serializer
       @object = object
       @includes = includes
+      @context = serializer._context
     end
 
     def data
@@ -31,7 +32,7 @@ class Jat
 
       attributes_names.each_with_object({}) do |name, attrs|
         attribute = serializer.class.attributes[name]
-        attrs[name] = serializer.public_send(attribute.original_name, object, serializer._params)
+        attrs[name] = serializer.public_send(attribute.original_name, object, context)
       end
     end
 
@@ -46,7 +47,7 @@ class Jat
 
     def relationship_data(name)
       rel_attribute = serializer.class.attributes[name]
-      rel_object = serializer.public_send(rel_attribute.original_name, object, serializer._params)
+      rel_object = serializer.public_send(rel_attribute.original_name, object, context)
 
       if rel_attribute.many?
         many_relationships_data(rel_object, rel_attribute)
