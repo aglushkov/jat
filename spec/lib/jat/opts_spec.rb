@@ -176,19 +176,19 @@ RSpec.describe Jat::Opts do
     end
   end
 
-  describe '#includes' do
-    subject(:includes) { opts.includes }
+  describe '#includes_with_path' do
+    subject(:includes_with_path) { opts.includes_with_path }
 
     context 'when no data provided and no serializer' do
-      it 'returns nil' do
-        expect(includes).to eq nil
+      it 'returns empty hash' do
+        expect(includes_with_path).to eq [{}, []]
       end
     end
 
-    context 'when data provided' do
+    context 'when data provided without serializer' do
       it 'returns transformed hash' do
         params[:opts] = { includes: { some: :data } }
-        expect(includes).to eq(some: { data: {} })
+        expect(includes_with_path).to eq [{ some: { data: {} } }, %i[]]
       end
     end
 
@@ -197,14 +197,24 @@ RSpec.describe Jat::Opts do
         params[:opts] = { serializer: jat }
         allow(opts).to receive(:key).and_return(:foobar)
 
-        expect(includes).to eq(foobar: {})
+        expect(includes_with_path).to eq [{ foobar: {} }, [:foobar]]
       end
     end
 
     context 'when data provided and serializer exists' do
       it 'returns transformed hash' do
-        params[:opts] = { includes: :data }
-        expect(includes).to eq(data: {})
+        params[:opts] = { serializer: jat, includes: :data }
+        expect(includes_with_path).to eq [{ data: {} }, [:data]]
+      end
+    end
+
+    context 'when specified main included resource (via "!")' do
+      it 'returns transformed hash' do
+        params[:opts] = { serializer: jat, includes: { a: { b!: { c: {} }, d: {} }, e: {} } }
+        expect(includes_with_path).to eq [
+          { a: { b: { c: {} }, d: {} }, e: {} },
+          %i[a b]
+        ]
       end
     end
   end

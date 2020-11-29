@@ -1,45 +1,11 @@
 # frozen_string_literal: true
 
-RSpec.describe Jat::Opts::CheckOptsIncludes do
+RSpec.describe Jat::Opts::Checks::OptsIncludes do
   let(:check) { described_class }
   let(:params) { { name: nil, opts: opts, block: nil } }
   let(:opts) { {} }
 
-  it 'allows only one branch opts[:includes] when serializer provided' do
-    opts[:serializer] = 'something'
-
-    opts[:includes] = :a
-    expect { check.(params) }.not_to raise_error
-
-    opts[:includes] = 'a'
-    expect { check.(params) }.not_to raise_error
-
-    opts[:includes] = nil
-    expect { check.(params) }.not_to raise_error
-
-    opts[:includes] = { foo: {} }
-    expect { check.(params) }.not_to raise_error
-
-    opts[:includes] = [:foo]
-    expect { check.(params) }.not_to raise_error
-
-    opts[:includes] = { foo: :bar }
-    expect { check.(params) }.not_to raise_error
-
-    opts[:includes] = { foo: { bar: :bazz } }
-    expect { check.(params) }.not_to raise_error
-
-    opts[:includes] = %i[foo bar]
-    expect { check.(params) }.to raise_error Jat::Error, /includes/
-
-    opts[:includes] = { foo: %i[bar bazz] }
-    expect { check.(params) }.to raise_error Jat::Error, /includes/
-
-    opts[:includes] = { foo: { bar1: :bazz1, bar2: :bazz2 } }
-    expect { check.(params) }.to raise_error Jat::Error, /includes/
-  end
-
-  it 'allows simple objects in opts[:includes] (symbol, string, hash with symbol or string keys, array)' do
+  it 'allows symbols, strings, hashes with symbol or string keys, arrays' do
     opts[:includes] = :a
     expect { check.(params) }.not_to raise_error
 

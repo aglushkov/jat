@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Jat::Opts::CheckOptsSerializer do
+RSpec.describe Jat::Opts::Checks::OptsSerializer do
   let(:check) { described_class }
   let(:params) { { name: nil, opts: opts, block: nil } }
   let(:opts) { {} }
