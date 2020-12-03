@@ -71,6 +71,7 @@ Also we can add attributes and relationships.
 All attributes and relationships are delegated to serialized object.
 This can be changed by providing a new key, new method or a block.
 
+Attributes redefining examples:
 ```ruby
   class UsersSerializer < Jat
     type :users
@@ -89,6 +90,31 @@ This can be changed by providing a new key, new method or a block.
     # by new method
     attribute :email, delegate: false # `delegate: false` is optional, but it fixes low-level ruby warning about next method redefining.
     def email(user, context)
+      user.confirmed_email || context[:email]
+    end
+  end
+```
+
+Relationships redefining examples:
+```ruby
+  class UserSerializer < Jat
+    type :comments
+
+    # by key
+    relationship(:comments, key: :published_comments, many: true...) # will use `user.published_comments`
+
+    # by block
+    relationship(:comments) { |user| user.published_comments }
+
+    # by block with context
+    relationship(:comments) do |user, context|
+      context[:current_user] == user ? user.comments : user.published_comments
+    end
+
+    # by new method
+    relationship :comments, delegate: false
+    def comments(user, context)
+      context[:current_user] == user ? user.comments : user.published_comments
       user.confirmed_email || context[:email]
     end
   end

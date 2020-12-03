@@ -294,6 +294,16 @@ RSpec.describe Jat do
     expect(attribute).not_to be_exposed # after
   end
 
+  it 'refreshes attributes names when config `key_transform` updated' do
+    jat.attribute :foo_bar
+    names = jat.attributes.instance_variable_get(:@attributes).keys
+    expect(names).to eq [:foo_bar]
+
+    jat.config.key_transform = :camelLower
+    names = jat.attributes.instance_variable_get(:@attributes).keys
+    expect(names).to eq [:fooBar]
+  end
+
   it 'nullifies @full_map and @exposed_map when settings changed' do
     jat.type(:jat)
     jat.attribute :foo

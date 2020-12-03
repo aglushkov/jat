@@ -5,7 +5,7 @@ require 'jat/attribute'
 class Jat
   class Attributes
     extend Forwardable
-    def_delegators :@attributes, :each, :each_value, :key?, :fetch
+    def_delegators :@attributes, :each, :each_value, :fetch, :key?, :values
 
     def initialize
       @attributes = {}
@@ -20,8 +20,16 @@ class Jat
       self
     end
 
+    # :reek:DuplicateMethodCall
     def refresh
-      each_value(&:refresh)
+      values.each do |attribute|
+        old_name = attribute.name
+        attribute.refresh
+
+        # name can change after refresh
+        new_name = attribute.name
+        @attributes[new_name] = @attributes.delete(old_name)
+      end
     end
 
     def copy_to(subclass)

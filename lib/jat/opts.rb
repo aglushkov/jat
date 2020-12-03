@@ -1,13 +1,17 @@
 # frozen_string_literal: true
 
-require 'jat/opts/check'
+require 'jat/opts/validate'
+require 'jat/opts/name'
+require 'jat/opts/includes_with_path'
+require 'jat/opts/serializer'
+require 'jat/opts/block'
 
 class Jat
   class Opts
     attr_reader :current_serializer, :original_name, :opts, :original_block
 
     def initialize(current_serializer, params)
-      Check.(params)
+      Validate.(params)
 
       @current_serializer = current_serializer
       @original_name = params.fetch(:name).to_sym
@@ -21,10 +25,7 @@ class Jat
     end
 
     def name
-      case current_serializer.config.key_transform
-      when :camelLower then camel_lower(original_name)
-      else original_name
-      end
+      Name.(original_name, current_serializer.config.key_transform)
     end
 
     def delegate?
@@ -48,59 +49,26 @@ class Jat
     end
 
     def serializer
-      return unless relation?
-
-      value = opts[:serializer]
-      value.is_a?(Proc) ? proc_serializer(value) : value
+      Serializer.(opts[:serializer]) if relation?
     end
 
-    def includes
-      incl = relation? ? opts.fetch(:includes, key) : opts[:includes]
-      Utils::IncludesToHash.(incl) if incl
+    # :reek:TooManyStatements
+    def includes_with_path
+      includes = relation? ? opts.fetch(:includes, key) : opts[:includes]
+      return [{}, []] unless includes
+
+      includes = Utils::IncludesToHash.(includes)
+      return [includes, []] if includes.empty? || !relation?
+
+      IncludesWithPath.(includes)
     end
 
     def block
-      return if !original_block && !delegate?
-
-      original_block ? transform_original_block : delegate_block
+      Block.(original_block, delegate?, key)
     end
 
     def copy_to(subclass)
       self.class.new(subclass, name: name, opts: opts, block: original_block)
-    end
-
-    private
-
-    def transform_original_block
-      return original_block if original_block.parameters.count == 2
-
-      block = original_block
-      ->(obj, _params) { block.(obj) }
-    end
-
-    def delegate_block
-      delegate_field = key
-      ->(obj, _params) { obj.public_send(delegate_field) }
-    end
-
-    # :reek:FeatureEnvy
-    def proc_serializer(value)
-      lambda do
-        serializer = value.()
-
-        if !serializer.is_a?(Class) || !(serializer < Jat)
-          raise Jat::Error, "Invalid serializer `#{serializer.inspect}`, must be a subclass of Jat"
-        end
-
-        serializer
-      end
-    end
-
-    def camel_lower(string)
-      first_word, *other = string.to_s.split('_')
-      last_words = other.map!(&:capitalize).join
-
-      "#{first_word}#{last_words}".to_sym
     end
   end
 end

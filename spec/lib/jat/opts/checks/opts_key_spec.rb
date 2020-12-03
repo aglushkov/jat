@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Jat::Opts::CheckOptsKey do
+RSpec.describe Jat::Opts::Checks::OptsKey do
   let(:check) { described_class }
   let(:params) { { name: nil, opts: opts, block: nil } }
   let(:opts) { {} }

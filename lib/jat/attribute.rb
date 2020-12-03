@@ -8,6 +8,7 @@ class Jat
                 :delegate,
                 :exposed,
                 :includes,
+                :includes_path,
                 :key,
                 :many,
                 :name,
@@ -28,12 +29,13 @@ class Jat
     # rubocop:disable Metrics/AbcSize
     # :reek:TooManyStatements
     # Some attributes options depends on serializer options, so when we change
-    # options, we need to update stored attributes
+    # options, we need to update stored attributes, thats why we need this
+    # refresh method.
     def refresh
       @block = opts.block
       @delegate = opts.delegate?
       @exposed = opts.exposed?
-      @includes = opts.includes
+      @includes, @includes_path = opts.includes_with_path
       @key = opts.key
       @many = opts.many?
       @name = opts.name

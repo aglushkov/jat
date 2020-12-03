@@ -91,7 +91,7 @@ RSpec.describe Jat::Includes do
     expect(result).to eq(profile: { confirmed_email: {}, unconfirmed_email: {} })
   end
 
-  it 'returns deeply nested includes for relationships' do
+  it 'includes nested relationships for nested relationship' do
     user_serializer.relationship :profile, serializer: profile_serializer, includes: { company: :profile }
     profile_serializer.attribute :email, includes: %i[confirmed_email unconfirmed_email]
 
@@ -104,7 +104,20 @@ RSpec.describe Jat::Includes do
     expect(result).to eq(company: { profile: { confirmed_email: {}, unconfirmed_email: {} } })
   end
 
-  it 'raises error if with 2 serializers have cross reference' do
+  it 'includes nested relationships to main (!) resource' do
+    user_serializer.relationship :profile, serializer: profile_serializer, includes: { company!: :profile }
+    profile_serializer.attribute :email, includes: %i[confirmed_email unconfirmed_email]
+
+    types_keys = {
+      user: { attributes: [], relationships: %i[profile] },
+      profile: { attributes: %i[email], relationships: [] }
+    }
+
+    result = described_class.new(types_keys).for(user_serializer)
+    expect(result).to eq(company: { profile: {}, confirmed_email: {}, unconfirmed_email: {} })
+  end
+
+  it 'raises error if with 2 serializers have recursive includes' do
     user_serializer.relationship :profile, serializer: profile_serializer, includes: :profile
     profile_serializer.relationship :user, serializer: user_serializer, includes: :user
 
@@ -114,10 +127,10 @@ RSpec.describe Jat::Includes do
     }
 
     expect { described_class.new(types_keys).for(user_serializer) }
-      .to raise_error Jat::Error, /Cross referenced includes/
+      .to raise_error Jat::Error, /recursive includes/
   end
 
-  it 'raises error if 3 serializers have cross reference' do
+  it 'raises error if 3 serializers recursive includes' do
     user_serializer.relationship :profile, serializer: profile_serializer, includes: :profile
     profile_serializer.relationship :email, serializer: email_serializer, includes: :email
     email_serializer.relationship :user, serializer: user_serializer, includes: :user
@@ -129,6 +142,35 @@ RSpec.describe Jat::Includes do
     }
 
     expect { described_class.new(types_keys).for(user_serializer) }
-      .to raise_error Jat::Error, /Cross referenced includes/
+      .to raise_error Jat::Error, /recursive includes/
+  end
+
+  it 'does not raises error if 2 serializers includes same includes' do
+    user_serializer.relationship :profile, serializer: profile_serializer, includes: :profile
+    user_serializer.relationship :email, serializer: email_serializer, includes: :email
+    profile_serializer.relationship :email, serializer: email_serializer, includes: :email
+
+    types_keys = {
+      user: { attributes: [], relationships: %i[profile email] },
+      profile: { attributes: [], relationships: %i[email] },
+      email: { attributes: [], relationships: %i[] }
+    }
+
+    expect { described_class.new(types_keys).for(user_serializer) }.not_to raise_error
+  end
+
+  it 'merges includes the same way regardless of order of includes' do
+    a = Class.new(Jat) { type(:a) }
+    a.attribute :a1, includes: { foo: { bar: { bazz1: {}, bazz: {} } } }
+    a.attribute :a2, includes: { foo: { bar: { bazz2: {}, bazz: { last: {} } } } }
+
+    types_keys1 = { a: { attributes: %i[a1 a2], relationships: %i[] } }
+    types_keys2 = { a: { attributes: %i[a2 a1], relationships: %i[] } }
+
+    result1 = described_class.new(types_keys1).for(a)
+    result2 = described_class.new(types_keys2).for(a)
+
+    expect(result1).to eq(result2)
+    expect(result1).to eq(foo: { bar: { bazz: { last: {} }, bazz1: {}, bazz2: {} } })
   end
 end
