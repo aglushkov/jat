@@ -25,15 +25,15 @@ class Jat
     end
 
     def name
-      Name.(original_name, current_serializer.config.key_transform)
+      Name.(original_name, config.key_transform)
     end
 
     def delegate?
-      opts.fetch(:delegate, current_serializer.config.delegate)
+      opts.fetch(:delegate, config.delegate)
     end
 
     def exposed?
-      case current_serializer.config.exposed
+      case config.exposed
       when :all then opts.fetch(:exposed, true)
       when :none then opts.fetch(:exposed, false)
       else opts.fetch(:exposed, !relation?)
@@ -41,7 +41,7 @@ class Jat
     end
 
     def many?
-      opts.fetch(:many, false)
+      opts[:many]
     end
 
     def relation?
@@ -53,10 +53,14 @@ class Jat
     end
 
     # :reek:TooManyStatements
+    # :reek:NilCheck
+    # rubocop:disable Metrics/CyclomaticComplexity
     def includes_with_path
+      return [nil, nil] unless config.auto_preload
+
       includes = opts[:includes]
 
-      # Return [nil, nil] when manually specified to return `nil`
+      # Return [nil, nil] when manually specified to include `nil` or `false`
       return [nil, nil] if opts.key?(:includes) && !includes
 
       includes ||= key if relation?
@@ -65,6 +69,7 @@ class Jat
 
       IncludesWithPath.(includes)
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
 
     def block
       Block.(original_block, delegate?, key)
@@ -72,6 +77,12 @@ class Jat
 
     def copy_to(subclass)
       self.class.new(subclass, name: name, opts: opts, block: original_block)
+    end
+
+    private
+
+    def config
+      current_serializer.config
     end
   end
 end

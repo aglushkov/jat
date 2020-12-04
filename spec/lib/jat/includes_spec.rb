@@ -19,6 +19,8 @@ RSpec.describe Jat::Includes do
     ser
   end
 
+  before { Jat.config.auto_preload = true }
+
   it 'returns empty hash when no attributes requested' do
     types_keys = { user: { attributes: [], relationships: [] } }
 

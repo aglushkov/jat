@@ -27,4 +27,11 @@ RSpec.configure do |config|
   config.order = :random
 
   Kernel.srand config.seed
+
+  config.around do |example|
+    Jat.config.auto_preload = false
+    example.()
+  ensure
+    Jat.config.auto_preload = true
+  end
 end

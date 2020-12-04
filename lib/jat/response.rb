@@ -14,14 +14,19 @@ class Jat
     end
 
     def to_h
-      cached(:hash) { response }
+      cached(:hash) { build_response }
     end
 
     def to_str
-      cached(:string) { serializer.class.config.to_str.(response) }
+      cached(:string) { serializer.class.config.to_str.(build_response) }
     end
 
     private
+
+    def build_response
+      @object = Jat::PreloadHandler.(object, serializer)
+      response
+    end
 
     # :reek:FeatureEnvy (refers to 'result' more than self)
     # :reek:TooManyStatements
@@ -38,7 +43,7 @@ class Jat
 
     def data_with_includes
       includes = {}
-      data = context[:many] ? many(includes) : one(includes)
+      data = many?(object, context) ? many(includes) : one(includes)
       [data, includes]
     end
 
@@ -61,6 +66,12 @@ class Jat
 
     def one(includes)
       ResponseData.new(serializer, object, includes).data
+    end
+
+    # :reek:NilCheck
+    def many?(data, context)
+      many = context[:many]
+      many.nil? ? data.is_a?(Enumerable) : many
     end
 
     def cached(format, &block)

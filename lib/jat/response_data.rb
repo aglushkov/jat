@@ -49,7 +49,7 @@ class Jat
       rel_attribute = serializer.class.attributes[name]
       rel_object = serializer.public_send(rel_attribute.original_name, object, context)
 
-      if rel_attribute.many?
+      if many?(rel_attribute, rel_object)
         many_relationships_data(rel_object, rel_attribute)
       else
         one_relationship_data(rel_object, rel_attribute)
@@ -77,6 +77,16 @@ class Jat
       includes[rel_uid] ||= rel_response_data.data
 
       rel_uid
+    end
+
+    def many?(attribute, object)
+      is_many = attribute.many?
+
+      # handle boolean
+      return is_many if (is_many == true) || (is_many == false)
+
+      # handle nil
+      object.is_a?(Enumerable)
     end
   end
 end

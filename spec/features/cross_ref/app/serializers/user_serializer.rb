@@ -2,6 +2,8 @@
 
 module CrossRef
   class UserSerializer < Jat
+    config.auto_preload = false
+
     type :user
 
     relationship :comments,

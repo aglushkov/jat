@@ -37,6 +37,31 @@ RSpec.describe Jat::Config do
     end
   end
 
+  describe '#auto_preload=' do
+    it 'changes auto_preload option' do
+      config.auto_preload = false
+      expect(config.auto_preload).to eq false
+    end
+
+    it 'calls serializer #refresh' do
+      allow(jat).to receive(:refresh)
+      config.auto_preload = false
+
+      expect(jat).to have_received(:refresh)
+    end
+
+    it 'does not calls serializer #refresh when config not changed' do
+      allow(jat).to receive(:refresh)
+      config.auto_preload = true
+
+      expect(jat).not_to have_received(:refresh)
+    end
+
+    it 'raises error when invalid value provided' do
+      expect { config.auto_preload = 1 }.to raise_error Jat::Error, /true, false/
+    end
+  end
+
   describe '#exposed=' do
     it 'changes delegate option' do
       config.exposed = :none
