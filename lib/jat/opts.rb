@@ -61,7 +61,6 @@ class Jat
 
       includes ||= key if relation?
       includes = Utils::IncludesToHash.(includes)
-
       return [includes, nil] if includes.empty? || !relation?
 
       IncludesWithPath.(includes)

@@ -252,8 +252,7 @@ When you inherit serializer, child copies parent config, type, attributes and
 relationships.
 
 ## 6. Caching
-You have full controll over caching on a per-request basis.
-First of all you need to specify callable cache instance.
+Please specify callable cache instance.
 
 Performance tips:
 - use `to_str` method when caching to save time for contructing and re-encoding hash
@@ -261,11 +260,6 @@ Performance tips:
 
 Example
 ```ruby
-  # objects - Currently serialized object(s).
-  # params - We can get `fields` and `include` params here to construct cache key.
-  # opts   - We can use some opts to construct cache key or skip caching.
-  # format - contains `:hash` or `:string` depending on serialization method.
-  # &block - you should call it without arguments to generate response.
   cache = ->(objects, context, &block) do
     break if context[:no_cache] # We can return falsey value to skip caching
 
