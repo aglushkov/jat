@@ -53,18 +53,30 @@ RSpec.describe Jat::Includes do
     expect(result).to eq(profile: { phones: {}, emails: {} })
   end
 
-  it 'returns no includes for relationships when specified empty includes' do
-    user_serializer.relationship :profile1, serializer: profile_serializer, includes: nil
-    user_serializer.relationship :profile2, serializer: profile_serializer, includes: {}
-    user_serializer.relationship :profile3, serializer: profile_serializer, includes: []
-
+  it 'returns no includes and no nested includes for relationships when specified includes is nil' do
+    user_serializer.relationship :profile, serializer: profile_serializer, includes: nil
+    profile_serializer.attribute :email, includes: :email # should not be included
     types_keys = {
-      user: { attributes: [], relationships: %i[profile1 profile2 profile3] },
-      profile: { attributes: [], relationships: [] }
+      user: { attributes: [], relationships: %i[profile] },
+      profile: { attributes: %i[email], relationships: [] }
     }
 
     result = described_class.new(types_keys).for(user_serializer)
     expect(result).to eq({})
+  end
+
+  it 'returns includes for nested relationships joined to root when specified includes is {} or []' do
+    [{}, []].each do |includes|
+      user_serializer.relationship :profile, serializer: profile_serializer, includes: includes
+      profile_serializer.attribute :email, includes: :email # should be included to root
+      types_keys = {
+        user: { attributes: [], relationships: %i[profile] },
+        profile: { attributes: %i[email], relationships: [] }
+      }
+
+      result = described_class.new(types_keys).for(user_serializer)
+      expect(result).to eq(email: {})
+    end
   end
 
   it 'returns includes for relationships' do

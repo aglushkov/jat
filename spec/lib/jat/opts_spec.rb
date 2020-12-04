@@ -180,15 +180,15 @@ RSpec.describe Jat::Opts do
     subject(:includes_with_path) { opts.includes_with_path }
 
     context 'when no data provided and no serializer' do
-      it 'returns empty hash' do
-        expect(includes_with_path).to eq [{}, []]
+      it 'returns empty hash as includes and nil as path' do
+        expect(includes_with_path).to eq [{}, nil]
       end
     end
 
     context 'when data provided without serializer' do
       it 'returns transformed hash' do
         params[:opts] = { includes: { some: :data } }
-        expect(includes_with_path).to eq [{ some: { data: {} } }, %i[]]
+        expect(includes_with_path).to eq [{ some: { data: {} } }, nil]
       end
     end
 
@@ -215,6 +215,29 @@ RSpec.describe Jat::Opts do
           { a: { b: { c: {} }, d: {} }, e: {} },
           %i[a b]
         ]
+      end
+    end
+
+    context 'when data is nil and no serializer' do
+      it 'returns [nil, nil]' do
+        params[:opts] = { includes: nil }
+        expect(includes_with_path).to eq [nil, nil]
+      end
+    end
+
+    context 'when data is nil and serializer exists' do
+      it 'returns [nil, nil]' do
+        params[:opts] = { includes: nil, serializer: jat }
+        expect(includes_with_path).to eq [nil, nil]
+      end
+    end
+
+    context 'when data is empty and serializer exists' do
+      it 'returns empty hash as includes and nil as path' do
+        [[], {}].each do |includes|
+          params[:opts] = { includes: includes, serializer: jat }
+          expect(includes_with_path).to eq [{}, nil]
+        end
       end
     end
   end

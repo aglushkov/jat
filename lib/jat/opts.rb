@@ -54,11 +54,15 @@ class Jat
 
     # :reek:TooManyStatements
     def includes_with_path
-      includes = relation? ? opts.fetch(:includes, key) : opts[:includes]
-      return [{}, []] unless includes
+      includes = opts[:includes]
 
+      # Return [nil, nil] when manually specified to return `nil`
+      return [nil, nil] if opts.key?(:includes) && !includes
+
+      includes ||= key if relation?
       includes = Utils::IncludesToHash.(includes)
-      return [includes, []] if includes.empty? || !relation?
+
+      return [includes, nil] if includes.empty? || !relation?
 
       IncludesWithPath.(includes)
     end

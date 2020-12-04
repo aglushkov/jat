@@ -31,25 +31,25 @@ class Jat
     def add_attributes(result, serializer, attributes_names)
       attributes_names.each do |name|
         attribute = serializer.attributes[name]
-        add_attribute(result, attribute)
+        includes = attribute.includes
+        next unless includes # we should not addd includes and nested includes when nil provided
 
-        add_nested_includes(result, attribute) if attribute.relation?
+        add_includes(result, includes, attribute)
       end
     end
 
-    def add_attribute(result, attribute)
-      includes = attribute.includes
-      return if includes.empty?
+    def add_includes(result, includes, attribute)
+      unless includes.empty?
+        includes = deep_dup(includes)
+        merge(result, includes)
+      end
 
-      includes = deep_dup(includes)
-      merge(result, includes)
+      add_nested_includes(result, attribute) if attribute.relation?
     end
 
-    # :reek:FeatureEnvy (refers to 'attribute' more than self)
     def add_nested_includes(result, attribute)
       path = attribute.includes_path
-
-      nested_result = path.empty? ? result : result.dig(*path)
+      nested_result = nested(result, path)
       nested_serializer = attribute.serializer
 
       append(nested_result, nested_serializer.())
@@ -65,6 +65,10 @@ class Jat
       includes.dup.transform_values! do |nested_includes|
         deep_dup(nested_includes)
       end
+    end
+
+    def nested(result, path)
+      !path || path.empty? ? result : result.dig(*path)
     end
   end
 end
