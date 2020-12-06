@@ -249,10 +249,20 @@ RSpec.describe Jat do
   describe 'inheritance' do
     it 'inherits config' do
       parent = jat
+      parent.config.auto_preload = false
+      parent.config.delegate = false
       parent.config.exposed = :none
+      parent.config.key_transform = :camelLower
+      parent.config.meta = { version: '1' }
+      parent.config.to_str = -> {}
 
       child = Class.new(parent)
+      expect(child.config.auto_preload).to eq false
+      expect(child.config.delegate).to eq false
       expect(child.config.exposed).to eq :none
+      expect(child.config.key_transform).to eq :camelLower
+      expect(child.config.meta).to eq(version: '1')
+      expect(child.config.to_str).to eq parent.config.to_str
     end
 
     it 'does not overwrites parent config' do

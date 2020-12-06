@@ -2,6 +2,7 @@
 
 module Camel
   class UserSerializer < Jat
+    config.auto_preload = false
     config.key_transform = :camelLower
 
     type :user

@@ -113,8 +113,8 @@ RSpec.describe Jat::Opts do
     subject(:is_many) { opts.many? }
 
     context 'when no key provided' do
-      it 'defaults to false' do
-        expect(is_many).to eq false
+      it 'returns nil' do
+        expect(is_many).to eq nil
       end
     end
 
@@ -179,6 +179,8 @@ RSpec.describe Jat::Opts do
   describe '#includes_with_path' do
     subject(:includes_with_path) { opts.includes_with_path }
 
+    before { jat.config.auto_preload = true }
+
     context 'when no data provided and no serializer' do
       it 'returns empty hash as includes and nil as path' do
         expect(includes_with_path).to eq [{}, nil]
@@ -219,16 +221,20 @@ RSpec.describe Jat::Opts do
     end
 
     context 'when data is nil and no serializer' do
-      it 'returns [nil, nil]' do
-        params[:opts] = { includes: nil }
-        expect(includes_with_path).to eq [nil, nil]
+      [nil, false].each do |data|
+        it 'returns [nil, nil]' do
+          params[:opts] = { includes: data }
+          expect(includes_with_path).to eq [nil, nil]
+        end
       end
     end
 
-    context 'when data is nil and serializer exists' do
-      it 'returns [nil, nil]' do
-        params[:opts] = { includes: nil, serializer: jat }
-        expect(includes_with_path).to eq [nil, nil]
+    context 'when data is falsey and serializer exists' do
+      [nil, false].each do |data|
+        it 'returns [nil, nil]' do
+          params[:opts] = { includes: data, serializer: jat }
+          expect(includes_with_path).to eq [nil, nil]
+        end
       end
     end
 
@@ -238,6 +244,15 @@ RSpec.describe Jat::Opts do
           params[:opts] = { includes: includes, serializer: jat }
           expect(includes_with_path).to eq [{}, nil]
         end
+      end
+    end
+
+    context 'when config auto_preload is false' do
+      before { jat.config.auto_preload = false }
+
+      it 'returns [nil, nil]' do
+        params[:opts] = { serializer: jat, includes: { a: { b!: { c: {} } } } }
+        expect(includes_with_path).to eq [nil, nil]
       end
     end
   end

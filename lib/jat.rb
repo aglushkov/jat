@@ -7,6 +7,7 @@ require 'jat/includes'
 require 'jat/map'
 require 'jat/map/construct'
 require 'jat/opts'
+require 'jat/preload_handler'
 require 'jat/response'
 require 'jat/utils/includes_to_hash'
 
@@ -131,6 +132,7 @@ class Jat
 
     def to_h(object, context = {})
       _reinitialize(context)
+
       Response.new(self, object).to_h
     end
 
