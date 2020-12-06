@@ -16,17 +16,17 @@ RSpec.describe Jat::Params::Fields::Validate do
     ser.relationship :b2, serializer: a_serializer
   end
 
-  it 'does not raises when serializer includes requested keys' do
+  it 'does not raises when serializer has all requested keys' do
     expect { described_class.(a_serializer, a: %i[a1 a2], b: %i[b1 b2]) }
       .not_to raise_error
   end
 
-  it 'does not raises when included only fields for nested serializer' do
+  it 'does not raises when requested only fields for nested serializer' do
     expect { described_class.(a_serializer, b: %i[b1 b2]) }
       .not_to raise_error
   end
 
-  it 'raises error when some type can not be in response  ' do
+  it 'raises error when some type can not be in response' do
     expect { described_class.(a_serializer, a: %i[a1 a2], foo: %i[b1 b2]) }
       .to raise_error "#{a_serializer} and its children have no requested type `foo`"
   end

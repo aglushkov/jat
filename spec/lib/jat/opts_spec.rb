@@ -176,21 +176,21 @@ RSpec.describe Jat::Opts do
     end
   end
 
-  describe '#includes_with_path' do
-    subject(:includes_with_path) { opts.includes_with_path }
+  describe '#preloads_with_path' do
+    subject(:preloads_with_path) { opts.preloads_with_path }
 
     before { jat.config.auto_preload = true }
 
     context 'when no data provided and no serializer' do
-      it 'returns empty hash as includes and nil as path' do
-        expect(includes_with_path).to eq [{}, nil]
+      it 'returns empty hash as preloads and nil as path' do
+        expect(preloads_with_path).to eq [{}, nil]
       end
     end
 
     context 'when data provided without serializer' do
       it 'returns transformed hash' do
-        params[:opts] = { includes: { some: :data } }
-        expect(includes_with_path).to eq [{ some: { data: {} } }, nil]
+        params[:opts] = { preload: { some: :data } }
+        expect(preloads_with_path).to eq [{ some: { data: {} } }, nil]
       end
     end
 
@@ -199,21 +199,21 @@ RSpec.describe Jat::Opts do
         params[:opts] = { serializer: jat }
         allow(opts).to receive(:key).and_return(:foobar)
 
-        expect(includes_with_path).to eq [{ foobar: {} }, [:foobar]]
+        expect(preloads_with_path).to eq [{ foobar: {} }, [:foobar]]
       end
     end
 
     context 'when data provided and serializer exists' do
       it 'returns transformed hash' do
-        params[:opts] = { serializer: jat, includes: :data }
-        expect(includes_with_path).to eq [{ data: {} }, [:data]]
+        params[:opts] = { serializer: jat, preload: :data }
+        expect(preloads_with_path).to eq [{ data: {} }, [:data]]
       end
     end
 
-    context 'when specified main included resource (via "!")' do
+    context 'when specified main preloaded resource (via "!")' do
       it 'returns transformed hash' do
-        params[:opts] = { serializer: jat, includes: { a: { b!: { c: {} }, d: {} }, e: {} } }
-        expect(includes_with_path).to eq [
+        params[:opts] = { serializer: jat, preload: { a: { b!: { c: {} }, d: {} }, e: {} } }
+        expect(preloads_with_path).to eq [
           { a: { b: { c: {} }, d: {} }, e: {} },
           %i[a b]
         ]
@@ -223,8 +223,8 @@ RSpec.describe Jat::Opts do
     context 'when data is nil and no serializer' do
       [nil, false].each do |data|
         it 'returns [nil, nil]' do
-          params[:opts] = { includes: data }
-          expect(includes_with_path).to eq [nil, nil]
+          params[:opts] = { preload: data }
+          expect(preloads_with_path).to eq [nil, nil]
         end
       end
     end
@@ -232,17 +232,17 @@ RSpec.describe Jat::Opts do
     context 'when data is falsey and serializer exists' do
       [nil, false].each do |data|
         it 'returns [nil, nil]' do
-          params[:opts] = { includes: data, serializer: jat }
-          expect(includes_with_path).to eq [nil, nil]
+          params[:opts] = { preload: data, serializer: jat }
+          expect(preloads_with_path).to eq [nil, nil]
         end
       end
     end
 
     context 'when data is empty and serializer exists' do
-      it 'returns empty hash as includes and nil as path' do
-        [[], {}].each do |includes|
-          params[:opts] = { includes: includes, serializer: jat }
-          expect(includes_with_path).to eq [{}, nil]
+      it 'returns empty hash as preloads and nil as path' do
+        [[], {}].each do |preloads|
+          params[:opts] = { preload: preloads, serializer: jat }
+          expect(preloads_with_path).to eq [{}, nil]
         end
       end
     end
@@ -251,8 +251,8 @@ RSpec.describe Jat::Opts do
       before { jat.config.auto_preload = false }
 
       it 'returns [nil, nil]' do
-        params[:opts] = { serializer: jat, includes: { a: { b!: { c: {} } } } }
-        expect(includes_with_path).to eq [nil, nil]
+        params[:opts] = { serializer: jat, preload: { a: { b!: { c: {} } } } }
+        expect(preloads_with_path).to eq [nil, nil]
       end
     end
   end

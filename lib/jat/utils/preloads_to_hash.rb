@@ -2,7 +2,7 @@
 
 class Jat
   module Utils
-    class IncludesToHash
+    class PreloadsToHash
       METHODS = {
         Array => :array_to_hash,
         Hash => :hash_to_hash,

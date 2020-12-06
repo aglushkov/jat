@@ -21,6 +21,7 @@ Serialization format is almost like original [JSON-API](https://jsonapi.org/form
   - Delegate
   - Camel Lower Keys
   - JSON encoder
+  - Meta / Paging
 5. Inheritance.
 6. Caching
 
@@ -37,32 +38,28 @@ Also we can add attributes and relationships.
     attribute :first_name
     attribute :last_name
 
-    relationship :profile, serializer: ProfileSerializer
-    relationship :roles, serializer: RoleSerializer, many: true
+    relationship :profile, serializer: -> { ProfileSerializer }
+    relationship :roles, serializer: -> { RoleSerializer }
   end
 
   # Serializes single object
-  UsersSerializer.to_h(user)
-  UsersSerializer.to_str(user)
+  UserSerializer.to_h(user) # serializes to hash
+  UserSerializer.to_str(user) # serializes to json string
 
   # Serializes multiple objects
-  UsersSerializer.to_h(users, many: true)
-  UsersSerializer.to_str(users, many: true)
+  UserSerializer.to_h(users, many: true) # `many: true` is optional, we can define this automatically
 
- # Serializes single object with params context
-  UsersSerializer.to_h(user, params: params)
-  UsersSerializer.to_str(user, params: params)
-
-  # Serializes multiple objects with params context
-  UsersSerializer.to_h(users, params: params, many: true)
-  UsersSerializer.to_str(users, params: params, many: true)
+ # Serializes object with params context
+  UserSerializer.to_h(user, params: params)
 
   # Add some meta
-  UsersSerializer.to_h(user, params: params, meta: { some: :thing })
-  UsersSerializer.to_str(user, params: params, meta: { some: :thing })
+  UserSerializer.to_h(user, meta: { some: :thing })
 
-  # We also can initialize serializer and reuse it
-  serializer = UsersSerializer.new(context)
+  # Using cache
+  UserSerializer.to_str(user, cache: cache) # more about caching below
+
+  # We can also initialize serializer and reuse it
+  serializer = UserSerializer.new(context)
   serializer.to_h(user1)
   serializer.to_h(user2)
 ```
@@ -71,10 +68,10 @@ Also we can add attributes and relationships.
 All attributes and relationships are delegated to serialized object.
 This can be changed by providing a new key, new method or a block.
 
-Attributes redefining examples:
+Redefine attribute examples:
 ```ruby
-  class UsersSerializer < Jat
-    type :users
+  class UserSerializer < Jat
+    type :user
 
     # by key
     attribute(:email, key: :confirmed_email) # will use `user.confirmed_email`
@@ -95,13 +92,13 @@ Attributes redefining examples:
   end
 ```
 
-Relationships redefining examples:
+Redefine relationship examples:
 ```ruby
   class UserSerializer < Jat
     type :comments
 
     # by key
-    relationship(:comments, key: :published_comments, many: true...) # will use `user.published_comments`
+    relationship(:comments, key: :published_comments...) # will use `user.published_comments`
 
     # by block
     relationship(:comments) { |user| user.published_comments }
@@ -113,6 +110,7 @@ Relationships redefining examples:
 
     # by new method
     relationship :comments, delegate: false
+
     def comments(user, context)
       context[:current_user] == user ? user.comments : user.published_comments
       user.confirmed_email || context[:email]
@@ -122,43 +120,53 @@ Relationships redefining examples:
 
 ### 1.3. Exposing attributes
 By default all attributes are exposed, and all relationships are hidden, we
-can change this on per-attribute basis
+can change this on per-attribute basis or by global config.
+
 ```ruby
-  class UsersSerializer < Jat
+  class UserSerializer < Jat
+    config.exposed = :default # :default, :all, :none
+
     attribute :first_name, exposed: false
-    relationship :profile, serializer: ProfileSerializer, exposed: true
+
+    relationship :profile, serializer: -> { ProfileSerializer }, exposed: true
   end
 ```
 
-### 1.4. Defining has_many relationship
-Any relationship by default has option `many: false`, we should redefine it:
-```ruby
-  class UsersSerializer < Jat
-    relationship :roles, serializer: RolesSerializer, many: true
-  end
-```
-
-## 2. Show associations to preload
+## 2. Auto preload
 We can tell which associations we want to preload for any attribute or relationship.
-All relationships automatically knows to preload association with self name.
-We can disable it by providing `{ includes: nil }`.
+
+All relationships automatically knows to preload association with its name.
+
+It is also possible to preload hashes or arrays.
+
+`Preloads` are merged together for all requested fields from all requested types/fields.
+
+This `preloads` will be added to serialized object automatically via ActiveRecord's `preload`.
+
+We can disable preloading by providing `preload: false / nil` - it should be helpfull for non ActiveRecord relationships.
+
 ```ruby
-  class UsersSerializer < Jat
-    type :users
-    attribute(:comments_count, includes: :users_stats) do |user|
-      user.users_stats.comments_count
-    end
-    relationship :profile, serializer: ProfileSerializer
+  class UserSerializer < Jat
+    type :user
+
+    attribute :current_email, preload: :emails
+
+    relationship :profile, expose: true, serializer: -> { ProfileSerializer } # preloads :profile by default
+    relationship :comments, expose: true, serializer: -> { CommentSerializer } # preloads :comments by default
   end
 
-  serializer = UsersSerializer.new
-  includes = serializer._includes # => { users_stats: {}, profile: {} }
+  class CommentSerializer < Jat
+    type :comment
 
-  user = User.includes(includes).find_by(...)
-  serializer.to_h(user)
+    relationship :images, expose: true, serializer: -> { ImagesSerializer }, preload: { images_attachments: :blob }
+  end
+
+  serializer = UserSerializer.new
+  includes = serializer._preloads
+  # => { emails: {}, profile: {}, comments: { images_attachments: :blob } }
 ```
 
-## 3. Client can request needed fields
+## 3. Specifying requested fields
 Client can provide `fields` and `include` params to manipulate response.
 Format and examples:
 - `fields` - https://jsonapi.org/format/#fetching-sparse-fieldsets
@@ -166,28 +174,28 @@ Format and examples:
 
 Code example:
 ```ruby
-  class UsersSerializer < Jat
-    type :users
+  class UserSerializer < Jat
+    type :user
     attribute :first_name
     attribute :last_name
-    relationship :profile, serializer: ProfileSerializer # relationships are not exposed by default
+    relationship :profile, serializer: -> { ProfileSerializer } # relationships are not exposed by default
   end
 
   context = nil
-  UsersSerializer.to_h(user, context) # will return only first_name and last_name
+  UserSerializer.to_h(user, context) # will return only first_name and last_name
 
   context = { params: { fields: { users: 'first_name,profile' } } }
-  UsersSerializer.to_h(user, context) # will return only first_name and profile
+  UserSerializer.to_h(user, context) # will return only first_name and profile
 
   params = { params: { include: 'profile' } }
-  UsersSerializer.to_h(user, context) # will return first_name, last_name and profile
+  UserSerializer.to_h(user, context) # will return first_name, last_name and profile
 ```
 
 ## 4. Global config
 ### 4.1 Exposed
 We can set all attributes to be exposed or not by config
 ```ruby
-  class UsersSerializer < Jat
+  class UserSerializer < Jat
     config.exposed = :default # (default) attributes are exposed, relationships are not
     # or
     config.exposed = :all # everything is exposed
@@ -200,7 +208,7 @@ We can set all attributes to be exposed or not by config
 We can set if we need delegation or not.
 By default all keys are delegated to same object attribute.
 ```ruby
-  class UsersSerializer < Jat
+  class UserSerializer < Jat
     config.delegate = true # (default) all keys are delegated to serialized object attributes
     # or
     config.delegate = false # nothing is delegated
@@ -210,7 +218,7 @@ By default all keys are delegated to same object attribute.
 ### 4.3 Camel Lower Keys
 We can transfrom all keys to `camelLower` case
 ```ruby
-  class UsersSerializer < Jat
+  class UserSerializer < Jat
     config.key_transform = :camelLower
     # or
     config.key_transform = :none # default
@@ -218,15 +226,16 @@ We can transfrom all keys to `camelLower` case
 ```
 
 ### 4.4 JSON encoder
-Default encoder is standard JSON module. You can change this for your favourite encoder by adding config globally or per-serializer.
+We need this to serialize to string by Jat.
+Serialization to string via `serializer.to_str` will be best choice together with *caching* to not re-encode each cached response.
+
+Default encoder is a standard JSON module. You can change this for your favourite encoder by adding config globally or per-serializer.
 
 ```ruby
-  Jat.config.to_str = ->(data) { Oj.dump(data) } # change to Oj
+  Jat.config.to_str = ->(data) { Oj.dump(data, mode: :compat) } # change to Oj
 ```
 
-Serialization to string via `serializer#to_str` method will be best choice together with *caching* to not re-encode each cached response.
-
-### 4.4 Meta
+### 4.5 Meta / Paging
 We can configure meta globally to be added to all responses.
 We will not add meta when it has `nil` value. This way we can skip adding meta when conditions were not met.
 
@@ -236,7 +245,7 @@ We will not add meta when it has `nil` value. This way we can skip adding meta w
 
   # We can add dynamic value
   Jat.config.meta[:paging] = ->(records, context) do
-    break unless context[:many]
+    break unless records.is_a?(Enumerable)
     break unless records.respond_to?(:total_count)
 
     {
@@ -252,28 +261,31 @@ When you inherit serializer, child copies parent config, type, attributes and
 relationships.
 
 ## 6. Caching
-Please specify callable cache instance.
+You should provide callable cache instance.
+This instance is responsible for constructing cache key and calling `your-cache-adapter.fetch { yield }`.
+It should accept provided serialized objects and context and it should yield provided block.
 
-Performance tips:
-- use `to_str` method when caching to save time for contructing and re-encoding hash
-- change JSON adapter to dump json by `Jat.config.to_str = ->(data) { Oj.dump(data) }`
+Performance tip:
+- use `to_str` method when caching to save time for re-encoding hash
 
-Example
+Example:
 ```ruby
-  cache = ->(objects, context, &block) do
-    break if context[:no_cache] # We can return falsey value to skip caching
+  class SerializersCache
+    def self.call(objects, context, &block)
+      return if context[:params][:no_cache] # We can return falsey value to skip caching
 
-    # Some code to construct cache key, usually we will use:
-    # - objects.cache_key (for ActiveRecord)
-    # - context[:params][:fields]
-    # - context[:params][:include]
-    # - context[:format] # added by Jat - can be `:hash` or `:string`
-    cache_key = '...'
+      # Some code to construct cache key, usually you want to use:
+      # - objects.cache_key (for ActiveRecord)
+      # - context[:params][:fields]
+      # - context[:params][:include]
+      # - context[:format] # added by Jat - can be `:hash` or `:string`
+      cache_key = '...'
 
-    Rails.cache.fetch(cache_key, expires_in: 5.minutes) { block.() }
+      Rails.cache.fetch(cache_key, expires_in: 5.minutes) { block.() }
+    end
   end
 
-  UserSerializer.to_str(users, cache: cache, **context)
+  UserSerializer.to_str(users, cache: SerializersCache, **context)
   # or
-  UserSerializer.to_h(users, cache: cache, **context)
+  UserSerializer.to_h(users, cache: SerializersCache, **context)
 ```

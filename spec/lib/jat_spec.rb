@@ -233,16 +233,16 @@ RSpec.describe Jat do
     end
   end
 
-  describe '#_includes' do
+  describe '#_preloads' do
     it 'delegates to Jat::Include with correct params' do
       jat.type :jat
       serializer = jat.new
 
-      includes = instance_double(Jat::Includes)
-      allow(Jat::Includes).to receive(:new).with(serializer.send(:_full_map)).and_return(includes)
-      allow(includes).to receive(:for).with(serializer.class).and_return('RES')
+      preloads = instance_double(Jat::Preloads)
+      allow(Jat::Preloads).to receive(:new).with(serializer.send(:_full_map)).and_return(preloads)
+      allow(preloads).to receive(:for).with(serializer.class).and_return('RES')
 
-      expect(serializer._includes).to eq 'RES'
+      expect(serializer._preloads).to eq 'RES'
     end
   end
 

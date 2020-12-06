@@ -3,13 +3,13 @@
 require 'jat/attributes'
 require 'jat/config'
 require 'jat/error'
-require 'jat/includes'
 require 'jat/map'
 require 'jat/map/construct'
 require 'jat/opts'
+require 'jat/preloads'
 require 'jat/preload_handler'
 require 'jat/response'
-require 'jat/utils/includes_to_hash'
+require 'jat/utils/preloads_to_hash'
 
 # Main namespace
 class Jat
@@ -145,8 +145,8 @@ class Jat
       object.id
     end
 
-    def _includes
-      Includes.new(_full_map).for(self.class)
+    def _preloads
+      Preloads.new(_full_map).for(self.class)
     end
 
     def _copy_to(nested_serializer)

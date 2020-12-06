@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Preloads
+module N1
   class ResourceImage < ActiveRecord::Base
     belongs_to :resource, polymorphic: true
     belongs_to :image

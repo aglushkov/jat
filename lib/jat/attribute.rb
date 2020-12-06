@@ -7,8 +7,8 @@ class Jat
                 :block,
                 :delegate,
                 :exposed,
-                :includes,
-                :includes_path,
+                :preloads,
+                :preloads_path,
                 :key,
                 :many,
                 :name,
@@ -35,7 +35,7 @@ class Jat
       @block = opts.block
       @delegate = opts.delegate?
       @exposed = opts.exposed?
-      @includes, @includes_path = opts.includes_with_path
+      @preloads, @preloads_path = opts.preloads_with_path
       @key = opts.key
       @many = opts.many?
       @name = opts.name

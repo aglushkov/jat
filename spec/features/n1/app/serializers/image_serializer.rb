@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Preloads
+module N1
   class ImageSerializer < Jat
     type :image
     attribute :src

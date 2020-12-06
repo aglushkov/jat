@@ -9,7 +9,7 @@ RSpec.describe Jat::Attribute do
       block: :old_block,
       delegate?: :old_delegate,
       exposed?: :old_exposed,
-      includes_with_path: %i[old_includes old_path],
+      preloads_with_path: %i[old_preloads old_path],
       key: :old_key,
       many?: :old_many,
       name: :old_name,
@@ -23,7 +23,7 @@ RSpec.describe Jat::Attribute do
     allow(opts).to receive(:block).and_return(:new_block)
     allow(opts).to receive(:delegate?).and_return(:new_delegate)
     allow(opts).to receive(:exposed?).and_return(:new_exposed)
-    allow(opts).to receive(:includes_with_path).and_return(%i[new_includes new_path])
+    allow(opts).to receive(:preloads_with_path).and_return(%i[new_preloads new_path])
     allow(opts).to receive(:key).and_return(:new_key)
     allow(opts).to receive(:many?).and_return(:new_many)
     allow(opts).to receive(:name).and_return(:new_name)
@@ -35,8 +35,8 @@ RSpec.describe Jat::Attribute do
     expect(attribute.block).to eq :old_block
     expect(attribute.delegate).to eq :old_delegate
     expect(attribute.exposed).to eq :old_exposed
-    expect(attribute.includes).to eq(:old_includes)
-    expect(attribute.includes_path).to eq(:old_path)
+    expect(attribute.preloads).to eq(:old_preloads)
+    expect(attribute.preloads_path).to eq(:old_path)
     expect(attribute.key).to eq :old_key
     expect(attribute.many).to eq :old_many
     expect(attribute.name).to eq :old_name
@@ -50,8 +50,8 @@ RSpec.describe Jat::Attribute do
     expect(attribute.block).to eq :new_block
     expect(attribute.delegate).to eq :new_delegate
     expect(attribute.exposed).to eq :new_exposed
-    expect(attribute.includes).to eq(:new_includes)
-    expect(attribute.includes_path).to eq(:new_path)
+    expect(attribute.preloads).to eq(:new_preloads)
+    expect(attribute.preloads_path).to eq(:new_path)
     expect(attribute.key).to eq :new_key
     expect(attribute.many).to eq :new_many
     expect(attribute.name).to eq :new_name
