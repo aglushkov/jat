@@ -1,14 +1,15 @@
 # frozen_string_literal: true
 
-module Preloads
+module N1
   class CommentSerializer < Jat
     config.auto_preload = true
+    config.exposed = :all
+
     type :comment
 
     relationship :images,
                  key: :resource_images,
-                 serializer: -> { Preloads::ResourceImageSerializer },
-                 includes: { resource_images!: :image },
-                 exposed: true
+                 serializer: -> { N1::ResourceImageSerializer },
+                 preload: { resource_images!: :image }
   end
 end

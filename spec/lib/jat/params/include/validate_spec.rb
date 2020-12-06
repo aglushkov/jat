@@ -17,7 +17,7 @@ RSpec.describe Jat::Params::Include::Validate do
     ser.relationship :b2, serializer: a_serializer
   end
 
-  it 'does not raises error when all include are valid' do
+  it 'does not raises error when all `include` values are valid' do
     include_param = { a2: { b2: { a2: { b2: { a2: {} } } } }, a3: { b2: { a2: { b2: { a2: {} } } } } }
     expect { described_class.(a_serializer, include_param) }.not_to raise_error
   end
@@ -37,7 +37,7 @@ RSpec.describe Jat::Params::Include::Validate do
       .to raise_error Jat::Params::Include::Invalid, "#{a_serializer} has no `a1` relationship"
   end
 
-  it 'raises error when trying to include attribute to children' do
+  it 'raises error when trying to include not existing nested attribute' do
     expect { described_class.(a_serializer, a2: { b1: {} }) }
       .to raise_error Jat::Params::Include::Invalid, "#{b_serializer} has no `b1` relationship"
   end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Preloads
+module N1
   class User < ActiveRecord::Base
     has_many :comments
     has_many :albums

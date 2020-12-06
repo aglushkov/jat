@@ -2,24 +2,24 @@
 
 class Jat
   class Opts
-    # We can have includes with a "!" mark that specifies main included resource,
-    # which should be used to include nested associations.
+    # We can have preloads with a "!" mark that specifies main included resource,
+    # which will be used to include nested associations.
     #
     # We should remove this "!" and save path to this marked association.
-    class IncludesWithPath
+    class PreloadsWithPath
       BANG = '!'
 
       class << self
-        def call(includes)
-          path = main_path(includes)
+        def call(preloads)
+          path = main_path(preloads)
 
           # Return if path does not end with bang.
-          return [includes, path] if path.last[-1] != BANG
+          return [preloads, path] if path.last[-1] != BANG
 
-          # We should remove bangs from last key in path and from associated includes key.
+          # We should remove bangs from last key in path and from associated preloads key.
           # We use mutable methods here.
-          remove_bangs(includes, path)
-          [includes, path]
+          remove_bangs(preloads, path)
+          [preloads, path]
         end
 
         private
@@ -48,7 +48,7 @@ class Jat
           path
         end
 
-        def remove_bangs(includes, path)
+        def remove_bangs(preloads, path)
           # Remove last path with bang
           bang_key = path.pop
 
@@ -56,8 +56,8 @@ class Jat
           fine_key = bang_key.to_s.delete_suffix!(BANG).to_sym
 
           # Navigate to main resource and replace key with BANG
-          nested_includes = empty_dig(includes, path)
-          nested_includes[fine_key] = nested_includes.delete(bang_key)
+          nested_preloads = empty_dig(preloads, path)
+          nested_preloads[fine_key] = nested_preloads.delete(bang_key)
 
           # Add cleared key to path
           path << fine_key

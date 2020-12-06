@@ -5,8 +5,9 @@ detectors:
   IrresponsibleModule:
     enabled: false
 
-
 directories:
   "spec":
     Attribute:
+      enabled: false
+    UncommunicativeModuleName:
       enabled: false

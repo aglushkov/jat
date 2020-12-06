@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Preloads
+module N1
   class ResourceImageSerializer < Jat
     config.auto_preload = true
     type :resource_image

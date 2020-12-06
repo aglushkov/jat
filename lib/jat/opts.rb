@@ -2,7 +2,7 @@
 
 require 'jat/opts/validate'
 require 'jat/opts/name'
-require 'jat/opts/includes_with_path'
+require 'jat/opts/preloads_with_path'
 require 'jat/opts/serializer'
 require 'jat/opts/block'
 
@@ -55,19 +55,19 @@ class Jat
     # :reek:TooManyStatements
     # :reek:NilCheck
     # rubocop:disable Metrics/CyclomaticComplexity
-    def includes_with_path
+    def preloads_with_path
       return [nil, nil] unless config.auto_preload
 
-      includes = opts[:includes]
+      preloads = opts[:preload]
 
       # Return [nil, nil] when manually specified to include `nil` or `false`
-      return [nil, nil] if opts.key?(:includes) && !includes
+      return [nil, nil] if opts.key?(:preload) && !preloads
 
-      includes ||= key if relation?
-      includes = Utils::IncludesToHash.(includes)
-      return [includes, nil] if includes.empty? || !relation?
+      preloads ||= key if relation?
+      preloads = Utils::PreloadsToHash.(preloads)
+      return [preloads, nil] if preloads.empty? || !relation?
 
-      IncludesWithPath.(includes)
+      PreloadsWithPath.(preloads)
     end
     # rubocop:enable Metrics/CyclomaticComplexity
 

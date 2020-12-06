@@ -11,7 +11,7 @@ RSpec.describe Jat::Opts::Checks::Opts do
     allow(Jat::Opts::Checks::OptsExposed).to receive(:call).with(params)
     allow(Jat::Opts::Checks::OptsSerializer).to receive(:call).with(params)
     allow(Jat::Opts::Checks::OptsMany).to receive(:call).with(params)
-    allow(Jat::Opts::Checks::OptsIncludes).to receive(:call).with(params)
+    allow(Jat::Opts::Checks::OptsPreload).to receive(:call).with(params)
 
     check.(params)
 
@@ -20,7 +20,7 @@ RSpec.describe Jat::Opts::Checks::Opts do
     expect(Jat::Opts::Checks::OptsExposed).to have_received(:call)
     expect(Jat::Opts::Checks::OptsSerializer).to have_received(:call)
     expect(Jat::Opts::Checks::OptsMany).to have_received(:call)
-    expect(Jat::Opts::Checks::OptsIncludes).to have_received(:call)
+    expect(Jat::Opts::Checks::OptsPreload).to have_received(:call)
   end
 
   it 'does not allow user-provided keys' do

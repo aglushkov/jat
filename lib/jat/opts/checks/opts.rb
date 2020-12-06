@@ -5,13 +5,13 @@ require 'jat/opts/checks/opts_delegate'
 require 'jat/opts/checks/opts_exposed'
 require 'jat/opts/checks/opts_serializer'
 require 'jat/opts/checks/opts_many'
-require 'jat/opts/checks/opts_includes'
+require 'jat/opts/checks/opts_preload'
 
 class Jat
   class Opts
     module Checks
       class Opts < Checks::Base
-        ALLOWED_OPTS = %i[key delegate exposed serializer many includes].freeze
+        ALLOWED_OPTS = %i[key delegate exposed serializer many preload].freeze
 
         # :reek:TooManyStatements
         def validate
@@ -20,7 +20,7 @@ class Jat
           OptsExposed.(params)
           OptsSerializer.(params)
           OptsMany.(params)
-          OptsIncludes.(params)
+          OptsPreload.(params)
 
           check_extra_keys
         end

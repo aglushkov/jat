@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Jat
-  class Includes
+  class Preloads
     attr_reader :initial_result
 
     def initialize(types_attrs)
@@ -14,7 +14,7 @@ class Jat
       append(initial_result, serializer)
       initial_result
     rescue SystemStackError
-      raise Error, "Stack level too deep, recursive includes detected: #{initial_result}"
+      raise Error, "Stack level too deep, recursive preloads detected: #{initial_result}"
     end
 
     private
@@ -31,39 +31,39 @@ class Jat
     def add_attributes(result, serializer, attributes_names)
       attributes_names.each do |name|
         attribute = serializer.attributes[name]
-        includes = attribute.includes
-        next unless includes # we should not addd includes and nested includes when nil provided
+        preloads = attribute.preloads
+        next unless preloads # we should not addd preloads and nested preloads when nil provided
 
-        add_includes(result, includes, attribute)
+        add_preloads(result, preloads, attribute)
       end
     end
 
-    def add_includes(result, includes, attribute)
-      unless includes.empty?
-        includes = deep_dup(includes)
-        merge(result, includes)
+    def add_preloads(result, preloads, attribute)
+      unless preloads.empty?
+        preloads = deep_dup(preloads)
+        merge(result, preloads)
       end
 
-      add_nested_includes(result, attribute) if attribute.relation?
+      add_nested_preloads(result, attribute) if attribute.relation?
     end
 
-    def add_nested_includes(result, attribute)
-      path = attribute.includes_path
+    def add_nested_preloads(result, attribute)
+      path = attribute.preloads_path
       nested_result = nested(result, path)
       nested_serializer = attribute.serializer
 
       append(nested_result, nested_serializer.())
     end
 
-    def merge(result, includes)
-      result.merge!(includes) do |_key, value_one, value_two|
+    def merge(result, preloads)
+      result.merge!(preloads) do |_key, value_one, value_two|
         merge(value_one, value_two)
       end
     end
 
-    def deep_dup(includes)
-      includes.dup.transform_values! do |nested_includes|
-        deep_dup(nested_includes)
+    def deep_dup(preloads)
+      preloads.dup.transform_values! do |nested_preloads|
+        deep_dup(nested_preloads)
       end
     end
 

@@ -6,40 +6,30 @@ require 'jat/preload_handler/active_record_relation'
 
 class Jat
   class PreloadHandler
+    HANDLERS = [
+      ActiveRecordRelation,
+      ActiveRecordObject,
+      ActiveRecordArray
+    ].freeze
+
     class << self
       def call(objects, serializer)
         return objects if !objects || !serializer.class.config.auto_preload
         return objects if objects.is_a?(Array) && objects.empty?
 
-        includes = serializer._includes
-        return objects if includes.empty?
+        preloads = serializer._preloads
+        return objects if preloads.empty?
 
-        preload(objects, includes)
+        preload(objects, preloads)
       end
 
       private
 
-      def preload(objects, includes)
-        preload_handler = handlers.find { |handler| handler.fit?(objects) }
+      def preload(objects, preloads)
+        preload_handler = HANDLERS.find { |handler| handler.fit?(objects) }
+        raise Error, "Can't preload #{preloads.inspect} to #{objects.inspect}" unless preload_handler
 
-        unless preload_handler
-          raise Error, "Don't know how to preload nested data to class: #{objects.class}, data: #{objects.inspect}"
-        end
-
-        preload_handler.preload(objects, includes)
-      end
-
-      def handlers
-        @handlers ||=
-          if defined?(ActiveRecord)
-            [
-              ActiveRecordRelation,
-              ActiveRecordObject,
-              ActiveRecordArray
-            ]
-          else
-            []
-          end
+        preload_handler.preload(objects, preloads)
       end
     end
   end
