@@ -323,10 +323,12 @@ RSpec.describe Jat::Response do
         id { |obj| obj }
         config.meta[:foo] = nil
         config.meta[:bar] = proc {}
+        config.meta[:bazz] = proc { false }
+        config.meta[:bazzz] = false
       end
 
       result = serializer.to_h('bar')
-      expect(result).to eq(data: { type: :foo, id: 'bar' })
+      expect(result).to eq(data: { type: :foo, id: 'bar' }, meta: { bazz: false, bazzz: false } )
     end
   end
 end

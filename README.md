@@ -1,33 +1,33 @@
 # JAT
 Jat is a serialization tool to build JSON API response.
 
-## Why another serializer?
-There is a hope this gem will make developers happy again.
+## Table of Contents
+* [Format](#format)
+* [DSL](#dsl)
+  * [Example](#example)
+  * [Redefining attributes](#redefining-attributes)
+  * [Exposing attributes](#exposing-attributes)
+* [Auto preload](#auto-preload)
+* [Limit response fields](#limit-response-fields)
+* [Configuration](#configuration)
+  * [Exposed option](#exposed-option)
+  * [Delegate option](#delegate-option)
+  * [Camel Lower option](#camel-lower-option)
+  * [JSON encoder option](#json-encoder-option)
+  * [Global Meta](#global-meta)
+* [Inheritance](#inheritance)
+* [Caching](#caching)
+* [Paging](#paging)
 
 ## Format
 Serialization format is almost like original [JSON-API](https://jsonapi.org/format/).
 
-## Features
-1. Simple DSL.
-  - Quick example
-  - Redefine how to get attribute
-  - Exposing attributes
-  - Defining has_many relationship
+What we don't support yet:
+- `links`
+- object specific `meta`
 
-2. Showing associations to preload.
-3. Configurable response fields.
-4. Global config.
-  - Exposed
-  - Delegate
-  - Camel Lower Keys
-  - JSON encoder
-  - Meta / Paging
-5. Inheritance.
-6. Caching
-
-## 1. Simple DSL
-
-### 1.1. Quick example
+## DSL
+### Example
 Each serializer must have *type*.
 Also we can add attributes and relationships.
 
@@ -64,11 +64,11 @@ Also we can add attributes and relationships.
   serializer.to_h(user2)
 ```
 
-### 1.2. Redefine attribute
+### Redefining attributes
 All attributes and relationships are delegated to serialized object.
 This can be changed by providing a new key, new method or a block.
 
-Redefine attribute examples:
+Redefine attribute example:
 ```ruby
   class UserSerializer < Jat
     type :user
@@ -92,7 +92,7 @@ Redefine attribute examples:
   end
 ```
 
-Redefine relationship examples:
+Redefine relationship example:
 ```ruby
   class UserSerializer < Jat
     type :comments
@@ -118,7 +118,7 @@ Redefine relationship examples:
   end
 ```
 
-### 1.3. Exposing attributes
+### Exposing Attributes
 By default all attributes are exposed, and all relationships are hidden, we
 can change this on per-attribute basis or by global config.
 
@@ -132,18 +132,14 @@ can change this on per-attribute basis or by global config.
   end
 ```
 
-## 2. Auto preload
+## Auto Preload
 We can tell which associations we want to preload for any attribute or relationship.
 
-All relationships automatically knows to preload association with its name.
-
-It is also possible to preload hashes or arrays.
-
-`Preloads` are merged together for all requested fields from all requested types/fields.
-
-This `preloads` will be added to serialized object automatically via ActiveRecord's `preload`.
-
-We can disable preloading by providing `preload: false / nil` - it should be helpfull for non ActiveRecord relationships.
+- `preload` can be complex value consisting of hashes and arrays
+- `preload`s are merged together only for returned fields
+- `preload` can be disabled by providing `preload: false / nil` - helpfull for non-ActiveRecord relationships
+- relationships do `preload` self name by default
+- works with ActiveRecord scope, ActiveRecord object, Array of ActiveRecord  objects
 
 ```ruby
   class UserSerializer < Jat
@@ -161,39 +157,36 @@ We can disable preloading by providing `preload: false / nil` - it should be hel
     relationship :images, expose: true, serializer: -> { ImagesSerializer }, preload: { images_attachments: :blob }
   end
 
-  serializer = UserSerializer.new
-  includes = serializer._preloads
-  # => { emails: {}, profile: {}, comments: { images_attachments: :blob } }
+  serializer = UserSerializer.to_h(users)
+  # Executes `users.preload(:emails, :profile, comments: { images_attachments: :blob })` before processing
 ```
 
-## 3. Specifying requested fields
-Client can provide `fields` and `include` params to manipulate response.
-Format and examples:
+Tips:
+ - We can run `someSerializer.new(params: params)._preloads` to find what we will `preload`.
+
+## Limit Response Fields
+Client can provide `fields` and `include` parameters to change response fields.
+
+Parameters have same format as in JSON-api specification:
 - `fields` - https://jsonapi.org/format/#fetching-sparse-fieldsets
 - `include` - https://jsonapi.org/format/#fetching-includes
 
-Code example:
+Fields should be provided as hash where keys are serializers `types` and values combinded with comma:
 ```ruby
-  class UserSerializer < Jat
-    type :user
-    attribute :first_name
-    attribute :last_name
-    relationship :profile, serializer: -> { ProfileSerializer } # relationships are not exposed by default
-  end
-
-  context = nil
-  UserSerializer.to_h(user, context) # will return only first_name and last_name
-
-  context = { params: { fields: { users: 'first_name,profile' } } }
-  UserSerializer.to_h(user, context) # will return only first_name and profile
-
-  params = { params: { include: 'profile' } }
-  UserSerializer.to_h(user, context) # will return first_name, last_name and profile
+UserSerializer.to_h(user, params: { fields: { user: `first_name,last_name`, comments: `text,images` } })
 ```
 
-## 4. Global config
-### 4.1 Exposed
-We can set all attributes to be exposed or not by config
+`include` parameter must be a string that contains different relations that should be included to main requested resource. Relationships should be combined with ',', nested relationships combined with '.':
+```ruby
+UserSerializer.to_h(user, params: { include: `profile,comments.images` } })
+```
+
+## Configuration
+  All config options can be specified globally in main Jat class or in specific classes.
+  Options are inherited from parent class.
+
+### Exposed Option
+We can set all attributes to be exposed or hidden by `exposed`
 ```ruby
   class UserSerializer < Jat
     config.exposed = :default # (default) attributes are exposed, relationships are not
@@ -204,9 +197,10 @@ We can set all attributes to be exposed or not by config
   end
 ```
 
-### 4.2 Delegate
+### Delegate Option
 We can set if we need delegation or not.
 By default all keys are delegated to same object attribute.
+
 ```ruby
   class UserSerializer < Jat
     config.delegate = true # (default) all keys are delegated to serialized object attributes
@@ -215,8 +209,9 @@ By default all keys are delegated to same object attribute.
   end
 ```
 
-### 4.3 Camel Lower Keys
+### Camel Lower Option
 We can transfrom all keys to `camelLower` case
+
 ```ruby
   class UserSerializer < Jat
     config.key_transform = :camelLower
@@ -225,17 +220,16 @@ We can transfrom all keys to `camelLower` case
   end
 ```
 
-### 4.4 JSON encoder
-We need this to serialize to string by Jat.
+### JSON Encoder Option
+We need this to serialize to string with maximum efficiency.
+Default encoder is a standard JSON module.
 Serialization to string via `serializer.to_str` will be best choice together with *caching* to not re-encode each cached response.
 
-Default encoder is a standard JSON module. You can change this for your favourite encoder by adding config globally or per-serializer.
-
 ```ruby
-  Jat.config.to_str = ->(data) { Oj.dump(data, mode: :compat) } # change to Oj
+  Jat.config.to_str = ->(data) { Oj.dump(data, mode: :compat) } # changed JSON.dump to Oj
 ```
 
-### 4.5 Meta / Paging
+### Global Meta
 We can configure meta globally to be added to all responses.
 We will not add meta when it has `nil` value. This way we can skip adding meta when conditions were not met.
 
@@ -244,23 +238,17 @@ We will not add meta when it has `nil` value. This way we can skip adding meta w
   Jat.config.meta[:version] = '1.2.3'
 
   # We can add dynamic value
-  Jat.config.meta[:paging] = ->(records, context) do
-    break unless records.is_a?(Enumerable)
-    break unless records.respond_to?(:total_count)
-
-    {
-      total_count: records.total_count
-      size: records.size,
-      offset_value: records.offset_value,
-    }
+  Jat.config.meta[:is_admin] = ->(records, context) do
+    return unless context[:current_user].admin? # skip adding meta `is_admin` key
+    true
   end
 ```
 
-## 5. Inheritance
+## Inheritance
 When you inherit serializer, child copies parent config, type, attributes and
 relationships.
 
-## 6. Caching
+## Caching
 You should provide callable cache instance.
 This instance is responsible for constructing cache key and calling `your-cache-adapter.fetch { yield }`.
 It should accept provided serialized objects and context and it should yield provided block.
@@ -288,4 +276,22 @@ Example:
   UserSerializer.to_str(users, cache: SerializersCache, **context)
   # or
   UserSerializer.to_h(users, cache: SerializersCache, **context)
+```
+
+## Paging
+There are no specific stuff to implement paging, we can just use `meta`
+
+```ruby
+  # config/initializers/jat.rb
+  #
+  Jat.config.meta[:paging] = ->(records, _context) do
+    break unless records.is_a?(Enumerable)
+    break unless records.respond_to?(:total_count)
+
+    {
+      total_count: records.total_count
+      size: records.size,
+      offset_value: records.offset_value,
+    }
+  end
 ```
