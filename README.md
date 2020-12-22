@@ -15,7 +15,6 @@ For stable version look at [0.0.1 README](https://github.com/aglushkov/jat/tree/
 * [Limit response fields](#limit-response-fields)
 * [Configuration](#configuration)
   * [Exposed option](#exposed-option)
-  * [Delegate option](#delegate-option)
   * [Camel Lower option](#camel-lower-option)
   * [JSON encoder option](#json-encoder-option)
   * [Global Meta](#global-meta)
@@ -71,26 +70,21 @@ Also we can add attributes and relationships.
 
 ### Redefining attributes
 All attributes and relationships are delegated to serialized object.
-This can be changed by providing a new key, new method or a block.
+This can be changed by providing a `key:` or a block.
 
 Redefine attribute example:
 ```ruby
   class UserSerializer < Jat
-    # by key
-    attribute(:email, key: :confirmed_email) # will use `user.confirmed_email`
+    # By key
+    attribute(:email, key: :confirmed_email) # `user.confirmed_email` will be executed
 
-    # by block
-    attribute(:email) { |user| user.confirmed_email }
+    # By block
+    # We can use `object` and `context` variables
+    attribute(:email) { object.confirmed_email }
 
-    # by block with context
-    attribute(:email) do |user, context|
-      user.confirmed_email if context[:controller_name] == 'CurrentUserController'
-    end
-
-    # by new method
-    attribute :email, delegate: false # `delegate: false` is optional, but it fixes low-level ruby warning about next method redefining.
-    def email(user, context)
-      user.confirmed_email || context[:email]
+    # By block with one or two args (aliases for `object` and `context`)
+    attribute(:email) do |user, ctx|
+      user.confirmed_email if ctx[:controller_name] == 'CurrentUserController'
     end
   end
 ```
@@ -98,23 +92,15 @@ Redefine attribute example:
 Redefine relationship example:
 ```ruby
   class UserSerializer < Jat
-    # by key
+    # By key
     relationship(:comments, key: :published_comments...) # will use `user.published_comments`
 
-    # by block
-    relationship(:comments) { |user| user.published_comments }
+    # By block
+    relationship(:comments) { object.published_comments }
 
-    # by block with context
-    relationship(:comments) do |user, context|
+    # By block with renamed `object` and `context` varaibles
+    relationship(:comments) do |user, _ctx|
       context[:current_user] == user ? user.comments : user.published_comments
-    end
-
-    # by new method
-    relationship :comments, delegate: false
-
-    def comments(user, context)
-      context[:current_user] == user ? user.comments : user.published_comments
-      user.confirmed_email || context[:email]
     end
   end
 ```
@@ -191,18 +177,6 @@ We can set all attributes to be exposed or hidden by `exposed`
     config.exposed = :all # everything is exposed
     # or
     config.exposed = :none # nothing is exposed
-  end
-```
-
-### Delegate Option
-We can set if we need delegation or not.
-By default all keys are delegated to same object attribute.
-
-```ruby
-  class UserSerializer < Jat
-    config.delegate = true # (default) all keys are delegated to serialized object attributes
-    # or
-    config.delegate = false # nothing is delegated
   end
 ```
 

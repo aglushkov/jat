@@ -5,6 +5,9 @@ detectors:
   IrresponsibleModule:
     enabled: false
 
+  ModuleInitialize:
+    enabled: false
+
 directories:
   "spec":
     Attribute:

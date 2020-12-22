@@ -11,12 +11,8 @@ module Camel
     attribute :first_name
 
     relationship :confirmed_email,
+                 key: :email,
                  exposed: true,
-                 serializer: -> { Camel::EmailSerializer },
-                 delegate: false
-
-    def confirmed_email(user, _params)
-      user.email
-    end
+                 serializer: -> { Camel::EmailSerializer }
   end
 end

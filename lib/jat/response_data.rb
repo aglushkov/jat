@@ -2,13 +2,13 @@
 
 class Jat
   class ResponseData
-    attr_reader :serializer, :object, :includes, :context
+    attr_reader :serializer, :object, :presenter, :includes
 
     def initialize(serializer, object, includes)
       @serializer = serializer
       @object = object
+      @presenter = serializer.class::Presenter.new(object, serializer._context)
       @includes = includes
-      @context = serializer._context
     end
 
     def data
@@ -21,7 +21,7 @@ class Jat
     end
 
     def uid
-      { type: serializer.type, id: serializer.id(object, context) }
+      { type: serializer.class.type, id: presenter.id }
     end
 
     private
@@ -32,7 +32,7 @@ class Jat
 
       attributes_names.each_with_object({}) do |name, attrs|
         attribute = serializer.class.attributes[name]
-        attrs[name] = serializer.public_send(attribute.original_name, object, context)
+        attrs[name] = presenter.public_send(attribute.original_name)
       end
     end
 
@@ -41,15 +41,13 @@ class Jat
       return if relationships_names.empty?
 
       relationships_names.each_with_object({}) do |name, rels|
-        next if name == :id
-
         rels[name] = { data: relationship_data(name) }
       end
     end
 
     def relationship_data(name)
       rel_attribute = serializer.class.attributes[name]
-      rel_object = serializer.public_send(rel_attribute.original_name, object, context)
+      rel_object = presenter.public_send(rel_attribute.original_name)
 
       if many?(rel_attribute, rel_object)
         many_relationships_data(rel_object, rel_attribute)
@@ -77,7 +75,6 @@ class Jat
       rel_response_data = self.class.new(rel_serializer, rel_object, includes)
       rel_uid = rel_response_data.uid
       includes[rel_uid] ||= rel_response_data.data
-
       rel_uid
     end
 

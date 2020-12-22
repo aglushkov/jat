@@ -14,10 +14,9 @@ class Jat
 
     class << self
       def call(objects, serializer)
-        return objects if !objects || !serializer.class.config.auto_preload
-        return objects if objects.is_a?(Array) && objects.empty?
+        return objects if skip_preload?(objects, serializer)
 
-        preloads = serializer._preloads
+        preloads = Preloads.new(serializer._full_map).for(serializer.class)
         return objects if preloads.empty?
 
         preload(objects, preloads)
@@ -30,6 +29,12 @@ class Jat
         raise Error, "Can't preload #{preloads.inspect} to #{objects.inspect}" unless preload_handler
 
         preload_handler.preload(objects, preloads)
+      end
+
+      def skip_preload?(objects, serializer)
+        !objects ||
+          !serializer.class.config.auto_preload ||
+          (objects.is_a?(Array) && objects.empty?)
       end
     end
   end

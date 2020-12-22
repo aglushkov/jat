@@ -4,11 +4,10 @@ RSpec.describe Jat::Opts::Checks::Block do
   let(:check) { described_class }
   let(:params) { { name: nil, opts: {}, block: nil } }
 
-  it 'allows no block' do
+  it 'allows 0, 1 or 2 arguments in block' do
+    params[:block] = -> {}
     expect { check.(params) }.not_to raise_error
-  end
 
-  it 'allows only 1 or 2 arguments in block' do
     params[:block] = ->(a) {}
     expect { check.(params) }.not_to raise_error
 

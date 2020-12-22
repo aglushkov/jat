@@ -28,11 +28,11 @@ RSpec.describe Jat do
     end
 
     it 'allows to redefine attribute' do
-      jat.attribute(:foo, delegate: true)
-      expect(jat.attributes[:foo].delegate?).to eq true
+      jat.attribute(:foo, exposed: false)
+      expect(jat.attributes[:foo].exposed).to eq false
 
-      jat.attribute(:foo, delegate: false)
-      expect(jat.attributes[:foo].delegate?).to eq false
+      jat.attribute(:foo, exposed: true)
+      expect(jat.attributes[:foo].exposed).to eq true
     end
   end
 
@@ -201,24 +201,10 @@ RSpec.describe Jat do
     end
   end
 
-  describe '#_preloads' do
-    it 'delegates to Jat::Include with correct params' do
-      jat.type :jat
-      serializer = jat.new
-
-      preloads = instance_double(Jat::Preloads)
-      allow(Jat::Preloads).to receive(:new).with(serializer.send(:_full_map)).and_return(preloads)
-      allow(preloads).to receive(:for).with(serializer.class).and_return('RES')
-
-      expect(serializer._preloads).to eq 'RES'
-    end
-  end
-
   describe 'inheritance' do
     it 'inherits config' do
       parent = jat
       parent.config.auto_preload = false
-      parent.config.delegate = false
       parent.config.exposed = :none
       parent.config.key_transform = :camelLower
       parent.config.meta = { version: '1' }
@@ -226,7 +212,6 @@ RSpec.describe Jat do
 
       child = Class.new(parent)
       expect(child.config.auto_preload).to eq false
-      expect(child.config.delegate).to eq false
       expect(child.config.exposed).to eq :none
       expect(child.config.key_transform).to eq :camelLower
       expect(child.config.meta).to eq(version: '1')
@@ -243,16 +228,22 @@ RSpec.describe Jat do
       expect(parent.config.meta).to eq(version: '1')
     end
 
-    it 'inherits type and attributes' do
+    it 'inherits type' do
       parent = jat
       parent.type :parent
-      parent.attribute :foo, exposed: true
-      parent.relationship :bar, serializer: -> { parent }, exposed: false
 
       child = Class.new(parent)
       expect(child.type).to eq :parent
+    end
+
+    it 'inherits attributes' do
+      parent = jat
+      parent.attribute(:foo, exposed: true) { 'foo' }
+
+      child = Class.new(parent)
       expect(child.attributes[:foo].exposed).to eq true
-      expect(child.attributes[:bar].exposed).to eq false
+      presenter = child::Presenter.new(nil, nil)
+      expect(presenter.foo).to eq 'foo'
     end
 
     it 'does not overwrites parent attributes' do
@@ -292,7 +283,7 @@ RSpec.describe Jat do
     expect(jat.instance_variable_get(:@full_map)).to be_any
     expect(jat.instance_variable_get(:@exposed_map)).to be_any
 
-    jat.config.delegate = false
+    jat.config.key_transform = :camelLower
 
     # After
     expect(jat.instance_variable_get(:@full_map)).to eq nil

@@ -43,7 +43,7 @@ class Jat
 
     def data_with_includes
       includes = {}
-      data = many?(object, context) ? many(includes) : one(includes)
+      data = many?(object, context) ? many(object, includes) : one(object, includes)
       [data, includes]
     end
 
@@ -60,12 +60,12 @@ class Jat
       end
     end
 
-    def many(includes)
-      object.map { |obj| ResponseData.new(serializer, obj, includes).data }
+    def many(objs, includes)
+      objs.map { |obj| one(obj, includes) }
     end
 
-    def one(includes)
-      ResponseData.new(serializer, object, includes).data
+    def one(obj, includes)
+      ResponseData.new(serializer, obj, includes).data
     end
 
     # :reek:NilCheck
