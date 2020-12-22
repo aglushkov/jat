@@ -69,6 +69,8 @@ class Jat
 
       # :reek:DuplicateMethodCall
       def expose?(type, attribute)
+        return false if attribute.name == :id
+
         case exposed
         when :all then true
         when :manual then manually_exposed?(type, attribute)

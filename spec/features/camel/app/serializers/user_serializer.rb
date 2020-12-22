@@ -7,6 +7,7 @@ module Camel
 
     type :user
 
+    attribute :id
     attribute :first_name
 
     relationship :confirmed_email,

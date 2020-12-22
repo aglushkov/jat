@@ -7,6 +7,7 @@ module Camel
 
     type :email
 
+    attribute :id
     attribute :email
     attribute :old_email
   end

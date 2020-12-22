@@ -81,14 +81,6 @@ class Jat
       @type = new_type
     end
 
-    def id(key: nil, &block)
-      raise Error, "Key and block can't be provided together" if key && block
-      raise Error, 'Key or block must be provided' if !key && !block
-
-      block ||= proc { |obj| obj.public_send(key) }
-      define_method(:id, &block)
-    end
-
     def attribute(name, **opts, &block)
       add_attribute(name: name, opts: opts, block: block)
     end
@@ -139,10 +131,6 @@ class Jat
     def to_str(object, context = {})
       _reinitialize(context)
       Response.new(self, object).to_str
-    end
-
-    def id(object)
-      object.id
     end
 
     def _preloads

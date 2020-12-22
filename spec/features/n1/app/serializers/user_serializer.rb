@@ -7,6 +7,7 @@ module N1
 
     type :user
 
+    attribute :id
     relationship :images, serializer: -> { N1::ImageSerializer }
     relationship :comments, serializer: -> { N1::CommentSerializer }
     relationship :albums, serializer: -> { N1::AlbumSerializer }

@@ -22,7 +22,7 @@ RSpec.describe Jat::Response do
   it 'returns correct structure with data' do
     str_serializer = Class.new(Jat) do
       type 'str'
-      id { |_| 'STRING' }
+      attribute(:id) { |_| 'STRING' }
     end
 
     result = str_serializer.new.to_h('STRING')
@@ -32,7 +32,7 @@ RSpec.describe Jat::Response do
   it 'returns correct structure with array data' do
     str_serializer = Class.new(Jat) do
       type 'str'
-      id { |obj| obj }
+      attribute(:id) { |obj| obj }
     end
 
     result = str_serializer.new.to_h(%w[1 2], many: true)
@@ -42,7 +42,7 @@ RSpec.describe Jat::Response do
   it 'returns correct structure with data and meta' do
     str_serializer = Class.new(Jat) do
       type 'str'
-      id { |obj| obj }
+      attribute(:id) { |obj| obj }
     end
 
     result = str_serializer.new.to_h('STRING', meta: { any: :thing })
@@ -52,7 +52,7 @@ RSpec.describe Jat::Response do
   it 'returns correct structure with data with attributes' do
     str_serializer = Class.new(Jat) do
       type 'str'
-      id { |obj| obj[0] }
+      attribute(:id) { |obj| obj[0] }
       attribute :length
     end
 
@@ -63,12 +63,12 @@ RSpec.describe Jat::Response do
   it 'returns correct structure with has-one relationship' do
     int_serializer = Class.new(Jat) do
       type 'int'
-      id { |obj| obj }
+      attribute(:id) { |obj| obj }
     end
 
     str_serializer = Class.new(Jat) do
       type 'str'
-      id { |obj| obj[0] }
+      attribute(:id) { |obj| obj[0] }
       relationship :length, serializer: int_serializer, exposed: true
     end
 
@@ -90,12 +90,12 @@ RSpec.describe Jat::Response do
   it 'does not return has-one relationship when not exposed' do
     int_serializer = Class.new(Jat) do
       type 'int'
-      id { |obj| obj }
+      attribute(:id) { |obj| obj }
     end
 
     str_serializer = Class.new(Jat) do
       type 'str'
-      id { |obj| obj[0] }
+      attribute(:id) { |obj| obj[0] }
       relationship :length, serializer: int_serializer
     end
 
@@ -107,7 +107,7 @@ RSpec.describe Jat::Response do
   it 'returns correct structure with empty has-one relationship' do
     str_serializer = Class.new(Jat) do
       type 'str'
-      id { |obj| obj[0] }
+      attribute(:id) { |obj| obj[0] }
       relationship(:length, serializer: self, exposed: true) { |_obj| nil }
     end
 
@@ -124,13 +124,13 @@ RSpec.describe Jat::Response do
   it 'returns correct structure with has-one relationship with attributes' do
     int_serializer = Class.new(Jat) do
       type 'int'
-      id { |obj| obj }
+      attribute(:id) { |obj| obj }
       attribute(:next) { |obj| obj + 1 }
     end
 
     str_serializer = Class.new(Jat) do
       type 'str'
-      id { |obj| obj[0] }
+      attribute(:id) { |obj| obj[0] }
       relationship :length, serializer: int_serializer, exposed: true
     end
 
@@ -156,7 +156,7 @@ RSpec.describe Jat::Response do
 
     str_serializer = Class.new(Jat) do
       type 'str'
-      id { |_obj| 'id' }
+      attribute(:id) { |_obj| 'id' }
       relationship :chars, serializer: chr_serializer, many: true, exposed: true
     end
 
@@ -172,12 +172,12 @@ RSpec.describe Jat::Response do
   it 'returns correct structure with has-many relationship' do
     chr_serializer = Class.new(Jat) do
       type 'chr'
-      id { |obj| obj }
+      attribute(:id) { |obj| obj }
     end
 
     str_serializer = Class.new(Jat) do
       type 'str'
-      id { |obj| obj[0] }
+      attribute(:id) { |obj| obj[0] }
       relationship :chars, serializer: chr_serializer, many: true, exposed: true
     end
 
@@ -199,13 +199,13 @@ RSpec.describe Jat::Response do
   it 'returns correct structure with has-many relationship with attributes' do
     chr_serializer = Class.new(Jat) do
       type 'chr'
-      id { |obj| obj }
+      attribute(:id) { |obj| obj }
       attribute :next
     end
 
     str_serializer = Class.new(Jat) do
       type 'str'
-      id { |obj| obj[0] }
+      attribute(:id) { |obj| obj[0] }
       relationship :chars, serializer: chr_serializer, many: true, exposed: true
     end
 
@@ -228,12 +228,12 @@ RSpec.describe Jat::Response do
   it 'accepts includes param' do
     chr_serializer = Class.new(Jat) do
       type 'chr'
-      id { |obj| obj }
+      attribute(:id) { |obj| obj }
     end
 
     str_serializer = Class.new(Jat) do
       type 'str'
-      id { |obj| obj[0] }
+      attribute(:id) { |obj| obj[0] }
       relationship :chars, serializer: chr_serializer, many: true, exposed: false
     end
 
@@ -255,12 +255,12 @@ RSpec.describe Jat::Response do
   it 'accepts sparse_fieldset' do
     chr_serializer = Class.new(Jat) do
       type 'chr'
-      id { |obj| obj }
+      attribute(:id) { |obj| obj }
     end
 
     str_serializer = Class.new(Jat) do
       type 'str'
-      id { |obj| obj[0] }
+      attribute(:id) { |obj| obj[0] }
       relationship :chars, serializer: chr_serializer, many: true, exposed: false
     end
 
@@ -283,7 +283,7 @@ RSpec.describe Jat::Response do
     it 'adds static and dynamic meta defined in serializer config' do
       serializer = Class.new(Jat) do
         type :foo
-        id { |obj| obj }
+        attribute(:id) { |obj| obj }
 
         config.meta = { version: '1.2.3' }
         # config.meta[:version] = '1.2.3'
@@ -304,7 +304,7 @@ RSpec.describe Jat::Response do
     it 'does not overwrites manually added meta' do
       serializer = Class.new(Jat) do
         type :foo
-        id { |obj| obj }
+        attribute(:id) { |obj| obj }
 
         config.meta[:version] = '1.2.3'
       end
@@ -320,7 +320,7 @@ RSpec.describe Jat::Response do
     it 'does not add meta with nil values' do
       serializer = Class.new(Jat) do
         type :foo
-        id { |obj| obj }
+        attribute(:id, key: :itself)
         config.meta[:foo] = nil
         config.meta[:bar] = proc {}
         config.meta[:bazz] = proc { false }
@@ -328,7 +328,7 @@ RSpec.describe Jat::Response do
       end
 
       result = serializer.to_h('bar')
-      expect(result).to eq(data: { type: :foo, id: 'bar' }, meta: { bazz: false, bazzz: false } )
+      expect(result).to eq(data: { type: :foo, id: 'bar' }, meta: { bazz: false, bazzz: false })
     end
   end
 end

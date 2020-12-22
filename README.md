@@ -1,6 +1,10 @@
 # JAT
 Jat is a serialization tool to build JSON API response.
 
+## README
+Current README is in development state and can show non-compatible with latest release examples.\
+For stable version look at [0.0.1 README](https://github.com/aglushkov/jat/tree/v0.0.1)
+
 ## Table of Contents
 * [Format](#format)
 * [DSL](#dsl)
@@ -35,6 +39,7 @@ Also we can add attributes and relationships.
   class UserSerializer < Jat
     type :user
 
+    attribute :id
     attribute :first_name
     attribute :last_name
 
@@ -71,8 +76,6 @@ This can be changed by providing a new key, new method or a block.
 Redefine attribute example:
 ```ruby
   class UserSerializer < Jat
-    type :user
-
     # by key
     attribute(:email, key: :confirmed_email) # will use `user.confirmed_email`
 
@@ -95,8 +98,6 @@ Redefine attribute example:
 Redefine relationship example:
 ```ruby
   class UserSerializer < Jat
-    type :comments
-
     # by key
     relationship(:comments, key: :published_comments...) # will use `user.published_comments`
 
@@ -143,8 +144,6 @@ We can tell which associations we want to preload for any attribute or relations
 
 ```ruby
   class UserSerializer < Jat
-    type :user
-
     attribute :current_email, preload: :emails
 
     relationship :profile, expose: true, serializer: -> { ProfileSerializer } # preloads :profile by default
@@ -152,8 +151,6 @@ We can tell which associations we want to preload for any attribute or relations
   end
 
   class CommentSerializer < Jat
-    type :comment
-
     relationship :images, expose: true, serializer: -> { ImagesSerializer }, preload: { images_attachments: :blob }
   end
 

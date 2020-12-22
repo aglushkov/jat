@@ -6,6 +6,7 @@ module CrossRef
 
     type :comment
 
+    attribute :id
     relationship :user,
                  exposed: true,
                  serializer: -> { CrossRef::UserSerializer }

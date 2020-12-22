@@ -21,7 +21,7 @@ class Jat
     end
 
     def uid
-      { type: serializer.type, id: serializer.id(object) }
+      { type: serializer.type, id: serializer.id(object, context) }
     end
 
     private
@@ -41,6 +41,8 @@ class Jat
       return if relationships_names.empty?
 
       relationships_names.each_with_object({}) do |name, rels|
+        next if name == :id
+
         rels[name] = { data: relationship_data(name) }
       end
     end

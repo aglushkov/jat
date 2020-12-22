@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'jat/opts/checks/name_format'
-require 'jat/opts/checks/name_reserved'
 
 class Jat
   class Opts
@@ -9,7 +8,6 @@ class Jat
       class Name < Checks::Base
         def validate
           NameFormat.(params)
-          NameReserved.(params)
         end
       end
     end

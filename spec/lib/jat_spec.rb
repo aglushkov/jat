@@ -21,30 +21,6 @@ RSpec.describe Jat do
     end
   end
 
-  describe '.id' do
-    it 'prohibits to add key and block together' do
-      expect { jat.id(key: :foo) { |_obj| 'ID' } }.to raise_error Jat::Error, /key.*block/i
-    end
-
-    it 'prohibits to call .id without key and block' do
-      expect { jat.id }.to raise_error Jat::Error, /key.*block/i
-    end
-
-    it 'allows to redefine #id by providing other key' do
-      jat.id(key: :new_id)
-      jat.type :jat
-      obj = Class.new { def new_id; 'ID'; end }.new
-      expect(jat.new.id(obj)).to eq 'ID'
-    end
-
-    it 'allows to redefine #id by providing block' do
-      jat.id { |_obj| 'ID' }
-      jat.type :jat
-      obj = Class.new
-      expect(jat.new.id(obj)).to eq 'ID'
-    end
-  end
-
   describe '.attribute' do
     it 'adds attribute' do
       jat.attribute :foo
@@ -75,14 +51,6 @@ RSpec.describe Jat do
     end
   end
 
-  describe '#id' do
-    it 'delegates to objects #id method by default' do
-      jat.type :jat
-      obj = Class.new { def id; 'ID'; end }.new
-      expect(jat.new.id(obj)).to eq 'ID'
-    end
-  end
-
   describe '.to_h' do
     it 'returns serialized to hash response' do
       context = { some: 'CONTEXT' }
@@ -110,7 +78,7 @@ RSpec.describe Jat do
   describe '#to_h' do
     it 'returns serialized response' do
       jat.type :jat
-      jat.id key: :itself
+      jat.attribute :id, key: :itself
 
       result = jat.new.to_h('OBJECT', meta: { foo: :bar })
       expect(result).to eq(
@@ -123,7 +91,7 @@ RSpec.describe Jat do
   describe '#to_str' do
     it 'returns json string' do
       jat.type :jat
-      jat.id key: :itself
+      jat.attribute :id, key: :itself
 
       result = jat.new.to_str('OBJECT', meta: { foo: :bar })
       expect(result).to eq JSON.dump(
@@ -150,7 +118,7 @@ RSpec.describe Jat do
 
     before do
       jat.type :jat
-      jat.id key: :itself
+      jat.attribute :id, key: :itself
       jat.attribute(:number) { |obj| obj[-1] }
     end
 
@@ -207,10 +175,10 @@ RSpec.describe Jat do
     before do
       children_serializer = Class.new(described_class)
       children_serializer.type(:jat2)
-      children_serializer.id key: :itself
+      children_serializer.attribute :id, key: :itself
 
       jat.type :jat
-      jat.id key: :itself
+      jat.attribute :id, key: :itself
       jat.attribute(:size, exposed: false)
       jat.relationship(:children, serializer: children_serializer) { 'jat2' }
     end

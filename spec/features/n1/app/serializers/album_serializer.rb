@@ -7,6 +7,7 @@ module N1
 
     type :album
 
+    attribute :id
     relationship :images,
                  key: :resource_images,
                  serializer: -> { N1::ResourceImageSerializer },

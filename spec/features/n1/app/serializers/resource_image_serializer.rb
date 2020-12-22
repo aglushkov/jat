@@ -5,6 +5,7 @@ module N1
     config.auto_preload = true
     type :resource_image
 
+    attribute :id
     attribute :image_src do |resource_image|
       resource_image.image.src
     end
