@@ -7,7 +7,6 @@ RSpec.describe Jat::Attribute do
     opts = instance_double(
       Jat::Opts,
       block: :old_block,
-      delegate?: :old_delegate,
       exposed?: :old_exposed,
       preloads_with_path: %i[old_preloads old_path],
       key: :old_key,
@@ -15,13 +14,13 @@ RSpec.describe Jat::Attribute do
       name: :old_name,
       original_name: :old_original_name,
       relation?: :old_relation,
-      serializer: :old_serializer
+      serializer: :old_serializer,
+      current_serializer: :old_current_serializer
     )
 
     attribute = described_class.new(opts)
 
     allow(opts).to receive(:block).and_return(:new_block)
-    allow(opts).to receive(:delegate?).and_return(:new_delegate)
     allow(opts).to receive(:exposed?).and_return(:new_exposed)
     allow(opts).to receive(:preloads_with_path).and_return(%i[new_preloads new_path])
     allow(opts).to receive(:key).and_return(:new_key)
@@ -30,10 +29,10 @@ RSpec.describe Jat::Attribute do
     allow(opts).to receive(:original_name).and_return(:new_original_name)
     allow(opts).to receive(:relation?).and_return(:new_relation)
     allow(opts).to receive(:serializer).and_return(:new_serializer)
+    allow(opts).to receive(:current_serializer).and_return(:new_current_serializer)
 
     # Check stored old values
     expect(attribute.block).to eq :old_block
-    expect(attribute.delegate).to eq :old_delegate
     expect(attribute.exposed).to eq :old_exposed
     expect(attribute.preloads).to eq(:old_preloads)
     expect(attribute.preloads_path).to eq(:old_path)
@@ -43,12 +42,12 @@ RSpec.describe Jat::Attribute do
     expect(attribute.original_name).to eq :old_original_name
     expect(attribute.relation).to eq :old_relation
     expect(attribute.serializer).to eq :old_serializer
+    expect(attribute.jat_class).to eq :old_current_serializer
 
     # Check has new values after refresh
     attribute.refresh
 
     expect(attribute.block).to eq :new_block
-    expect(attribute.delegate).to eq :new_delegate
     expect(attribute.exposed).to eq :new_exposed
     expect(attribute.preloads).to eq(:new_preloads)
     expect(attribute.preloads_path).to eq(:new_path)
@@ -58,5 +57,6 @@ RSpec.describe Jat::Attribute do
     expect(attribute.original_name).to eq :new_original_name
     expect(attribute.relation).to eq :new_relation
     expect(attribute.serializer).to eq :new_serializer
+    expect(attribute.jat_class).to eq :new_current_serializer
   end
 end

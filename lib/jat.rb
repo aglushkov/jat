@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'jat/attributes'
+require 'jat/presenter'
 require 'jat/config'
 require 'jat/error'
 require 'jat/map'
@@ -14,10 +15,19 @@ require 'jat/utils/preloads_to_hash'
 # Main namespace
 class Jat
   module ClassMethods
+    # :reek:TooManyStatements
+    # :reek:FeatureEnvy
     def inherited(subclass)
+      presenter_class = Class.new(Presenter)
+      presenter_class.jat_class = subclass
+      subclass.const_set(:Presenter, presenter_class)
+
       subclass.extend DSLClassMethods
       subclass.include DSLInstanceMethods
-      copy_to(subclass)
+
+      config.copy_to(subclass)
+      attributes.copy_to(subclass)
+      subclass.type(@type) if defined?(@type)
 
       super
     end
@@ -52,12 +62,6 @@ class Jat
       attributes.refresh
       clear
     end
-
-    def copy_to(subclass)
-      subclass.type(@type) if defined?(@type)
-      config.copy_to(subclass)
-      attributes.copy_to(subclass)
-    end
   end
 
   module DSLClassMethods
@@ -74,10 +78,9 @@ class Jat
     end
 
     def type(new_type = nil)
-      return @type || raise(Error, "#{self} has no defined type") unless new_type
+      return (defined?(@type) && @type) || raise(Error, "#{self} has no defined type") unless new_type
 
       new_type = new_type.to_sym
-      define_method(:type) { new_type }
       @type = new_type
     end
 
@@ -94,22 +97,12 @@ class Jat
 
     def add_attribute(params)
       opts = Opts.new(self, params)
+      attribute = Attribute.new(opts)
+      attributes.add(attribute, self::Presenter)
 
-      Attribute.new(opts).tap do |attribute|
-        attributes << attribute
-        add_method(attribute)
-        clear
-      end
-    end
+      clear
 
-    def add_method(attribute)
-      block = attribute.block
-      return unless block
-
-      name = attribute.original_name
-      # Warning-free method redefinition
-      remove_method(name) if method_defined?(name)
-      define_method(name, &block)
+      attribute
     end
   end
 
@@ -124,17 +117,12 @@ class Jat
 
     def to_h(object, context = {})
       _reinitialize(context)
-
       Response.new(self, object).to_h
     end
 
     def to_str(object, context = {})
       _reinitialize(context)
       Response.new(self, object).to_str
-    end
-
-    def _preloads
-      Preloads.new(_full_map).for(self.class)
     end
 
     def _copy_to(nested_serializer)
@@ -151,7 +139,7 @@ class Jat
     end
 
     def _map
-      @_map ||= _full_map.fetch(type)
+      @_map ||= _full_map.fetch(self.class.type)
     end
 
     private

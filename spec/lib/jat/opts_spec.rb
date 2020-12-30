@@ -45,25 +45,6 @@ RSpec.describe Jat::Opts do
     end
   end
 
-  describe '#delegate?' do
-    subject(:is_delegate) { opts.delegate? }
-
-    before { jat.config.delegate = true }
-
-    context 'when no key provided' do
-      it 'defaults to serializer delegate option' do
-        expect(is_delegate).to eq true
-      end
-    end
-
-    context 'when key provided' do
-      it 'returns provided value' do
-        params[:opts] = { delegate: false }
-        expect(is_delegate).to eq false
-      end
-    end
-  end
-
   describe '#exposed?' do
     subject(:is_exposed) { opts.exposed? }
 
@@ -260,6 +241,20 @@ RSpec.describe Jat::Opts do
   describe '#block' do
     subject(:block) { opts.block }
 
+    context 'with block with no params' do
+      it 'returns this block' do
+        params[:block] = -> {}
+        expect(block).to eq params[:block]
+      end
+    end
+
+    context 'with block with one param' do
+      it 'returns this block' do
+        params[:block] = ->(arg1) {}
+        expect(block).to eq params[:block]
+      end
+    end
+
     context 'with block with two params' do
       it 'returns this block' do
         params[:block] = ->(arg1, arg2) {}
@@ -267,20 +262,8 @@ RSpec.describe Jat::Opts do
       end
     end
 
-    context 'with block with one param' do
-      it 'returns block with two params that delegates first param to original block' do
-        params[:block] = ->(arg) { arg }
-        res = block
-
-        expect(res).to be_a Proc
-        expect(res.parameters.count).to eq 2
-        expect(res.('foo', 'bar')).to eq 'foo'
-      end
-    end
-
-    context 'without block and with delegate option' do
+    context 'without block and with key option' do
       before do
-        allow(opts).to receive(:delegate?).and_return(true)
         allow(opts).to receive(:key).and_return(:size)
       end
 
@@ -289,16 +272,28 @@ RSpec.describe Jat::Opts do
 
         object = Array.new(3)
         expect(res).to be_a Proc
-        expect(res.parameters.count).to eq 2
-        expect(res.(object, nil)).to eq 3
+        expect(res.parameters.count).to eq 0
+
+        presenter = jat::Presenter.new(object, {})
+        expect(presenter.instance_exec(&block)).to eq 3
       end
     end
 
-    context 'without block and without delegate option' do
-      it 'returns nil' do
+    context 'without block and without key option' do
+      before do
+        params[:name] = :size
         params[:block] = nil
-        params[:opts] = { delegate: false }
-        expect(block).to eq nil
+      end
+
+      it 'constructs block that calls current option name method on object' do
+        res = block
+
+        object = Array.new(3)
+        expect(res).to be_a Proc
+        expect(res.parameters.count).to eq 0
+
+        presenter = jat::Presenter.new(object, {})
+        expect(presenter.instance_exec(&block)).to eq 3
       end
     end
   end

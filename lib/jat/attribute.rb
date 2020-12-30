@@ -2,10 +2,12 @@
 
 class Jat
   # :reek:TooManyInstanceVariables
+  #
+  # Stores custom options provided by user to serialize specific field
   class Attribute
     attr_reader :opts,
+                :jat_class,
                 :block,
-                :delegate,
                 :exposed,
                 :preloads,
                 :preloads_path,
@@ -16,7 +18,6 @@ class Jat
                 :relation,
                 :serializer
 
-    alias delegate? delegate
     alias exposed? exposed
     alias many? many
     alias relation? relation
@@ -32,8 +33,8 @@ class Jat
     # options, we need to update stored attributes, thats why we need this
     # refresh method.
     def refresh
+      @jat_class = opts.current_serializer
       @block = opts.block
-      @delegate = opts.delegate?
       @exposed = opts.exposed?
       @preloads, @preloads_path = opts.preloads_with_path
       @key = opts.key

@@ -7,7 +7,6 @@ RSpec.describe Jat::Opts::Checks::Opts do
 
   it 'calls other validations' do
     allow(Jat::Opts::Checks::OptsKey).to receive(:call).with(params)
-    allow(Jat::Opts::Checks::OptsDelegate).to receive(:call).with(params)
     allow(Jat::Opts::Checks::OptsExposed).to receive(:call).with(params)
     allow(Jat::Opts::Checks::OptsSerializer).to receive(:call).with(params)
     allow(Jat::Opts::Checks::OptsMany).to receive(:call).with(params)
@@ -16,7 +15,6 @@ RSpec.describe Jat::Opts::Checks::Opts do
     check.(params)
 
     expect(Jat::Opts::Checks::OptsKey).to have_received(:call)
-    expect(Jat::Opts::Checks::OptsDelegate).to have_received(:call)
     expect(Jat::Opts::Checks::OptsExposed).to have_received(:call)
     expect(Jat::Opts::Checks::OptsSerializer).to have_received(:call)
     expect(Jat::Opts::Checks::OptsMany).to have_received(:call)

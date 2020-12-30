@@ -5,36 +5,10 @@ RSpec.describe Jat::Config do
   let(:config) { described_class.new(jat) }
 
   it 'has default options' do
-    expect(config.delegate).to eq true
     expect(config.exposed).to eq :default
     expect(config.key_transform).to eq :none
     expect(config.meta).to eq({})
     expect(config.to_str).to be_a Proc
-  end
-
-  describe '#delegate=' do
-    it 'changes delegate option' do
-      config.delegate = false
-      expect(config.delegate).to eq false
-    end
-
-    it 'calls serializer #refresh' do
-      allow(jat).to receive(:refresh)
-      config.delegate = false
-
-      expect(jat).to have_received(:refresh)
-    end
-
-    it 'does not calls serializer #refresh when config not changed' do
-      allow(jat).to receive(:refresh)
-      config.delegate = true
-
-      expect(jat).not_to have_received(:refresh)
-    end
-
-    it 'raises error when invalid value provided' do
-      expect { config.delegate = 1 }.to raise_error Jat::Error, /true, false/
-    end
   end
 
   describe '#auto_preload=' do
@@ -63,7 +37,7 @@ RSpec.describe Jat::Config do
   end
 
   describe '#exposed=' do
-    it 'changes delegate option' do
+    it 'changes exposed settings' do
       config.exposed = :none
       expect(config.exposed).to eq :none
     end
@@ -88,7 +62,7 @@ RSpec.describe Jat::Config do
   end
 
   describe '#key_transform=' do
-    it 'changes delegate option' do
+    it 'changes key_transform settings' do
       config.key_transform = :camelLower
       expect(config.key_transform).to eq :camelLower
     end
@@ -123,7 +97,6 @@ RSpec.describe Jat::Config do
 
   describe '#copy_to' do
     it 'copies options to another serializer' do
-      config.delegate = false
       config.exposed = :all
       config.meta = { version: '1.2.3' }
 
@@ -131,7 +104,6 @@ RSpec.describe Jat::Config do
       config.copy_to(subclass)
 
       subconfig = subclass.config
-      expect(subconfig.delegate).to eq false
       expect(subconfig.exposed).to eq :all
       expect(subconfig.to_str).to eq config.to_str
 

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'jat/opts/checks/opts_key'
-require 'jat/opts/checks/opts_delegate'
 require 'jat/opts/checks/opts_exposed'
 require 'jat/opts/checks/opts_serializer'
 require 'jat/opts/checks/opts_many'
@@ -11,12 +10,11 @@ class Jat
   class Opts
     module Checks
       class Opts < Checks::Base
-        ALLOWED_OPTS = %i[key delegate exposed serializer many preload].freeze
+        ALLOWED_OPTS = %i[key exposed serializer many preload].freeze
 
         # :reek:TooManyStatements
         def validate
           OptsKey.(params)
-          OptsDelegate.(params)
           OptsExposed.(params)
           OptsSerializer.(params)
           OptsMany.(params)

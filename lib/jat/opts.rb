@@ -4,9 +4,9 @@ require 'jat/opts/validate'
 require 'jat/opts/name'
 require 'jat/opts/preloads_with_path'
 require 'jat/opts/serializer'
-require 'jat/opts/block'
 
 class Jat
+  # Handles transformation of provided attribute options
   class Opts
     attr_reader :current_serializer, :original_name, :opts, :original_block
 
@@ -26,10 +26,6 @@ class Jat
 
     def name
       Name.(original_name, config.key_transform)
-    end
-
-    def delegate?
-      opts.fetch(:delegate, config.delegate)
     end
 
     def exposed?
@@ -72,7 +68,10 @@ class Jat
     # rubocop:enable Metrics/CyclomaticComplexity
 
     def block
-      Block.(original_block, delegate?, key)
+      original_block || begin
+        key_method_name = key
+        -> { object.public_send(key_method_name) }
+      end
     end
 
     def copy_to(subclass)

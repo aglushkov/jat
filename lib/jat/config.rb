@@ -6,7 +6,6 @@ class Jat
   class Config
     ALLOWED_OPTIONS = {
       auto_preload: { default: true, allowed: [true, false] },
-      delegate: { default: true, allowed: [true, false] },
       exposed: { default: :default, allowed: %i[all none default] },
       key_transform: { default: :none, allowed: %i[none camelLower] },
       meta: { callable_default: -> { {} } },
@@ -36,12 +35,10 @@ class Jat
     end
 
     # :reek:TooManyStatements
-    # rubocop:disable Metrics/AbcSize
     def copy_to(subclass)
       subconfig = self.class.new(subclass)
 
       subconfig.auto_preload = auto_preload
-      subconfig.delegate = delegate
       subconfig.exposed = exposed
       subconfig.key_transform = key_transform
       subconfig.meta = meta.dup
@@ -49,7 +46,6 @@ class Jat
 
       subclass.config = subconfig
     end
-    # rubocop:enable Metrics/AbcSize
 
     private
 
