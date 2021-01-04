@@ -10,15 +10,15 @@ class Jat
         class << self
           def call(serializer, includes)
             includes.each do |name, nested_includes|
-              opts = serializer.attributes[name]
-              raise_error(serializer, name) if !opts || !opts.relation?
+              attribute = serializer.attributes[name]
+              raise_error(serializer, name) if !attribute || !attribute.relation?
 
-              call(opts.serializer, nested_includes)
+              call(attribute.serializer, nested_includes)
             end
           end
 
-          def raise_error(serializer, name)
-            raise Invalid, "#{serializer} has no `#{name}` relationship"
+          def raise_error(jat_class, name)
+            raise Invalid, "#{jat_class} has no `#{name}` relationship"
           end
         end
       end

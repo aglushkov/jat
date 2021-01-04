@@ -6,9 +6,13 @@ class Jat
   # Stores all serialized attributes
   class Attributes
     extend Forwardable
+
+    attr_reader :jat_class
+
     def_delegators :@attributes, :each, :each_value, :fetch, :key?, :values
 
-    def initialize
+    def initialize(jat_class)
+      @jat_class = jat_class
       @attributes = {}
     end
 
@@ -16,10 +20,11 @@ class Jat
       @attributes[name.to_sym]
     end
 
-    def add(attribute, presenter_class)
+    def add(params)
+      attribute = Attribute.new(jat_class, params)
       @attributes[attribute.name] = attribute
-      add_method(presenter_class, attribute.original_name, attribute.block)
-      self
+      add_method(jat_class::Presenter, attribute.original_name, attribute.block)
+      attribute
     end
 
     # :reek:DuplicateMethodCall
@@ -30,14 +35,7 @@ class Jat
 
         # name can change after refresh
         @attributes.delete(old_name)
-        add(attribute, attribute.jat_class::Presenter)
-      end
-    end
-
-    def copy_to(subclass)
-      each_value do |attribute|
-        attribute_copy = attribute.copy_to(subclass)
-        subclass.attributes.add(attribute_copy, subclass::Presenter)
+        add(attribute.params)
       end
     end
 

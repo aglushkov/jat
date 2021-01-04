@@ -180,7 +180,7 @@ RSpec.describe Jat do
       jat.type :jat
       jat.attribute :id, key: :itself
       jat.attribute(:size, exposed: false)
-      jat.relationship(:children, serializer: children_serializer) { 'jat2' }
+      jat.relationship(:children, serializer: children_serializer, preload: nil) { 'jat2' }
     end
 
     it 'redefines params with #to_h' do
@@ -214,8 +214,11 @@ RSpec.describe Jat do
       expect(child.config.auto_preload).to eq false
       expect(child.config.exposed).to eq :none
       expect(child.config.key_transform).to eq :camelLower
-      expect(child.config.meta).to eq(version: '1')
       expect(child.config.to_str).to eq parent.config.to_str
+
+      # Check meta are different objects with same values
+      expect(child.config.meta).to eq(version: '1')
+      expect(child.config.meta).not_to be_equal(parent.config.meta)
     end
 
     it 'does not overwrites parent config' do

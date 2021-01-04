@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
+require 'jat/opts'
+
 class Jat
   # :reek:TooManyInstanceVariables
   #
   # Stores custom options provided by user to serialize specific field
   class Attribute
-    attr_reader :opts,
-                :jat_class,
+    attr_reader :jat_class,
+                :params,
                 :block,
                 :exposed,
                 :preloads,
@@ -22,18 +24,20 @@ class Jat
     alias many? many
     alias relation? relation
 
-    def initialize(opts)
-      @opts = opts
+    def initialize(jat_class, params)
+      @params = params
+      @jat_class = jat_class
+
       refresh
     end
 
-    # rubocop:disable Metrics/AbcSize
     # :reek:TooManyStatements
-    # Some attributes options depends on serializer options, so when we change
-    # options, we need to update stored attributes, thats why we need this
-    # refresh method.
+    # Some attributes options depend on jat_class options, so when we change
+    # options, we need to update already stored attributes, thats why we need
+    # this refresh method.
     def refresh
-      @jat_class = opts.current_serializer
+      opts = Opts.new(jat_class, params)
+
       @block = opts.block
       @exposed = opts.exposed?
       @preloads, @preloads_path = opts.preloads_with_path
@@ -43,12 +47,6 @@ class Jat
       @original_name = opts.original_name
       @relation = opts.relation?
       @serializer = opts.serializer
-    end
-    # rubocop:enable Metrics/AbcSize
-
-    def copy_to(subclass)
-      opts_copy = opts.copy_to(subclass)
-      self.class.new(opts_copy)
     end
   end
 end

@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'jat/opts/validate'
 require 'jat/opts/name'
 require 'jat/opts/preloads_with_path'
 require 'jat/opts/serializer'
@@ -8,12 +7,10 @@ require 'jat/opts/serializer'
 class Jat
   # Handles transformation of provided attribute options
   class Opts
-    attr_reader :current_serializer, :original_name, :opts, :original_block
+    attr_reader :jat_class, :original_name, :opts, :original_block
 
-    def initialize(current_serializer, params)
-      Validate.(params)
-
-      @current_serializer = current_serializer
+    def initialize(jat_class, params)
+      @jat_class = jat_class
       @original_name = params.fetch(:name).to_sym
 
       @opts = params.fetch(:opts).freeze
@@ -74,14 +71,10 @@ class Jat
       end
     end
 
-    def copy_to(subclass)
-      self.class.new(subclass, name: name, opts: opts, block: original_block)
-    end
-
     private
 
     def config
-      current_serializer.config
+      jat_class.config
     end
   end
 end

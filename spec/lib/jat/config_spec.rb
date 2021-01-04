@@ -94,22 +94,4 @@ RSpec.describe Jat::Config do
       expect(config.to_str).to eq new_to_str
     end
   end
-
-  describe '#copy_to' do
-    it 'copies options to another serializer' do
-      config.exposed = :all
-      config.meta = { version: '1.2.3' }
-
-      subclass = Class.new(jat)
-      config.copy_to(subclass)
-
-      subconfig = subclass.config
-      expect(subconfig.exposed).to eq :all
-      expect(subconfig.to_str).to eq config.to_str
-
-      # Check meta are different objects with same values
-      expect(subconfig.meta).to eq(config.meta)
-      expect(subconfig.meta).not_to be_equal(config.meta)
-    end
-  end
 end

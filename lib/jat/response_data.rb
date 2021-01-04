@@ -59,15 +59,14 @@ class Jat
     def many_relationships_data(rel_objects, rel_attribute)
       return [] if rel_objects.empty?
 
-      rel_serializer = serializer._copy_to(rel_attribute.serializer)
-
+      rel_serializer = new_rel_serializer(rel_attribute)
       rel_objects.map { |rel_object| add_relationship_data(rel_serializer, rel_object) }
     end
 
     def one_relationship_data(rel_object, rel_attribute)
       return unless rel_object
 
-      rel_serializer = serializer._copy_to(rel_attribute.serializer)
+      rel_serializer = new_rel_serializer(rel_attribute)
       add_relationship_data(rel_serializer, rel_object)
     end
 
@@ -86,6 +85,11 @@ class Jat
 
       # handle nil
       object.is_a?(Enumerable)
+    end
+
+    def new_rel_serializer(rel_attribute)
+      jat_class = rel_attribute.serializer.()
+      jat_class.new(serializer._context, serializer._full_map)
     end
   end
 end

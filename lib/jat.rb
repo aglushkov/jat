@@ -6,7 +6,7 @@ require 'jat/config'
 require 'jat/error'
 require 'jat/map'
 require 'jat/map/construct'
-require 'jat/opts'
+require 'jat/opts/validate'
 require 'jat/preloads'
 require 'jat/preload_handler'
 require 'jat/response'
@@ -18,15 +18,21 @@ class Jat
     # :reek:TooManyStatements
     # :reek:FeatureEnvy
     def inherited(subclass)
+      # Initialize empty presenter
       presenter_class = Class.new(Presenter)
       presenter_class.jat_class = subclass
       subclass.const_set(:Presenter, presenter_class)
 
+      # Add DSL methods
       subclass.extend DSLClassMethods
       subclass.include DSLInstanceMethods
 
-      config.copy_to(subclass)
-      attributes.copy_to(subclass)
+      # Copy config
+      config.each { |name, value| subclass.config.public_send("#{name}=", value) }
+
+      # Copy attributes
+      attributes.each_value { |attribute| subclass.attributes.add(attribute.params) }
+
       subclass.type(@type) if defined?(@type)
 
       super
@@ -36,12 +42,8 @@ class Jat
       @config ||= Config.new(self)
     end
 
-    def config=(config)
-      @config = config
-    end
-
     def attributes
-      @attributes ||= Attributes.new
+      @attributes ||= Attributes.new(self)
     end
 
     # Used to validate provided params (fields, include)
@@ -49,6 +51,7 @@ class Jat
       @full_map ||= Map::Construct.new(self, :all).to_h
     end
 
+    # Used to serialize final response
     def exposed_map
       @exposed_map ||= Map::Construct.new(self, :exposed).to_h
     end
@@ -96,10 +99,8 @@ class Jat
     private
 
     def add_attribute(params)
-      opts = Opts.new(self, params)
-      attribute = Attribute.new(opts)
-      attributes.add(attribute, self::Presenter)
-
+      Opts::Validate.(params)
+      attribute = attributes.add(params)
       clear
 
       attribute
@@ -123,10 +124,6 @@ class Jat
     def to_str(object, context = {})
       _reinitialize(context)
       Response.new(self, object).to_str
-    end
-
-    def _copy_to(nested_serializer)
-      nested_serializer.().new(_context, _full_map)
     end
 
     def _full_map

@@ -12,11 +12,15 @@ class Jat
       to_str: { default: proc { |data, _context| Jat::JSON.dump(data) } }
     }.freeze
 
-    def initialize(serializer)
-      @serializer = serializer
+    def initialize(jat_class)
+      @jat_class = jat_class
       @config = ALLOWED_OPTIONS.transform_values do |value|
         value[:default] || value.fetch(:callable_default).()
       end
+    end
+
+    def each(&block)
+      config.each(&block)
     end
 
     ALLOWED_OPTIONS.each do |key, data|
@@ -29,27 +33,14 @@ class Jat
 
         check_value_allowed(key, value, data[:allowed])
 
-        config[key] = value
-        serializer.refresh
+        config[key] = value.is_a?(Hash) ? value.dup : value
+        jat_class.refresh
       end
-    end
-
-    # :reek:TooManyStatements
-    def copy_to(subclass)
-      subconfig = self.class.new(subclass)
-
-      subconfig.auto_preload = auto_preload
-      subconfig.exposed = exposed
-      subconfig.key_transform = key_transform
-      subconfig.meta = meta.dup
-      subconfig.to_str = to_str
-
-      subclass.config = subconfig
     end
 
     private
 
-    attr_reader :config, :serializer
+    attr_reader :config, :jat_class
 
     # :reek:FeatureEnvy
     def check_value_allowed(key, value, allowed_values)
