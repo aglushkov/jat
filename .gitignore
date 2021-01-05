@@ -1,3 +1,2 @@
-*.gem
-spec/examples.txt
 coverage
+*.gem
