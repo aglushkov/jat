@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Jat
-  class Opts
+  class AttributeParams
     # We can have preloads with a "!" mark that specifies main included resource,
     # which will be used to include nested associations.
     #

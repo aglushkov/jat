@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Jat::Opts::Checks::Block do
+RSpec.describe Jat::AttributeParams::Checks::Block do
   let(:check) { described_class }
   let(:params) { { name: nil, opts: {}, block: nil } }
 

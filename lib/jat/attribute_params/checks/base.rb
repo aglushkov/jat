@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Jat
-  class Opts
+  class AttributeParams
     module Checks
       class Base
         attr_reader :params, :name, :opts, :block

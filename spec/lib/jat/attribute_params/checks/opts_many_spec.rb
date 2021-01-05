@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Jat::Opts::Checks::OptsMany do
+RSpec.describe Jat::AttributeParams::Checks::OptsMany do
   let(:check) { described_class }
   let(:params) { { name: nil, opts: opts, block: nil } }
   let(:opts) { { serializer: nil } }

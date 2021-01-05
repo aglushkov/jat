@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Jat
-  class Opts
+  class AttributeParams
     module Checks
       class NameFormat < Checks::Base
         NAME_REGEXP = /\A[a-zA-Z0-9_-]+\z/.freeze

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Jat::Opts do
+RSpec.describe Jat::AttributeParams do
   let(:jat) { Class.new(Jat) }
 
   let(:opts) { described_class.new(jat, params) }

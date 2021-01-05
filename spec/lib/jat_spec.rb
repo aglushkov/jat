@@ -180,7 +180,7 @@ RSpec.describe Jat do
       jat.type :jat
       jat.attribute :id, key: :itself
       jat.attribute(:size, exposed: false)
-      jat.relationship(:children, serializer: children_serializer, preload: nil) { 'jat2' }
+      jat.relationship(:children, serializer: children_serializer) { 'jat2' }
     end
 
     it 'redefines params with #to_h' do

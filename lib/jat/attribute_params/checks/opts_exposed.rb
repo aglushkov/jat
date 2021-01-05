@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Jat
-  class Opts
+  class AttributeParams
     module Checks
       class OptsExposed < Checks::Base
         def validate

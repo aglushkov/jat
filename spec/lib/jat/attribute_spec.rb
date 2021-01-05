@@ -5,7 +5,7 @@ RSpec.describe Jat::Attribute do
 
   it 'stores and refreshes initial opts' do
     opts = instance_double(
-      Jat::Opts,
+      Jat::AttributeParams,
       block: :old_block,
       exposed?: :old_exposed,
       preloads_with_path: %i[old_preloads old_path],
@@ -16,7 +16,7 @@ RSpec.describe Jat::Attribute do
       relation?: :old_relation,
       serializer: :old_serializer
     )
-    allow(Jat::Opts).to receive(:new).with('JAT_CLASS', 'PARAMS').and_return(opts)
+    allow(Jat::AttributeParams).to receive(:new).with('JAT_CLASS', 'PARAMS').and_return(opts)
     attribute = described_class.new('JAT_CLASS', 'PARAMS')
 
     allow(opts).to receive(:block).and_return(:new_block)

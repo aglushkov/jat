@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'jat/opts'
+require 'jat/attribute_params'
 
 class Jat
   # :reek:TooManyInstanceVariables
@@ -36,7 +36,7 @@ class Jat
     # options, we need to update already stored attributes, thats why we need
     # this refresh method.
     def refresh
-      opts = Opts.new(jat_class, params)
+      opts = AttributeParams.new(jat_class, params)
 
       @block = opts.block
       @exposed = opts.exposed?

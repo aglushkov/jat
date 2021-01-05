@@ -7,7 +7,11 @@ class Jat
   class Attributes
     extend Forwardable
 
+    # Jat class where all this attributes assigned
     attr_reader :jat_class
+
+    # Hash that stores attributes { attribute_name => attribute_object }
+    attr_reader :attributes
 
     def_delegators :@attributes, :each, :each_value, :fetch, :key?, :values
 
@@ -17,13 +21,13 @@ class Jat
     end
 
     def [](name)
-      @attributes[name.to_sym]
+      attributes[name.to_sym]
     end
 
     def add(params)
       attribute = Attribute.new(jat_class, params)
-      @attributes[attribute.name] = attribute
-      add_method(jat_class::Presenter, attribute.original_name, attribute.block)
+      attributes[attribute.name] = attribute
+      jat_class::Presenter.add_method(attribute.original_name, attribute.block)
       attribute
     end
 
@@ -33,16 +37,10 @@ class Jat
         old_name = attribute.name
         attribute.refresh
 
-        # name can change after refresh
+        # Name can change if key_transform option changed
         @attributes.delete(old_name)
         add(attribute.params)
       end
-    end
-
-    private
-
-    def add_method(presenter_class, method_name, block)
-      presenter_class.add_method(method_name, block)
     end
   end
 end

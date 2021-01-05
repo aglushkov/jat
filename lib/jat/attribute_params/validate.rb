@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require 'jat/opts/checks/base'
-require 'jat/opts/checks/name'
-require 'jat/opts/checks/opts'
-require 'jat/opts/checks/block'
+require 'jat/attribute_params/checks/base'
+require 'jat/attribute_params/checks/name'
+require 'jat/attribute_params/checks/opts'
+require 'jat/attribute_params/checks/block'
 
 class Jat
-  class Opts
+  class AttributeParams
     class Validate
       def self.call(params)
         Checks::Name.(params)

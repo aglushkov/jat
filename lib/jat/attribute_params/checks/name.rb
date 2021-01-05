@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'jat/opts/checks/name_format'
+require 'jat/attribute_params/checks/name_format'
 
 class Jat
-  class Opts
+  class AttributeParams
     module Checks
       class Name < Checks::Base
         def validate

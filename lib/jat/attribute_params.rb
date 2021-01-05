@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require 'jat/opts/name'
-require 'jat/opts/preloads_with_path'
-require 'jat/opts/serializer'
+require 'jat/attribute_params/name'
+require 'jat/attribute_params/preloads_with_path'
+require 'jat/attribute_params/serializer'
 
 class Jat
-  # Handles transformation of provided attribute options
-  class Opts
+  # Handles transformation of provided attribute params
+  class AttributeParams
     attr_reader :jat_class, :original_name, :opts, :original_block
 
     def initialize(jat_class, params)

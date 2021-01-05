@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 require 'jat/attributes'
+require 'jat/attribute_params/validate'
 require 'jat/presenter'
 require 'jat/config'
 require 'jat/error'
 require 'jat/map'
 require 'jat/map/construct'
-require 'jat/opts/validate'
 require 'jat/preloads'
 require 'jat/preload_handler'
 require 'jat/response'
@@ -99,7 +99,7 @@ class Jat
     private
 
     def add_attribute(params)
-      Opts::Validate.(params)
+      AttributeParams::Validate.(params)
       attribute = attributes.add(params)
       clear
 

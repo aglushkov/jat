@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require 'jat/opts/checks/opts_key'
-require 'jat/opts/checks/opts_exposed'
-require 'jat/opts/checks/opts_serializer'
-require 'jat/opts/checks/opts_many'
-require 'jat/opts/checks/opts_preload'
+require 'jat/attribute_params/checks/opts_key'
+require 'jat/attribute_params/checks/opts_exposed'
+require 'jat/attribute_params/checks/opts_serializer'
+require 'jat/attribute_params/checks/opts_many'
+require 'jat/attribute_params/checks/opts_preload'
 
 class Jat
-  class Opts
+  class AttributeParams
     module Checks
       class Opts < Checks::Base
         ALLOWED_OPTS = %i[key exposed serializer many preload].freeze

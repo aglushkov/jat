@@ -178,7 +178,7 @@ RSpec.describe Jat::Response do
     str_serializer = Class.new(Jat) do
       type 'str'
       attribute(:id) { |obj| obj[0] }
-      relationship :chars, serializer: chr_serializer, many: true, exposed: true, preload: nil
+      relationship :chars, serializer: chr_serializer, many: true, exposed: true
     end
 
     result = str_serializer.new.to_h('ab')
