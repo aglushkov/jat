@@ -14,33 +14,38 @@ require 'jat/utils/preloads_to_hash'
 
 # Main namespace
 class Jat
+  @config = Config.new
+
   module ClassMethods
+    attr_reader :config
+
     # :reek:TooManyStatements
     # :reek:FeatureEnvy
+    # rubocop:disable Metrics/MethodLength
+    # rubocop:disable Metrics/AbcSize
     def inherited(subclass)
-      # Initialize empty presenter
-      presenter_class = Class.new(Presenter)
+      # Initialize config
+      config_class = Class.new(self::Config)
+      config_class.jat_class = subclass
+      subclass.const_set(:Config, config_class)
+      subclass.instance_variable_set(:@config, subclass::Config.new(config.opts_copy))
+
+      # Initialize presenter with methods
+      presenter_class = Class.new(self::Presenter)
       presenter_class.jat_class = subclass
       subclass.const_set(:Presenter, presenter_class)
+      attributes.each_value { |attribute| subclass.attributes.add(attribute.params) }
 
       # Add DSL methods
       subclass.extend DSLClassMethods
       subclass.include DSLInstanceMethods
 
-      # Copy config
-      config.each { |name, value| subclass.config.public_send("#{name}=", value) }
-
-      # Copy attributes
-      attributes.each_value { |attribute| subclass.attributes.add(attribute.params) }
-
       subclass.type(@type) if defined?(@type)
 
       super
     end
-
-    def config
-      @config ||= Config.new(self)
-    end
+    # rubocop:enable Metrics/AbcSize
+    # rubocop:enable Metrics/MethodLength
 
     def attributes
       @attributes ||= Attributes.new(self)

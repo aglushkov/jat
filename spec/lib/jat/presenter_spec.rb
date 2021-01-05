@@ -7,7 +7,7 @@ RSpec.describe Jat::Presenter do
 
   let(:presenter) { presenter_class.new('OBJECT', 'CONTEXT') }
 
-  describe '#new' do
+  describe '.new' do
     it 'initializes with public attributes object and context' do
       expect(presenter.object).to eq 'OBJECT'
       expect(presenter.context).to eq 'CONTEXT'

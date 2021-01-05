@@ -17,7 +17,7 @@ class Jat
     end
 
     module ClassMethods
-      # Returns the Jat class that this attacher class is namespaced under.
+      # Returns the Jat class that this presenter class is namespaced under.
       # :reek:Attribute
       attr_accessor :jat_class
 

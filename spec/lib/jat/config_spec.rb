@@ -2,33 +2,41 @@
 
 RSpec.describe Jat::Config do
   let(:jat) { Class.new(Jat) }
-  let(:config) { described_class.new(jat) }
+  let(:config) { jat.config }
 
-  it 'has default options' do
-    expect(config.exposed).to eq :default
-    expect(config.key_transform).to eq :none
-    expect(config.meta).to eq({})
-    expect(config.to_str).to be_a Proc
+  describe '.new' do
+    it 'initializes with default options' do
+      expect(config.exposed).to eq :default
+      expect(config.key_transform).to eq :none
+      expect(config.meta).to eq({})
+      expect(config.to_str).to be_a Proc
+    end
+  end
+
+  describe '.inspect' do
+    it 'returns name of jat class with ::Config suffix' do
+      expect(config.class.inspect).to match(/#<Class:.*?>::Config/)
+    end
+  end
+
+  describe '#opts_copy' do
+    it 'deeply copies options' do
+      config.auto_preload = false
+      config.exposed = :none
+      config.key_transform = :camelLower
+      config.meta[:foo] = [1, 2, 3]
+
+      copy = config.opts_copy
+      expect(copy).to eq config.opts
+      expect(copy).not_to equal config.opts
+      expect(copy[:meta][:foo]).not_to equal config.opts[:meta][:foo]
+    end
   end
 
   describe '#auto_preload=' do
     it 'changes auto_preload option' do
       config.auto_preload = false
       expect(config.auto_preload).to eq false
-    end
-
-    it 'calls serializer #refresh' do
-      allow(jat).to receive(:refresh)
-      config.auto_preload = false
-
-      expect(jat).to have_received(:refresh)
-    end
-
-    it 'does not calls serializer #refresh when config not changed' do
-      allow(jat).to receive(:refresh)
-      config.auto_preload = true
-
-      expect(jat).not_to have_received(:refresh)
     end
 
     it 'raises error when invalid value provided' do
