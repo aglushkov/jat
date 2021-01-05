@@ -1,0 +1,47 @@
+# frozen_string_literal: true
+
+require "test_helper"
+
+describe "Jat::Plugins::JsonApi::Params::Fields::Validate" do
+  before { Jat::Plugins.load_plugin(:json_api) }
+
+  let(:described_class) { Jat::Plugins::JsonApi::Params::Fields::Validate }
+  let(:base_class) { Class.new(Jat) { plugin :json_api } }
+  let(:a_serializer) { Class.new(base_class) }
+  let(:b_serializer) { Class.new(base_class) }
+
+  before do
+    ser = a_serializer
+    ser.type :a
+    ser.attribute :a1
+    ser.relationship :a2, serializer: b_serializer
+
+    ser = b_serializer
+    ser.type :b
+    ser.attribute :b1
+    ser.relationship :b2, serializer: a_serializer
+  end
+
+  it "does not raises when serializer has all requested keys" do
+    assert described_class.call(a_serializer.allocate, a: %i[a1 a2], b: %i[b1 b2])
+  end
+
+  it "does not raises when requested only fields for nested serializer" do
+    assert described_class.call(a_serializer.allocate, b: %i[b1 b2])
+  end
+
+  it "raises error when some type can not be in response" do
+    error = assert_raises(Jat::Error) { described_class.call(a_serializer.allocate, a: %i[a1 a2], foo: %i[b1 b2]) }
+    assert_equal "#{a_serializer} and its children have no requested type `foo`", error.message
+  end
+
+  it "raises error when some key is not present in main serializer" do
+    error = assert_raises(Jat::Error) { described_class.call(a_serializer.allocate, a: %i[b1]) }
+    assert_equal "#{a_serializer} has no requested attribute or relationship `b1`", error.message
+  end
+
+  it "raises error when some key is not present in nested serializer" do
+    error = assert_raises(Jat::Error) { described_class.call(a_serializer.allocate, a: %i[a1], b: %i[a1]) }
+    assert_equal "#{b_serializer} has no requested attribute or relationship `a1`", error.message
+  end
+end

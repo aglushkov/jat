@@ -18,7 +18,6 @@ class Jat
 
     module ClassMethods
       # Returns the Jat class that this presenter class is namespaced under.
-      # :reek:Attribute
       attr_accessor :jat_class
 
       # Since Presenter is anonymously subclassed when Jat is subclassed,
@@ -30,20 +29,18 @@ class Jat
 
       def add_method(name, block)
         # Warning-free method redefinition
-        # Check method defined in current class only, not in ancestors
         remove_method(name) if method_defined?(name, false)
         define_method(name, &block_without_args(block))
       end
 
       private
 
-      # :reek:TooManyStatements
       def block_without_args(block)
         case block.parameters.count
         when 0 then block
         when 1 then -> { instance_exec(object, &block) }
         when 2 then -> { instance_exec(object, context, &block) }
-        else raise Error, 'Invalid block arguments count'
+        else raise Error, "Invalid block arguments count"
         end
       end
     end
