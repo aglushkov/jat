@@ -1,9 +1,17 @@
 # frozen_string_literal: true
 
 RSpec.describe Jat::Response do
+  let(:response_class) { Class.new(Jat)::Response }
+
   before { Jat.config.auto_preload = false }
 
   after { Jat.config.auto_preload = true }
+
+  describe '.inspect' do
+    it 'returns name of jat class with ::Response suffix' do
+      expect(response_class.inspect).to match(/#<Class:.*?>::Response/)
+    end
+  end
 
   it 'returns empty hash when nothing to serialize' do
     empty_serializer = Class.new(Jat) { type(:type) }

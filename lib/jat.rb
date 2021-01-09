@@ -36,6 +36,11 @@ class Jat
       subclass.const_set(:Presenter, presenter_class)
       attributes.each_value { |attribute| subclass.attributes.add(attribute.params) }
 
+      # Initialize response generation class
+      response_class = Class.new(self::Response)
+      response_class.jat_class = subclass
+      subclass.const_set(:Response, response_class)
+
       # Add DSL methods
       subclass.extend DSLClassMethods
       subclass.include DSLInstanceMethods
@@ -123,12 +128,12 @@ class Jat
 
     def to_h(object, context = {})
       _reinitialize(context)
-      Response.new(self, object).to_h
+      self.class::Response.new(self, object).to_h
     end
 
     def to_str(object, context = {})
       _reinitialize(context)
-      Response.new(self, object).to_str
+      self.class::Response.new(self, object).to_str
     end
 
     def _full_map
