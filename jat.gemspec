@@ -3,7 +3,6 @@
 Gem::Specification.new do |gem|
   gem.name = "jat"
   gem.version = "0.0.2"
-  gem.date = "2020-12-07"
   gem.summary = "JSON Serializer"
   gem.description = <<~DESC
     The serializer allows you to generate a response based on the fields requested by the client.
@@ -17,10 +16,10 @@ Gem::Specification.new do |gem|
   gem.homepage = "https://github.com/aglushkov/jat"
   gem.license = "MIT"
   gem.required_ruby_version = 2.5
-  gem.metadata     = {
+  gem.metadata = {
     "bug_tracker_uri" => "https://github.com/aglushkov/jat/issues",
     "changelog_uri" => "https://github.com/aglushkov/jat/blob/master/CHANGELOG.md",
-    "source_code_uri" => "https://github.com/aglushkov/jat",
+    "source_code_uri" => "https://github.com/aglushkov/jat"
   }
 
   # General testing helpers

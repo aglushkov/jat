@@ -5,6 +5,16 @@ require "test_helper"
 describe Jat do
   let(:jat_class) { Class.new(Jat) }
 
+  describe ".plugin" do
+    it "raises error when trying to load not a symbol or module" do
+      plugin = "TEST_PLUGIN"
+      error = assert_raises(Jat::Error) { jat_class.plugin(plugin) }
+
+      error_message = "Plugin class must be a Symbol or a Module, #{plugin.inspect} given"
+      assert_equal error_message, error.message
+    end
+  end
+
   describe ".config" do
     it "returns config object" do
       config = jat_class.config

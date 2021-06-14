@@ -4,8 +4,8 @@ require "simplecov"
 SimpleCov.start
 
 if RUBY_VERSION >= "2.7"
-  # Warning[:deprecated] = true
-  # Warning[:experimental] = true
+  Warning[:deprecated] = true
+  Warning[:experimental] = true
 end
 
 require "bundler/setup"

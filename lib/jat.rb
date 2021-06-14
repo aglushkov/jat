@@ -42,6 +42,10 @@ class Jat
     end
 
     def plugin(plugin, **opts)
+      if !plugin.is_a?(Symbol) && !plugin.is_a?(Module)
+        raise Error, "Plugin class must be a Symbol or a Module, #{plugin.inspect} given"
+      end
+
       plugin = Plugins.load_plugin(plugin) if plugin.is_a?(Symbol)
 
       Plugins.before_load(plugin, self, **opts)
