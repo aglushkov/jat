@@ -2,9 +2,11 @@
 
 require "test_helper"
 
-describe Jat::Presenter do
-  let(:jat_class) { Class.new(Jat) }
-  let(:presenter_class) { jat_class::Presenter }
+describe "Jat::Presenters::JsonapiPresenter" do
+  before { Jat::Plugins.load_plugin(:json_api) }
+
+  let(:jat_class) { Class.new(Jat) { plugin :json_api } }
+  let(:presenter_class) { jat_class::JsonapiPresenter }
 
   describe ".jat_class=" do
     it "assigns @jat_class" do
@@ -22,7 +24,7 @@ describe Jat::Presenter do
 
   describe ".inspect" do
     it "returns self name" do
-      assert_equal "#{jat_class}::Presenter", presenter_class.inspect
+      assert_equal "#{jat_class}::Presenters::JsonapiPresenter", presenter_class.inspect
     end
   end
 
@@ -47,6 +49,12 @@ describe Jat::Presenter do
     it "raises error when block has more than two variables" do
       error = assert_raises(Jat::Error) { presenter_class.add_method(:foo, proc { |_a, _b, _c| }) }
       assert_equal "Invalid block arguments count", error.message
+    end
+
+    it "redefines_method" do
+      presenter_class.add_method(:foo, proc { "OLD" })
+      presenter_class.add_method(:foo, proc { "NEW" })
+      assert_equal "NEW", presenter.foo
     end
   end
 

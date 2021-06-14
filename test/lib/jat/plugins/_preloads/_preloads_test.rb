@@ -8,7 +8,7 @@ describe "Jat::Plugins::Preloads" do
   end
 
   def attribute(name, opts)
-    jat_class.attribute(name, opts)
+    jat_class.attribute(name, **opts)
   end
 
   describe "AttributeMethods" do
