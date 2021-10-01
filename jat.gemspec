@@ -2,10 +2,10 @@
 
 Gem::Specification.new do |gem|
   gem.name = "jat"
-  gem.version = "0.0.2"
-  gem.summary = "JSON Serializer"
+  gem.version = "0.0.3"
+  gem.summary = "JSON API TOOLKIT"
   gem.description = <<~DESC
-    The serializer allows you to generate a response based on the fields requested by the client.
+    The JAT serializer allows you to generate a JSON response based on the fields requested by the client.
     Besides, it avoids manually adding includes and solves N+1 problems on its own.
   DESC
 
