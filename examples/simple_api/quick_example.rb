@@ -2,7 +2,7 @@
 
 require "bundler/inline"
 
-gemfile(true) do
+gemfile(true, quiet: true) do
   source "https://rubygems.org"
   git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 

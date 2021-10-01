@@ -2,7 +2,7 @@
 
 require "bundler/inline"
 
-gemfile(true) do
+gemfile(true, quiet: true) do
   source "https://rubygems.org"
   git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
@@ -10,17 +10,19 @@ gemfile(true) do
 end
 
 class JsonapiSerializer < Jat
-  plugin :json_api, activerecord: false # or true to preload relations automatically
+  plugin :json_api
 end
 
 class UserSerializer < JsonapiSerializer
+  config[:exposed] = :default # Default value can be omitted. Other options: :all, :none
+
   type :user
 
   attribute :id
   attribute(:name) { |user| [user.first_name, user.last_name].join(" ") }
 
-  attribute :profile, serializer: -> { ProfileSerializer }, exposed: true
-  attribute :roles, serializer: -> { RoleSerializer }, exposed: true
+  relationship :profile, serializer: -> { ProfileSerializer }, exposed: true
+  relationship :roles, serializer: -> { RoleSerializer }, exposed: true
 end
 
 class ProfileSerializer < JsonapiSerializer
