@@ -179,7 +179,7 @@ puts JSON.pretty_generate(response)
 
 ## DSL
 
-### Plugins
+### Plugin
 
 Plugins can be enabled on `Jat` class itself or inside any subclass
 ```ruby
@@ -204,8 +204,8 @@ Attributes will be inherited by subclasses, but they can be redefined there.
 
 ```ruby
 class UserSerializer < Jat
-  # We will serialize `object.confirmed_email`
-  attribute(:email, key: :confirmed_email)
+  # We will serialize `object.email`
+  attribute(:email)
 
   # We will serialize `object.confirmed_email`
   attribute(:email, key: :confirmed_email)
@@ -221,7 +221,43 @@ class UserSerializer < Jat
 end
 ```
 
+### Relationships
+Relationships are also attributes, but with `:serializer` option. It should be defined as lambda. 
+
+```ruby
+class UserSerializer < Jat
+  # We will serialize `object.profile`
+  attribute :profile, serializer: -> { ProfileSerializer }
+
+  # We will serialize `object.main_profile`
+  attribute :profile, key: :main_profile, serializer: -> { ProfileSerializer }
+
+  # We can define block to find needed record
+  attribute(:profile, serializer: -> { ProfileSerializer }) do |user, _ctx|
+    user.profiles.select(&:last)
+  end 
+end
+```
+
+JSON:API plugin has additional `.relationship` method that forces adding serializer option.
+
+```ruby
+Jat.plugin :json_api
+class UserSerializer < Jat
+  relationship :profile, serializer: -> { ProfileSerializer }
+end
+```
+
+### Exposed attributes
+All attributes are **exposed by default**, so they will be shown in response unless attribute has option `exposed: false`.
+To get not exposed attributes, client should manually request them .
+
+
 [shrine]: https://shrinerb.com/docs/getting-started#plugin-system
 [JSON:API]: https://jsonapi.org/format/
 [AMS]: https://github.com/rails-api/active_model_serializers/tree/0-9-stable
 [Jbuilder]: https://github.com/rails/jbuilder
+
+### Meta
+
+### Reques
