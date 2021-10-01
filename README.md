@@ -19,39 +19,39 @@ Supported two serialization formats:
   <summary>JSON:API format example</summary>
 
 ```ruby
-role1 = OpenStruct.new(id: 4, name: 'superhero')
-role2 = OpenStruct.new(id: 3, name: 'reporter')
-profile = OpenStruct.new(id: 2, followers_count: 999, location: nil)
-user = OpenStruct.new(id: 1, first_name: 'Clark', last_name: 'Kent', profile: profile, roles: [role1, role2])
-
-class BaseSerializer < Jat
-  plugin :json_api, activerecord: false # or true to preload relations automatically
+class JsonapiSerializer < Jat
+  plugin :json_api
 end
 
-class UserSerializer < BaseSerializer
+class UserSerializer < JsonapiSerializer
   type :user
 
   attribute :id
-  attribute(:name) { |user| [user.first_name, user.last_name].join(' ') }
+  attribute(:name) { |user| [user.first_name, user.last_name].join(" ") }
 
   attribute :profile, serializer: -> { ProfileSerializer }, exposed: true
   attribute :roles, serializer: -> { RoleSerializer }, exposed: true
 end
 
-class ProfileSerializer < BaseSerializer
+class ProfileSerializer < JsonapiSerializer
   type :profile
 
   attribute :id
-  attribute(:location) { |profile| profile.location || 'Gotham City' }
+  attribute(:location) { |profile| profile.location || "Gotham City" }
   attribute :followers_count
 end
 
-class RoleSerializer < BaseSerializer
+class RoleSerializer < JsonapiSerializer
   type :role
 
   attribute :id
   attribute :name
 end
+
+role1 = OpenStruct.new(id: 4, name: "superhero")
+role2 = OpenStruct.new(id: 3, name: "reporter")
+profile = OpenStruct.new(id: 2, followers_count: 999, location: nil)
+user = OpenStruct.new(id: 1, first_name: "Clark", last_name: "Kent", profile: profile, roles: [role1, role2])
 
 response = UserSerializer.to_h(user)
 puts JSON.pretty_generate(response)
@@ -118,35 +118,35 @@ puts JSON.pretty_generate(response)
   <summary>Simple:API format example</summary>
 
 ```ruby
-role1 = OpenStruct.new(id: 4, name: 'superhero')
-role2 = OpenStruct.new(id: 3, name: 'reporter')
-profile = OpenStruct.new(id: 2, followers_count: 999, location: nil)
-user = OpenStruct.new(id: 1, first_name: 'Clark', last_name: 'Kent', profile: profile, roles: [role1, role2])
-
-class BaseSerializer < Jat
-  plugin :simple_api, activerecord: false # or true to preload relations automatically
+class SimpleSerializer < Jat
+  plugin :simple_api
 end
 
-class UserSerializer < BaseSerializer
+class UserSerializer < SimpleSerializer
   root :users
 
   attribute :id
-  attribute(:name) { |user| [user.first_name, user.last_name].join(' ') }
+  attribute(:name) { |user| [user.first_name, user.last_name].join(" ") }
 
   attribute :profile, serializer: -> { ProfileSerializer }, exposed: true
   attribute :roles, serializer: -> { RoleSerializer }, exposed: true
 end
 
-class ProfileSerializer < BaseSerializer
+class ProfileSerializer < SimpleSerializer
   attribute :id
-  attribute(:location) { |profile| profile.location || 'Gotham City' }
+  attribute(:location) { |profile| profile.location || "Gotham City" }
   attribute :followers_count
 end
 
-class RoleSerializer < BaseSerializer
+class RoleSerializer < SimpleSerializer
   attribute :id
   attribute :name
 end
+
+role1 = OpenStruct.new(id: 4, name: "superhero")
+role2 = OpenStruct.new(id: 3, name: "reporter")
+profile = OpenStruct.new(id: 2, followers_count: 999, location: nil)
+user = OpenStruct.new(id: 1, first_name: "Clark", last_name: "Kent", profile: profile, roles: [role1, role2])
 
 response = UserSerializer.to_h(user)
 puts JSON.pretty_generate(response)
