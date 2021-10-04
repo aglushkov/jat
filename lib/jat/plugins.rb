@@ -22,18 +22,25 @@ class Jat
       @plugins[name] || raise(Error, "plugin #{name} did not register itself correctly in Jat::Plugins")
     end
 
-    # Delegate call to the plugin in a way that works across Ruby versions.
-    def self.before_load(plugin, jat_class, **opts)
-      return unless plugin.respond_to?(:before_load)
+    # Before plugin applied we can make some validations checks, or load plugins
+    # that should be loaded before current plugin.
+    def self.before_apply(plugin, jat_class, **opts)
+      return unless plugin.respond_to?(:before_apply)
 
-      plugin.before_load(jat_class, **opts)
+      plugin.before_apply(jat_class, **opts)
     end
 
-    # Delegate call to the plugin in a way that works across Ruby versions.
-    def self.after_load(plugin, jat_class, **opts)
-      return unless plugin.respond_to?(:after_load)
+    # Here we include plugin modules to base class
+    def self.apply(plugin, jat_class)
+      plugin.apply(jat_class)
+    end
 
-      plugin.after_load(jat_class, **opts)
+    # After applying we can set some config setting or load additional plugins,
+    # that should be loaded after current plugin.
+    def self.after_apply(plugin, jat_class, **opts)
+      return unless plugin.respond_to?(:after_apply)
+
+      plugin.after_apply(jat_class, **opts)
     end
   end
 end

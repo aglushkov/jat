@@ -13,25 +13,13 @@ describe "Jat::Plugins::JsonApi" do
 
   let(:plugin) { Jat::Plugins.load_plugin(:json_api) }
 
-  describe ".after_load" do
+  describe ".after_apply" do
     it "loads _json_api_activerecord plugin if activerecord option provided" do
       jat_class = Class.new(Jat)
       jat_class.expects(:plugin).with(:_json_api_activerecord, activerecord: true)
 
-      Jat::Plugins.after_load(plugin, jat_class, activerecord: true)
-    end
-
-    it "registers Presenters constants" do
-      jat_class = Class.new(Jat)
-      Jat::Plugins.after_load(plugin, jat_class, activerecord: true)
-
-      assert_equal jat_class::JsonapiPresenter.jat_class, jat_class
-      assert_equal jat_class::LinksPresenter.jat_class, jat_class
-      assert_equal jat_class::DocumentLinksPresenter.jat_class, jat_class
-      assert_equal jat_class::RelationshipLinksPresenter.jat_class, jat_class
-      assert_equal jat_class::MetaPresenter.jat_class, jat_class
-      assert_equal jat_class::DocumentMetaPresenter.jat_class, jat_class
-      assert_equal jat_class::RelationshipMetaPresenter.jat_class, jat_class
+      plugin.apply(jat_class)
+      plugin.after_apply(jat_class, activerecord: true)
     end
   end
 
@@ -63,7 +51,7 @@ describe "Jat::Plugins::JsonApi" do
         atribute = jat_class.attributes[:foo]
         assert_equal jat_class, atribute.serializer
         assert_equal true, atribute.exposed?
-        assert_equal "block", jat_class::Presenter.new(nil, nil).foo
+        assert_equal "block", atribute.block.call
       end
     end
 
@@ -77,7 +65,7 @@ describe "Jat::Plugins::JsonApi" do
         jat_class.jsonapi(:version) { "1.0" }
 
         child = Class.new(jat_class)
-        assert_equal("1.0", child.jsonapi_data[:version].call)
+        assert_equal("1.0", child.jsonapi_data[:version].block.call)
       end
 
       it "inherits `object_links`, `relationship_links`, `document_links`" do
@@ -86,9 +74,9 @@ describe "Jat::Plugins::JsonApi" do
         jat_class.document_link(:last) { "/articles/3" }
         child = Class.new(jat_class)
 
-        assert_equal("/articles/1", child.object_links[:self].call)
-        assert_equal("/articles/2", child.relationship_links[:related].call)
-        assert_equal("/articles/3", child.document_links[:last].call)
+        assert_equal("/articles/1", child.object_links[:self].block.call)
+        assert_equal("/articles/2", child.relationship_links[:related].block.call)
+        assert_equal("/articles/3", child.document_links[:last].block.call)
       end
 
       it "does not change parents links when children links are changed" do
@@ -101,9 +89,9 @@ describe "Jat::Plugins::JsonApi" do
         child.relationship_links.delete(:related)
         child.document_links.delete(:last)
 
-        assert_equal("/articles/1", jat_class.object_links[:self].call)
-        assert_equal("/articles/2", jat_class.relationship_links[:related].call)
-        assert_equal("/articles/3", jat_class.document_links[:last].call)
+        assert_equal("/articles/1", jat_class.object_links[:self].block.call)
+        assert_equal("/articles/2", jat_class.relationship_links[:related].block.call)
+        assert_equal("/articles/3", jat_class.document_links[:last].block.call)
       end
 
       it "inherits `object_meta`, `relationship_meta`, `document_meta`" do
@@ -112,9 +100,9 @@ describe "Jat::Plugins::JsonApi" do
         jat_class.document_meta(:last) { "foo/3" }
         child = Class.new(jat_class)
 
-        assert_equal("foo/1", child.added_object_meta[:self].call)
-        assert_equal("foo/2", child.added_relationship_meta[:related].call)
-        assert_equal("foo/3", child.added_document_meta[:last].call)
+        assert_equal("foo/1", child.added_object_meta[:self].block.call)
+        assert_equal("foo/2", child.added_relationship_meta[:related].block.call)
+        assert_equal("foo/3", child.added_document_meta[:last].block.call)
       end
 
       it "does not change parents meta when children meta changed" do
@@ -127,9 +115,9 @@ describe "Jat::Plugins::JsonApi" do
         child.added_relationship_meta.delete(:related)
         child.added_document_meta.delete(:last)
 
-        assert_equal("foo/1", jat_class.added_object_meta[:self].call)
-        assert_equal("foo/2", jat_class.added_relationship_meta[:related].call)
-        assert_equal("foo/3", jat_class.added_document_meta[:last].call)
+        assert_equal("foo/1", jat_class.added_object_meta[:self].block.call)
+        assert_equal("foo/2", jat_class.added_relationship_meta[:related].block.call)
+        assert_equal("foo/3", jat_class.added_document_meta[:last].block.call)
       end
     end
 

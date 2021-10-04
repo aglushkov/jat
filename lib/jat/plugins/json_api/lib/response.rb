@@ -5,6 +5,8 @@ class Jat
   module Plugins
     module JsonApi
       class Response
+        EMPTY = {}.freeze
+
         attr_reader :jat, :jat_class, :object, :context
 
         def initialize(jat)
@@ -55,47 +57,39 @@ class Jat
         end
 
         def jsonapi_data
-          data = context[:jsonapi]&.transform_keys(&:to_sym) || {}
-          jsonapi_data = jat_class.jsonapi_data
-          return data if jsonapi_data.empty?
-
-          presenter = jat_class::JsonapiPresenter.new(object, context)
-          jsonapi_data.each_key do |key|
-            data[key] = presenter.public_send(key) unless data.key?(key)
-          end
-          data.compact!
-          data
+          combine(jat_class.jsonapi_data, context[:jsonapi])
         end
 
         def document_links
-          data = context[:links]&.transform_keys(&:to_sym) || {}
-          document_links = jat_class.document_links
-          return data if document_links.empty?
-
-          presenter = jat_class::DocumentLinksPresenter.new(object, context)
-          document_links.each_key do |key|
-            data[key] = presenter.public_send(key) unless data.key?(key)
-          end
-          data.compact!
-          data
+          combine(jat_class.document_links, context[:links])
         end
 
         def document_meta
-          data = context[:meta]&.transform_keys(&:to_sym) || {}
-          document_meta = jat_class.added_document_meta
-          return data if document_meta.empty?
+          combine(jat_class.added_document_meta, context[:meta])
+        end
 
-          presenter = jat_class::DocumentMetaPresenter.new(object, context)
-          document_meta.each_key do |key|
-            data[key] = presenter.public_send(key) unless data.key?(key)
+        def combine(attributes, attributes_context)
+          data = attributes_context&.transform_keys(&:to_sym) || {}
+          data.transform_keys! { |key| CamelLowerTransformation.call(key) } if jat_class.config[:camel_lower]
+
+          return data if attributes.empty?
+
+          attributes.each_value do |attr|
+            name = attr.name
+            next if data.key?(name)
+
+            value = attr.block.call(object, context)
+            data[name] = value unless value.nil?
           end
-          data.compact!
+
           data
         end
       end
 
       class ResponseData
-        attr_reader :jat_class, :object, :context, :full_map, :map, :includes, :presenter
+        EMPTY_HASH = {}.freeze
+        EMPTY_ARRAY = [].freeze
+        attr_reader :jat_class, :object, :context, :full_map, :map, :includes
 
         def initialize(jat_class, object, context, full_map, includes)
           @jat_class = jat_class
@@ -104,7 +98,6 @@ class Jat
           @includes = includes
           @full_map = full_map
           @map = full_map.fetch(jat_class.type)
-          @presenter = jat_class::Presenter.new(object, context)
         end
 
         def data
@@ -124,7 +117,7 @@ class Jat
         end
 
         def uid
-          {type: jat_class.type, id: presenter.id}
+          {type: jat_class.type, id: jat_class.attributes[:id].block.call(object, context)}
         end
 
         private
@@ -135,7 +128,7 @@ class Jat
 
           attributes_names.each_with_object({}) do |name, attrs|
             attribute = jat_class.attributes[name]
-            attrs[name] = presenter.public_send(attribute.original_name)
+            attrs[name] = attribute.block.call(object, context)
           end
         end
 
@@ -145,7 +138,7 @@ class Jat
 
           relationships_names.each_with_object({}) do |name, rels|
             rel_attribute = jat_class.attributes[name]
-            rel_object = presenter.public_send(rel_attribute.original_name)
+            rel_object = rel_attribute.block.call(object, context)
 
             rel_serializer = rel_attribute.serializer.call
             rel_links = get_relationship_links(rel_serializer, rel_object)
@@ -166,7 +159,7 @@ class Jat
         end
 
         def many_relationships_data(rel_serializer, rel_objects)
-          return [] if rel_objects.empty?
+          return EMPTY_ARRAY if rel_objects.empty?
 
           rel_objects.map { |rel_object| add_relationship_data(rel_serializer, rel_object) }
         end
@@ -195,43 +188,41 @@ class Jat
         end
 
         def get_links
-          links = jat_class.object_links
-          return links if links.empty?
-
-          presenter = jat_class::LinksPresenter.new(object, context)
-          result = links.each_key.each_with_object({}) { |key, data| data[key] = presenter.public_send(key) }
-          result.compact!
-          result
+          jat_class
+            .object_links
+            .transform_values { |attr| attr.block.call(object, context) }
+            .tap(&:compact!)
         end
 
         def get_meta
-          meta = jat_class.added_object_meta
-          return meta if meta.empty?
-
-          presenter = jat_class::MetaPresenter.new(object, context)
-          result = meta.each_key.each_with_object({}) { |key, data| data[key] = presenter.public_send(key) }
-          result.compact!
-          result
+          jat_class
+            .added_object_meta
+            .transform_values { |attr| attr.block.call(object, context) }
+            .tap(&:compact!)
         end
 
         def get_relationship_links(rel_serializer, rel_object)
           links = rel_serializer.relationship_links
-          return links if links.empty?
+          return EMPTY_HASH unless links
 
-          presenter = rel_serializer::RelationshipLinksPresenter.new(object, rel_object, context)
-          result = links.each_key.each_with_object({}) { |key, data| data[key] = presenter.public_send(key) }
-          result.compact!
-          result
+          context[:parent_object] = object
+
+          links
+            .transform_values { |attr| attr.block.call(rel_object, context) }
+            .tap(&:compact!)
+            .tap { context.delete(:parent_object) }
         end
 
         def get_relationship_meta(rel_serializer, rel_object)
           meta = rel_serializer.added_relationship_meta
-          return meta if meta.empty?
+          return EMPTY_HASH unless meta
 
-          presenter = rel_serializer::RelationshipMetaPresenter.new(object, rel_object, context)
-          result = meta.each_key.each_with_object({}) { |key, data| data[key] = presenter.public_send(key) }
-          result.compact!
-          result
+          context[:parent_object] = object
+
+          meta
+            .transform_values { |attr| attr.block.call(rel_object, context) }
+            .tap(&:compact!)
+            .tap { context.delete(:parent_object) }
         end
       end
     end

@@ -7,6 +7,10 @@ require_relative "./lib/preloads_with_path"
 class Jat
   module Plugins
     module Preloads
+      def self.apply(jat_class)
+        jat_class::Attribute.include(AttributeMethods)
+      end
+
       module AttributeMethods
         NULL_PRELOADS = [nil, [].freeze].freeze
 

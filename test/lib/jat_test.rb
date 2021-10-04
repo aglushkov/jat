@@ -40,11 +40,6 @@ describe Jat do
       assert_equal parent::Attribute, child::Attribute.superclass
       assert child.attributes[:foo]
     end
-
-    it "inherits presenter" do
-      child = Class.new(parent)
-      assert_equal parent::Presenter, child::Presenter.superclass
-    end
   end
 
   describe ".call" do
@@ -83,11 +78,6 @@ describe Jat do
     it "adds new attribute to attributes hash" do
       attribute = jat_class.attribute :foo
       assert_equal jat_class.attributes[:foo], attribute
-    end
-
-    it "adds method to Presenter class" do
-      jat_class.attribute :foo
-      assert jat_class::Presenter.method_defined?(:foo)
     end
   end
 

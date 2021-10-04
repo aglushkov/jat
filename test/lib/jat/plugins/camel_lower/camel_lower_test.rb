@@ -40,13 +40,31 @@ describe "Jat::Plugins::CamelLower" do
       response = jat_class.to_h(true, params: {fields: "fooBar"})
       assert_equal({fooBar: 1}, response)
     end
+
+    it "returns meta keys in camelLower format" do
+      jat_class.meta(:user_agent) { "Firefox" }
+
+      response = jat_class.to_h(nil)
+      assert_equal({meta: {userAgent: "Firefox"}}, response)
+    end
+
+    it "returns context meta keys in camelLower format" do
+      response = jat_class.to_h(nil, meta: {user_agent: "Firefox"})
+      assert_equal({meta: {userAgent: "Firefox"}}, response)
+    end
+
+    it "joins meta in camelLower format" do
+      jat_class.meta(:userAgent) { "Firefox" }
+      response = jat_class.to_h(nil, meta: {user_agent: "Firefox 2.0"})
+      assert_equal({meta: {userAgent: "Firefox 2.0"}}, response)
+    end
   end
 
   describe "Test responses with json_api plugin" do
     before do
       jat_class.plugin(:json_api)
       jat_class.type :foo
-      jat_class.attribute(:id) { object }
+      jat_class.attribute(:id) { |object| object }
     end
 
     it "returns attributes in camelLower case" do
@@ -66,7 +84,7 @@ describe "Jat::Plugins::CamelLower" do
       new_serializer = Class.new(Jat)
       new_serializer.plugin(:json_api)
       new_serializer.type :new
-      new_serializer.attribute(:id) { object }
+      new_serializer.attribute(:id) { |object| object }
 
       jat_class.relationship(:foo_bar, serializer: new_serializer) { 1 }
 

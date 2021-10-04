@@ -59,11 +59,26 @@ class Jat
       end
 
       def block
-        @block ||=
-          params.fetch(:block) || begin
-            key_method_name = key
-            -> { object.public_send(key_method_name) }
-          end
+        return @block if instance_variable_defined?(:@block)
+
+        param_block = params.fetch(:block) || begin
+          key_method_name = key
+          proc { |object| object.public_send(key_method_name) }
+        end
+
+        parameters = param_block.parameters
+        parameters_valid = parameters.count == parameters.count { |param| param[0] == :opt }
+
+        raise Error, <<~ERROR unless parameters_valid
+          Block can have only 0 params or 1 optional parameter or 2 optional parameters
+        ERROR
+
+        # Ensure block has 2 optional parameters
+        block = proc { |object = nil, context = nil| param_block.call(object, context) }
+
+        # Make block executable inside anonymized context,
+        # without possibility to access all public methods of current class
+        @block = Class.new { private define_method(:_, &block) }.new.method(:_).to_proc
       end
     end
 
