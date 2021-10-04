@@ -15,12 +15,22 @@ describe "Jat::Plugins::SimpleApi" do
 
   let(:plugin) { @plugin }
 
-  describe ".after_load" do
+  describe ".after_apply" do
     it "loads _json_api_activerecord plugin if activerecord option provided" do
       jat_class = Class.new(Jat)
       jat_class.expects(:plugin).with(:_json_api_activerecord, activerecord: true)
 
-      Jat::Plugins.after_load(plugin, jat_class, activerecord: true)
+      plugin.apply(jat_class)
+      plugin.after_apply(jat_class, activerecord: true)
+    end
+
+    it "adds default `:meta` meta_key config option" do
+      jat_class = Class.new(Jat)
+      assert_nil jat_class.config[:meta_key]
+
+      plugin.apply(jat_class)
+      plugin.after_apply(jat_class, activerecord: true)
+      assert_equal :meta, jat_class.config[:meta_key]
     end
   end
 
@@ -43,38 +53,71 @@ describe "Jat::Plugins::SimpleApi" do
   end
 
   describe "ClassMethods" do
-    describe ".inherited" do
-      it "inherits root" do
-        child = Class.new(jat_class)
-        assert_equal :data, child.root
-      end
-    end
-
     describe ".root" do
-      it "saves and returns current root" do
-        assert_equal :data, jat_class.root
+      it "sets root config values" do
+        jat_class.root :data
+
+        assert_equal :data, jat_class.config[:root_one]
+        assert_equal :data, jat_class.config[:root_many]
+      end
+
+      it "sets root config values separately for one or many objects" do
+        jat_class.root one: "user", many: "users"
+
+        assert_equal :user, jat_class.config[:root_one]
+        assert_equal :users, jat_class.config[:root_many]
+      end
+
+      it "removes root values when `false` or `nil` provided" do
+        jat_class.root :data
+        jat_class.root false
+
+        assert_nil jat_class.config[:root_one]
+        assert_nil jat_class.config[:root_many]
+
+        jat_class.root :data
+        jat_class.root nil
+
+        assert_nil jat_class.config[:root_one]
+        assert_nil jat_class.config[:root_many]
+      end
+
+      it "removes root values when `false` or nil provided in hash" do
+        jat_class.root :data
+        jat_class.root one: nil, many: nil
+        assert_nil jat_class.config[:root_one]
+        assert_nil jat_class.config[:root_many]
+
+        jat_class.root :data
+        jat_class.root one: false, many: false
+        assert_nil jat_class.config[:root_one]
+        assert_nil jat_class.config[:root_many]
       end
 
       it "symbolizes root" do
-        jat_class.root "users"
-        assert_equal :users, jat_class.root
+        jat_class.root "data"
+        assert_equal :data, jat_class.config[:root_one]
+        assert_equal :data, jat_class.config[:root_many]
+
+        jat_class.root one: "user", many: "users"
+        assert_equal :user, jat_class.config[:root_one]
+        assert_equal :users, jat_class.config[:root_many]
       end
     end
 
     describe ".meta_key" do
       it "returns default meta_key" do
-        assert_equal :meta, jat_class.meta_key
+        assert_equal :meta, jat_class.config[:meta_key]
       end
 
-      it "saves and returns meta key" do
+      it "changes meta key" do
         jat_class.meta_key :metadata
-        assert_equal :metadata, jat_class.meta_key
-        assert_same jat_class.meta_key, jat_class.meta_key
+        assert_equal :metadata, jat_class.config[:meta_key]
       end
 
       it "symbolizes meta key" do
         jat_class.meta_key "metadata"
-        assert_equal :metadata, jat_class.meta_key
+        assert_equal :metadata, jat_class.config[:meta_key]
       end
     end
   end

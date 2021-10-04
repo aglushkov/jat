@@ -5,6 +5,10 @@ require_relative "./lib/preloader"
 class Jat
   module Plugins
     module ActiverecordPreloads
+      def self.apply(jat_class)
+        jat_class.include(InstanceMethods)
+      end
+
       module InstanceMethods
         def initialize(*)
           super

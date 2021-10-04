@@ -388,7 +388,7 @@ describe "Jat::Plugins::JsonApi::Response" do
     it "adds relationship meta defined in serializer" do
       foo_serializer.relationship(:bar, serializer: -> { bar_serializer }, exposed: true) { "bar" }
       bar_serializer.relationship_meta(:version) { "1.2.3" }
-      bar_serializer.relationship_meta(:uid) { |parent, obj, context| [parent, obj, context[:time]] }
+      bar_serializer.relationship_meta(:uid) { |obj, context| [context[:parent_object], obj, context[:time]] }
       bar_serializer.relationship_meta(:null) {}
 
       response = foo_serializer.to_h("foo", time: "12:00")
@@ -478,7 +478,7 @@ describe "Jat::Plugins::JsonApi::Response" do
     it "adds relationship link defined in serializer" do
       foo_serializer.relationship(:bar, serializer: -> { bar_serializer }, exposed: true) { "bar" }
       bar_serializer.relationship_link(:self) { "/self" }
-      bar_serializer.relationship_link(:related) { |parent_obj| "/#{parent_obj}/self" }
+      bar_serializer.relationship_link(:related) { |_obj, ctx| "/#{ctx[:parent_object]}/self" }
       bar_serializer.relationship_link(:null) {}
 
       response = foo_serializer.to_h("foo")

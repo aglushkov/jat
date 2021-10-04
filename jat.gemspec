@@ -28,8 +28,8 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "rake", "~> 13.0"
 
   # Code standard
-  gem.add_development_dependency "standard", "~> 1.0"
   gem.add_development_dependency "simplecov", "~> 0.21"
+  gem.add_development_dependency "standard", "~> 1.0"
 
   # ORM plugins
   gem.add_development_dependency "activerecord", RUBY_VERSION >= "2.5" ? "~> 6.0" : "~> 5.2"

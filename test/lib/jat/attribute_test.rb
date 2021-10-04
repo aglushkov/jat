@@ -127,16 +127,14 @@ describe Jat::Attribute do
 
   describe "#block" do
     it "returns provided block" do
-      block = -> {}
+      block = proc { "RESULT" }
       attribute = attribute_class.new(name: "foo", block: block)
-      assert_equal block, attribute.block
+      assert_equal "RESULT", attribute.value(nil, nil)
     end
 
     it "constructs block that calls current key method on object" do
       attribute = attribute_class.new(name: "foo", opts: {key: :length})
-      presenter = jat_class::Presenter.new([1, 2, 3], {})
-
-      assert_equal 3, presenter.instance_exec(&attribute.block)
+      assert_equal 3, attribute.value([1, 2, 3], nil)
     end
   end
 end

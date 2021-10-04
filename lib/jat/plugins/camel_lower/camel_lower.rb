@@ -3,16 +3,34 @@
 class Jat
   module Plugins
     module CamelLower
-      module AttributeMethods
-        def name
-          first_word, *other = original_name.to_s.split("_")
-          last_words = other.map!(&:capitalize).join
+      def self.apply(jat_class)
+        jat_class::Attribute.include(AttributeInstanceMethods)
+      end
 
-          :"#{first_word}#{last_words}"
+      def self.after_apply(jat_class)
+        jat_class.config[:camel_lower] = true
+      end
+
+      module AttributeInstanceMethods
+        def name
+          CamelLowerTransformation.call(original_name)
         end
       end
     end
 
     register_plugin(:camel_lower, CamelLower)
+  end
+
+  class CamelLowerTransformation
+    SEPARATOR = "_"
+
+    def self.call(string)
+      first_word, *others = string.to_s.split(SEPARATOR)
+
+      first_word[0] = first_word[0].downcase
+      last_words = others.each(&:capitalize!).join
+
+      :"#{first_word}#{last_words}"
+    end
   end
 end

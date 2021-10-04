@@ -7,12 +7,12 @@ describe "Jat::Plugins::JsonApiActiverecord" do
     @plugin = Jat::Plugins.load_plugin(:_json_api_activerecord)
   end
 
-  it "loads other plugins in after_load" do
+  it "loads other plugins in after_apply" do
     jat_class = Class.new(Jat)
     jat_class.expects(:plugin).with(:_preloads, foo: :bar)
     jat_class.expects(:plugin).with(:_activerecord_preloads, foo: :bar)
 
-    Jat::Plugins.after_load(@plugin, jat_class, foo: :bar)
+    @plugin.after_apply(jat_class, foo: :bar)
   end
 
   describe "ClassMethods" do

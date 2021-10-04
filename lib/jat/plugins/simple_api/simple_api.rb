@@ -3,14 +3,20 @@
 require_relative "./lib/map"
 require_relative "./lib/response"
 
-# Serializes to JSON-API format
 class Jat
   module Plugins
     module SimpleApi
       DEFAULT_META_KEY = :meta
 
-      def self.after_load(jat_class, **opts)
+      def self.apply(jat_class)
+        jat_class.include(InstanceMethods)
+        jat_class.extend(ClassMethods)
+      end
+
+      def self.after_apply(jat_class, **opts)
         jat_class.plugin(:_json_api_activerecord, **opts) if opts[:activerecord]
+
+        jat_class.meta_key(DEFAULT_META_KEY)
       end
 
       module InstanceMethods
@@ -25,37 +31,36 @@ class Jat
 
       module ClassMethods
         def inherited(subclass)
-          subclass.root(@root) if defined?(@root)
-
           super
+
+          # Assign same meta
+          added_meta.each_value do |attribute|
+            params = attribute.params
+            subclass.attribute(params[:name], **params[:opts], &params[:block])
+          end
         end
 
-        def root(new_root = nil)
-          return (defined?(@root) && @root) unless new_root
+        def root(default = nil, one: nil, many: nil)
+          root_one = one || default
+          root_many = many || default
 
-          new_root = new_root.to_sym
-          @root = new_root
+          config[:root_one] = root_one ? root_one.to_sym : nil
+          config[:root_many] = root_many ? root_many.to_sym : nil
+
+          {root_one: root_one, root_many: root_many}
         end
 
-        def root_for_one(new_root_for_one = nil)
-          return (defined?(@root_for_one) && @root_for_one) unless new_root_for_one
-
-          new_root_for_one = new_root_for_one.to_sym
-          @root_for_one = new_root_for_one
+        def meta_key(new_meta_key)
+          config[:meta_key] = new_meta_key.to_sym
         end
 
-        def root_for_many(new_root_for_many = nil)
-          return (defined?(@root_for_many) && @root_for_many) unless new_root_for_many
-
-          new_root_for_many = new_root_for_many.to_sym
-          @root_for_many = new_root_for_many
+        def added_meta
+          @added_meta ||= {}
         end
 
-        def meta_key(new_meta_key = nil)
-          return ((defined?(@meta_key) && @meta_key) || DEFAULT_META_KEY) unless new_meta_key
-
-          new_meta_key = new_meta_key.to_sym
-          @meta_key = new_meta_key
+        def meta(name, **opts, &block)
+          new_attr = self::Attribute.new(name: name, opts: opts, block: block)
+          added_meta[new_attr.name] = new_attr
         end
       end
     end

@@ -11,12 +11,6 @@ describe "Jat::Plugins::SimpleApi::Response" do
     assert_equal({}, empty_serializer.to_h(nil))
   end
 
-  it "returns correct structure with meta" do
-    empty_serializer = Class.new(base_class)
-
-    assert_equal({meta: {any: :thing}}, empty_serializer.to_h(nil, meta: {any: :thing}))
-  end
-
   it "returns correct structure with data" do
     str_serializer = Class.new(base_class) do
       attribute(:id) { |_| "STRING" }
@@ -46,18 +40,6 @@ describe "Jat::Plugins::SimpleApi::Response" do
       [{id: "1"}, {id: "2"}],
       str_serializer.to_h(%w[1 2])
     )
-  end
-
-  it "raises error when trying to add meta to response without root key" do
-    str_serializer = Class.new(base_class) do
-      attribute(:id) { |obj| obj }
-    end
-
-    error = assert_raises(Jat::Error) { str_serializer.to_h("1", meta: {foo: :bar}) }
-    assert_equal "Response must have a root key to add metadata", error.message
-
-    error = assert_raises(Jat::Error) { str_serializer.to_h(["1"], meta: {foo: :bar}) }
-    assert_equal "Response must have a root key to add metadata", error.message
   end
 
   it "returns correct structure with array data" do
@@ -92,11 +74,10 @@ describe "Jat::Plugins::SimpleApi::Response" do
     )
   end
 
-  it "returns correct structures root_for_one and root_for_many keys" do
+  it "returns correct roots" do
     str_serializer = Class.new(base_class) do
-      root(:not_used)
-      root_for_one(:digit)
-      root_for_many(:digits)
+      root(one: :digit, many: :digits)
+
       attribute(:id) { |obj| obj }
     end
 
@@ -107,32 +88,11 @@ describe "Jat::Plugins::SimpleApi::Response" do
   it "returns correct structures when root is overwritten" do
     str_serializer = Class.new(base_class) do
       root(:root)
-      root_for_one(:root)
-      root_for_many(:root)
       attribute(:id) { |obj| obj }
     end
 
     assert_equal({foo: {id: "1"}}, str_serializer.to_h("1", root: :foo))
     assert_equal({foo: [{id: "1"}]}, str_serializer.to_h(["1"], root: :foo))
-  end
-
-  it "returns correct structure with data and meta" do
-    str_serializer = Class.new(base_class) do
-      root(:root)
-      config[:meta] = {version: "1.2.3"}
-
-      attribute(:id) { |obj| obj }
-    end
-
-    assert_equal(
-      {root: {id: "1"}, meta: {any: :thing, version: "1.2.3"}},
-      str_serializer.to_h("1", meta: {any: :thing})
-    )
-
-    assert_equal(
-      {root: [{id: "1"}], meta: {any: :thing, version: "1.2.3"}},
-      str_serializer.to_h(["1"], meta: {any: :thing})
-    )
   end
 
   it "returns correct structure with data multiple attributes" do
@@ -297,46 +257,92 @@ describe "Jat::Plugins::SimpleApi::Response" do
     )
   end
 
-  it "does not overwrite manually added meta" do
-    str_serializer = Class.new(base_class) do
-      root(:root)
-      config[:meta] = {version: "1.2.3"}
+  describe "adding meta" do
+    it "returns correct structure with only meta" do
+      empty_serializer = Class.new(base_class)
 
-      attribute(:id) { |obj| obj }
+      assert_equal({meta: {any: :thing}}, empty_serializer.to_h(nil, meta: {any: :thing}))
     end
 
-    assert_equal(
-      {root: {id: "1"}, meta: {version: "2.0.0"}},
-      str_serializer.to_h("1", meta: {version: "2.0.0"})
-    )
-  end
+    it "returns correct structure with overwritten meta key" do
+      empty_serializer = Class.new(base_class)
+      empty_serializer.meta_key :metadata
+      empty_serializer.meta(:foo) { :bar }
 
-  it "allows to provide lambda as meta key" do
-    str_serializer = Class.new(base_class) do
-      root(:root)
-      config[:meta] = {
-        obj: ->(obj, _context) { obj },
-        context: ->(_obj, context) { context },
-        time: ->(_obj, _context) { Time.new(2020, 1, 1) }
-      }
-
-      attribute(:id) { |obj| obj }
+      assert_equal({metadata: {foo: :bar, any: :thing}}, empty_serializer.to_h(nil, meta: {any: :thing}))
     end
 
-    assert_equal(
-      {root: {id: "1"}, meta: {obj: "1", context: {foo: :bar}, time: Time.new(2020, 1, 1)}},
-      str_serializer.to_h("1", foo: :bar)
-    )
-  end
+    it "returns correct structure with data and meta" do
+      str_serializer = Class.new(base_class) do
+        root(:root)
+        meta(:version) { "1.2.3" }
 
-  it "does not adds nil meta" do
-    str_serializer = Class.new(base_class) do
-      root(:root)
-      config[:meta] = {foo: nil, bar: proc {}}
+        attribute(:id) { |obj| obj }
+      end
 
-      attribute(:id) { |obj| obj }
+      assert_equal(
+        {root: {id: "1"}, meta: {any: :thing, version: "1.2.3"}},
+        str_serializer.to_h("1", meta: {any: :thing})
+      )
+
+      assert_equal(
+        {root: [{id: "1"}], meta: {any: :thing, version: "1.2.3"}},
+        str_serializer.to_h(["1"], meta: {any: :thing})
+      )
     end
 
-    assert_equal({root: {id: "1"}}, str_serializer.to_h("1", bazz: nil))
+    it "raises error when trying to add meta to response without root key" do
+      str_serializer = Class.new(base_class) do
+        attribute(:id) { |obj| obj }
+      end
+
+      error = assert_raises(Jat::Error) { str_serializer.to_h("1", meta: {foo: :bar}) }
+      assert_equal "Response must have a root key to add metadata", error.message
+
+      error = assert_raises(Jat::Error) { str_serializer.to_h(["1"], meta: {foo: :bar}) }
+      assert_equal "Response must have a root key to add metadata", error.message
+    end
+
+    it "does not overwrite manually added meta" do
+      str_serializer = Class.new(base_class) do
+        root(:root)
+        meta(:version) { "1.2.3" }
+
+        attribute(:id) { |obj| obj }
+      end
+
+      assert_equal(
+        {root: {id: "1"}, meta: {version: "2.0.0"}},
+        str_serializer.to_h("1", meta: {version: "2.0.0"})
+      )
+    end
+
+    it "allows to provide lambda as meta key" do
+      str_serializer = Class.new(base_class) do
+        root(:root)
+
+        meta(:obj) { |obj| obj }
+        meta(:context) { |_obj, context| context }
+        meta(:time) { Time.new(2020, 1, 1) }
+
+        attribute(:id) { |obj| obj }
+      end
+
+      assert_equal(
+        {root: {id: "1"}, meta: {obj: "1", context: {foo: :bar}, time: Time.new(2020, 1, 1)}},
+        str_serializer.to_h("1", foo: :bar)
+      )
+    end
+
+    it "does not adds nil meta" do
+      str_serializer = Class.new(base_class) do
+        root(:root)
+        meta(:foo) {}
+
+        attribute(:id) { |obj| obj }
+      end
+
+      assert_equal({root: {id: "1"}}, str_serializer.to_h("1", bazz: nil))
+    end
   end
 end

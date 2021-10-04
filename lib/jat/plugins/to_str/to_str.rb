@@ -3,7 +3,12 @@
 class Jat
   module Plugins
     module ToStr
-      def self.after_load(jat_class, **opts)
+      def self.apply(jat_class)
+        jat_class.include(InstanceMethods)
+        jat_class.extend(ClassMethods)
+      end
+
+      def self.after_apply(jat_class, **opts)
         jat_class.config[:to_str] = opts[:to_str] || ->(data) { ToStrJSON.dump(data) }
       end
 

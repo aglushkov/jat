@@ -3,8 +3,12 @@
 class Jat
   module Plugins
     module Cache
-      def self.before_load(jat_class, **opts)
+      def self.before_apply(jat_class, **opts)
         jat_class.plugin :to_str, **opts
+      end
+
+      def self.apply(jat_class)
+        jat_class.include(InstanceMethods)
       end
 
       module InstanceMethods

@@ -6,7 +6,7 @@ require "test_plugin"
 describe "plugin system" do
   describe "Jat.plugin" do
     let(:jat_class) { Class.new(Jat) }
-    let(:components) { [jat_class, jat_class::Attribute, jat_class::Config, jat_class::Presenter] }
+    let(:components) { [jat_class, jat_class::Attribute, jat_class::Config] }
 
     before do
       components.each do |component|
@@ -36,14 +36,14 @@ describe "plugin system" do
       end
     end
 
-    it "loads dependencies before loading plugin" do
+    it "calls before_apply before applying plugin" do
       jat_class.plugin(TestPlugin)
-      assert_equal :foo, jat_class.config[:before_load]
+      assert_equal :foo, jat_class.config[:before_apply]
     end
 
-    it "after_loads after loading plugin" do
+    it "calls after_apply after applying plugin" do
       jat_class.plugin(TestPlugin)
-      assert_equal :plugin_foo, jat_class.config[:after_load]
+      assert_equal :plugin_foo, jat_class.config[:after_apply]
     end
   end
 end
