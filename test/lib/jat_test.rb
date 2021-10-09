@@ -81,6 +81,20 @@ describe Jat do
     end
   end
 
+  describe ".relationship" do
+    it "forces using of :serializer option" do
+      error = assert_raises(ArgumentError) { jat_class.relationship(:foo) }
+      assert_match "serializer", error.message
+    end
+
+    it "adds new attribute" do
+      jat_class.relationship(:foo, serializer: jat_class)
+
+      attribute = jat_class.attributes[:foo]
+      assert_equal jat_class, attribute.serializer
+    end
+  end
+
   describe "#initialize" do
     it "initializes object and context attributes" do
       jat = jat_class.new("obj", "context")

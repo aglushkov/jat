@@ -1,13 +1,6 @@
 # frozen_string_literal: true
 
-require "bundler/inline"
-
-gemfile(true, quiet: true) do
-  source "https://rubygems.org"
-  git_source(:github) { |repo| "https://github.com/#{repo}.git" }
-
-  gem "jat", "~> 0.0.3"
-end
+require_relative "../load_gem"
 
 class JsonapiSerializer < Jat
   plugin :json_api
@@ -17,18 +10,17 @@ class UserSerializer < JsonapiSerializer
   config[:exposed] = :default # Default value can be omitted. Other options: :all, :none
 
   type :user
-  attribute :id
 
   # Attributes are exposed by default
   attribute :name
 
-  # Hide exposed by default attribute
+  # Hide attribute
   attribute :email, exposed: false
 
   # Relationships are hidden by default
   relationship :profile, serializer: -> { ProfileSerializer }
 
-  # Expose hidden by default relationship
+  # Expose relationship
   relationship :avatar, serializer: -> { AvatarSerializer }, exposed: true
 end
 
@@ -36,14 +28,12 @@ class AvatarSerializer < JsonapiSerializer
   config[:exposed] = :none
   type :avatar
 
-  attribute :id, exposed: true
   attribute :url, exposed: true
   attribute :url_2x
 end
 
 class ProfileSerializer < JsonapiSerializer
   type :profile
-  attribute :id
 end
 
 require "ostruct"

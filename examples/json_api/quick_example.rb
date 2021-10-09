@@ -1,13 +1,6 @@
 # frozen_string_literal: true
 
-require "bundler/inline"
-
-gemfile(true, quiet: true) do
-  source "https://rubygems.org"
-  git_source(:github) { |repo| "https://github.com/#{repo}.git" }
-
-  gem "jat", "~> 0.0.3"
-end
+require_relative "../load_gem"
 
 class JsonapiSerializer < Jat
   plugin :json_api
@@ -18,7 +11,6 @@ class UserSerializer < JsonapiSerializer
 
   type :user
 
-  attribute :id
   attribute(:name) { |user| [user.first_name, user.last_name].join(" ") }
 
   relationship :profile, serializer: -> { ProfileSerializer }, exposed: true
@@ -28,7 +20,6 @@ end
 class ProfileSerializer < JsonapiSerializer
   type :profile
 
-  attribute :id
   attribute(:location) { |profile| profile.location || "Gotham City" }
   attribute :followers_count
 end
@@ -36,7 +27,6 @@ end
 class RoleSerializer < JsonapiSerializer
   type :role
 
-  attribute :id
   attribute :name
 end
 

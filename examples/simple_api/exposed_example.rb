@@ -1,13 +1,6 @@
 # frozen_string_literal: true
 
-require "bundler/inline"
-
-gemfile(true, quiet: true) do
-  source "https://rubygems.org"
-  git_source(:github) { |repo| "https://github.com/#{repo}.git" }
-
-  gem "jat", "~> 0.0.3"
-end
+require_relative "../load_gem"
 
 class SimpleSerializer < Jat
   plugin :simple_api
@@ -17,16 +10,17 @@ class UserSerializer < SimpleSerializer
   config[:exposed] = :default # Default value can be omitted. Other options: :all, :none
 
   # Attributes are exposed by default
+  attribute :id
   attribute :name
 
-  # Hide exposed by default attribute
+  # Hide attribute
   attribute :email, exposed: false
 
   # Relationships are hidden by default
-  attribute :profile, serializer: -> { ProfileSerializer }
+  relationship :profile, serializer: -> { ProfileSerializer }
 
-  # Expose hidden by default relationship
-  attribute :avatar, serializer: -> { AvatarSerializer }, exposed: true
+  # Expose relationship
+  relationship :avatar, serializer: -> { AvatarSerializer }, exposed: true
 end
 
 class AvatarSerializer < SimpleSerializer

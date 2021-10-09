@@ -44,14 +44,10 @@ describe "Jat::Plugins::JsonApi" do
   end
 
   describe "ClassMethods" do
-    describe ".relationship" do
-      it "adds new attribute with required serializer" do
-        jat_class.relationship(:foo, serializer: jat_class, exposed: true) { "block" }
-
-        attribute = jat_class.attributes[:foo]
-        assert_equal jat_class, attribute.serializer
-        assert_equal true, attribute.exposed?
-        assert_equal "block", attribute.value(nil, nil)
+    describe ".id" do
+      it "adds new attribute with predefined `:id` name" do
+        jat_class.id
+        assert_includes jat_class.attributes.keys, :id
       end
     end
 

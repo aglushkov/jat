@@ -1,13 +1,6 @@
 # frozen_string_literal: true
 
-require "bundler/inline"
-
-gemfile(true, quiet: true) do
-  source "https://rubygems.org"
-  git_source(:github) { |repo| "https://github.com/#{repo}.git" }
-
-  gem "jat", "~> 0.0.3"
-end
+require_relative "../load_gem"
 
 class SimpleSerializer < Jat
   plugin :simple_api
@@ -19,8 +12,8 @@ class UserSerializer < SimpleSerializer
   attribute :id
   attribute(:name) { |user| [user.first_name, user.last_name].join(" ") }
 
-  attribute :profile, serializer: -> { ProfileSerializer }, exposed: true
-  attribute :roles, serializer: -> { RoleSerializer }, exposed: true
+  relationship :profile, serializer: -> { ProfileSerializer }, exposed: true
+  relationship :roles, serializer: -> { RoleSerializer }, exposed: true
 end
 
 class ProfileSerializer < SimpleSerializer

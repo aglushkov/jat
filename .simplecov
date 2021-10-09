@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# CI=true bundle exec rspec
-
+SimpleCov.command_name "Unit Tests"
 SimpleCov.enable_coverage :branch
 SimpleCov.minimum_coverage line: 100, branch: 100
 SimpleCov.at_exit { SimplecovResult.new(SimpleCov.result).print_result }
@@ -13,7 +12,7 @@ class SimplecovResult
 
   def print_result
     statistics = result.coverage_statistics
-    percent = ((statistics[:line].percent + statistics[:branch].percent) / 2.0).ceil(2)
+    percent = (statistics[:line].percent + statistics[:branch].percent) / 2.0
 
     uncovered_files.each(&method(:print_uncovered_file)) if percent < 100
     puts "(#{percent}%) covered"

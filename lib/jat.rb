@@ -65,6 +65,10 @@ class Jat
       new_attr = self::Attribute.new(name: name, opts: opts, block: block)
       attributes[new_attr.name] = new_attr
     end
+
+    def relationship(name, serializer:, **opts, &block)
+      attribute(name, serializer: serializer, **opts, &block)
+    end
   end
 
   module InstanceMethods

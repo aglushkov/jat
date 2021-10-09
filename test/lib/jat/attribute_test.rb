@@ -127,9 +127,21 @@ describe Jat::Attribute do
 
   describe "#block" do
     it "returns provided block" do
+      block = proc { |object, context| [object, context] }
+      attribute = attribute_class.new(name: "foo", block: block)
+      assert_equal ["OBJECT", "CONTEXT"], attribute.value("OBJECT", "CONTEXT")
+    end
+
+    it "returns provided block when block was without params" do
       block = proc { "RESULT" }
       attribute = attribute_class.new(name: "foo", block: block)
-      assert_equal "RESULT", attribute.value(nil, nil)
+      assert_equal "RESULT", attribute.value("OBJECT", "CONTEXT")
+    end
+
+    it "returns provided block when block was with one param" do
+      block = proc { |object| object }
+      attribute = attribute_class.new(name: "foo", block: block)
+      assert_equal "OBJECT", attribute.value("OBJECT", "CONTEXT")
     end
 
     it "constructs block that calls current key method on object" do

@@ -83,8 +83,8 @@ class Jat
           @type = new_type
         end
 
-        def relationship(name, serializer:, **opts, &block)
-          attribute(name, serializer: serializer, **opts, &block)
+        def id(**opts, &block)
+          attribute(:id, **opts, &block)
         end
 
         # JSON API block values
