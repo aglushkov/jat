@@ -2,17 +2,24 @@
 
 JAT helps to serialize complex nested objects to JSON format.
 
-Key features:
+## Supported Formats
 
-* **Auto preload** – No need to preload data manually to omit N+1 (Active Record only)
-* **Configurable exposed attributes** – No more tons of serializers with different attributes sets
-* **Modular design** – plugin system (aka [shrine]) allows you to load only the functionality you need
-
-## Output Format
-
-Supported two serialization formats:
   - [JSON:API]
-  - Simple:API (it is just nested JSON objects, same response format as constructed by good old [AMS] or [Jbuilder])
+  - [Simple:API] (it is just nested JSON objects, same response format as constructed by good old [AMS] or [Jbuilder])
+
+## Key Featurs:
+
+* Configurable exposed attributes
+* Auto preload (with ActiveRecord)
+* Modular design – plugin system allows you to load only functionality you need
+
+## Plugins
+
+* **plugin :json_api** - enables JSON:API response formatting
+* **plugin :simple_api** - enables SIMPLE:API response formatting
+* **plugin :cache** - allows to cache response
+* **plugin :to_s** - adds `.to_s` method to serialize to string
+* **plugin :camel_lower** - transaforms all attributes to lowerCamelCase
 
 ## Quick Examples
 <details>
@@ -199,7 +206,7 @@ end
 ```
 
 ### Attributes
-All attributes are delegated to serialized object. We can define attributes in various of simple ways. \
+All attributes are delegated to serialized object. 
 Attributes will be inherited by subclasses, but they can be redefined there.
 
 ```ruby
