@@ -9,4 +9,5 @@
 7. Update CHANGELOG.md if needed
 8. Update README.md if needed
 9. Commit changes
-9. Push gem `gem push jat-VERSION.gem`
+10. Add tag `git tag -a v$(cat "JAT_VERSION") -m v$(cat "JAT_VERSION")`
+11. Push gem `gem push jat-$(cat "JAT_VERSION").gem`
