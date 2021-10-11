@@ -36,14 +36,14 @@ describe "plugin system" do
       end
     end
 
-    it "calls before_apply before applying plugin" do
+    it "calls before_load before loading plugin" do
       jat_class.plugin(TestPlugin)
-      assert_equal :foo, jat_class.config[:before_apply]
+      assert_equal :foo, jat_class.config[:before_load]
     end
 
-    it "calls after_apply after applying plugin" do
+    it "calls after_load after loading plugin" do
       jat_class.plugin(TestPlugin)
-      assert_equal :plugin_foo, jat_class.config[:after_apply]
+      assert_equal :plugin_foo, jat_class.config[:after_load]
     end
   end
 end

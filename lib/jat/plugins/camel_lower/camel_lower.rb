@@ -3,11 +3,11 @@
 class Jat
   module Plugins
     module CamelLower
-      def self.apply(jat_class)
+      def self.load(jat_class, **_opts)
         jat_class::Attribute.include(AttributeInstanceMethods)
       end
 
-      def self.after_apply(jat_class)
+      def self.after_load(jat_class)
         jat_class.config[:camel_lower] = true
       end
 

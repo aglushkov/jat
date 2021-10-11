@@ -5,18 +5,32 @@ class Jat
   module Plugins
     module SimpleApi
       class Response
-        module InstanceMethods
-          attr_reader :jat, :jat_class, :object, :context, :config
+        module ClassMethods
+          # Returns the Jat class that this Response class is namespaced under.
+          attr_accessor :jat_class
 
-          def initialize(jat)
-            @jat = jat
-            @jat_class = jat.class
-            @object = jat.object
-            @context = jat.context
-            @config = jat_class.config
+          # Since Response is anonymously subclassed when Jat is subclassed,
+          # and then assigned to a constant of the Jat subclass, make inspect
+          # reflect the likely name for the class.
+          def inspect
+            "#{jat_class.inspect}::Response"
           end
 
-          def response
+          def call(object, context)
+            new(object, context).to_h
+          end
+        end
+
+        module InstanceMethods
+          attr_reader :object, :context, :jat_class
+
+          def initialize(object, context)
+            @object = object
+            @context = context
+            @jat_class = self.class.jat_class
+          end
+
+          def to_h
             # Add main response
             is_many = many?
             root = root_key(is_many)
@@ -44,7 +58,8 @@ class Jat
           end
 
           def one(obj)
-            ResponseData.new(jat_class, obj, context, jat.traversal_map).data
+            map = jat_class.map(context)
+            jat_class::ResponsePiece.to_h(obj, context, map)
           end
 
           def many?
@@ -58,12 +73,13 @@ class Jat
               root = context[:root]
               root ? root.to_sym : root
             else
+              config = jat_class.config
               is_many ? config[:root_many] : config[:root_one]
             end
           end
 
           def meta_key
-            context[:meta_key]&.to_sym || config[:meta_key]
+            context[:meta_key]&.to_sym || jat_class.config[:meta_key]
           end
 
           def metadata
@@ -73,11 +89,11 @@ class Jat
             meta = jat_class.added_meta
             return data if meta.empty?
 
-            meta.each_value do |attr|
-              name = attr.name
+            meta.each_value do |attribute|
+              name = attribute.name
               next if data.key?(name)
 
-              value = attr.block.call(object, context)
+              value = attribute.block.call(object, context)
               data[name] = value if value
             end
 
@@ -89,58 +105,8 @@ class Jat
           end
         end
 
+        extend ClassMethods
         include InstanceMethods
-      end
-
-      class ResponseData
-        attr_reader :jat_class, :object, :context, :map, :presenter
-
-        def initialize(jat_class, object, context, map)
-          @jat_class = jat_class
-          @object = object
-          @context = context
-          @map = map
-        end
-
-        def data
-          return unless object
-
-          result = {}
-
-          map.each do |key, inner_keys|
-            attribute = jat_class.attributes.fetch(key)
-            value = attribute.block.call(object, context)
-
-            result[key] =
-              if attribute.relation?
-                if many?(attribute, value)
-                  value.map { |obj| response_data(attribute, obj, inner_keys) }
-                else
-                  response_data(attribute, value, inner_keys)
-                end
-              else
-                value
-              end
-          end
-
-          result
-        end
-
-        private
-
-        def response_data(attribute, value, map)
-          ResponseData.new(attribute.serializer.call, value, context, map).data
-        end
-
-        def many?(attribute, object)
-          is_many = attribute.many?
-
-          # handle boolean
-          return is_many if (is_many == true) || (is_many == false)
-
-          # handle nil
-          object.is_a?(Enumerable)
-        end
       end
     end
   end

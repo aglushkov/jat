@@ -14,7 +14,7 @@ describe "Jat::Plugins::JsonApi::Response" do
   it "returns correct structure with data" do
     str_serializer = Class.new(base_class) do
       type "str"
-      attribute(:id) { |_| "STRING" }
+      id { |_| "STRING" }
     end
 
     assert_equal({data: {type: :str, id: "STRING"}}, str_serializer.to_h("STRING"))
@@ -23,7 +23,7 @@ describe "Jat::Plugins::JsonApi::Response" do
   it "returns correct structure with array data" do
     str_serializer = Class.new(base_class) do
       type "str"
-      attribute(:id) { |obj| obj }
+      id { |obj| obj }
     end
 
     assert_equal(
@@ -35,7 +35,7 @@ describe "Jat::Plugins::JsonApi::Response" do
   it "returns correct structure with data with attributes" do
     str_serializer = Class.new(base_class) do
       type "str"
-      attribute(:id) { |obj| obj[0] }
+      id { |obj| obj[0] }
       attribute :length
     end
 
@@ -48,12 +48,12 @@ describe "Jat::Plugins::JsonApi::Response" do
   it "returns correct structure with has-one relationship" do
     int_serializer = Class.new(base_class) do
       type "int"
-      attribute(:id) { |obj| obj }
+      id { |obj| obj }
     end
 
     str_serializer = Class.new(base_class) do
       type "str"
-      attribute(:id) { |obj| obj[0] }
+      id { |obj| obj[0] }
       relationship :length, serializer: int_serializer, exposed: true
     end
 
@@ -76,12 +76,12 @@ describe "Jat::Plugins::JsonApi::Response" do
   it "does not return has-one relationship when not exposed" do
     int_serializer = Class.new(base_class) do
       type "int"
-      attribute(:id) { |obj| obj }
+      id { |obj| obj }
     end
 
     str_serializer = Class.new(base_class) do
       type "str"
-      attribute(:id) { |obj| obj[0] }
+      id { |obj| obj[0] }
       relationship :length, serializer: int_serializer # relationships are not exposed by default
     end
 
@@ -91,7 +91,7 @@ describe "Jat::Plugins::JsonApi::Response" do
   it "returns correct structure with empty has-one relationship" do
     str_serializer = Class.new(base_class) do
       type "str"
-      attribute(:id) { |obj| obj[0] }
+      id { |obj| obj[0] }
       relationship(:length, serializer: self, exposed: true) { |_obj| nil }
     end
 
@@ -109,13 +109,13 @@ describe "Jat::Plugins::JsonApi::Response" do
   it "returns correct structure with has-one relationship with attributes" do
     int_serializer = Class.new(base_class) do
       type "int"
-      attribute(:id) { |obj| obj }
+      id { |obj| obj }
       attribute(:next) { |obj| obj + 1 }
     end
 
     str_serializer = Class.new(base_class) do
       type "str"
-      attribute(:id) { |obj| obj[0] }
+      id { |obj| obj[0] }
       relationship :length, serializer: int_serializer, exposed: true
     end
 
@@ -142,7 +142,7 @@ describe "Jat::Plugins::JsonApi::Response" do
 
     str_serializer = Class.new(base_class) do
       type "str"
-      attribute(:id) { |_obj| "id" }
+      id { |_obj| "id" }
       relationship :chars, serializer: chr_serializer, many: true, exposed: true
     end
 
@@ -160,12 +160,12 @@ describe "Jat::Plugins::JsonApi::Response" do
   it "returns correct structure with has-many relationship" do
     chr_serializer = Class.new(base_class) do
       type "chr"
-      attribute(:id) { |obj| obj }
+      id { |obj| obj }
     end
 
     str_serializer = Class.new(base_class) do
       type "str"
-      attribute(:id) { |obj| obj[0] }
+      id { |obj| obj[0] }
       relationship :chars, serializer: chr_serializer, many: true, exposed: true
     end
 
@@ -188,13 +188,13 @@ describe "Jat::Plugins::JsonApi::Response" do
   it "returns correct structure with has-many relationship with attributes" do
     chr_serializer = Class.new(base_class) do
       type "chr"
-      attribute(:id) { |obj| obj }
+      id { |obj| obj }
       attribute :next
     end
 
     str_serializer = Class.new(base_class) do
       type "str"
-      attribute(:id) { |obj| obj[0] }
+      id { |obj| obj[0] }
       relationship :chars, serializer: chr_serializer, many: true, exposed: true
     end
 
@@ -218,12 +218,12 @@ describe "Jat::Plugins::JsonApi::Response" do
   it "accepts includes param" do
     chr_serializer = Class.new(base_class) do
       type "chr"
-      attribute(:id) { |obj| obj }
+      id { |obj| obj }
     end
 
     str_serializer = Class.new(base_class) do
       type "str"
-      attribute(:id) { |obj| obj[0] }
+      id { |obj| obj[0] }
       relationship :chars, serializer: chr_serializer, many: true, exposed: false
     end
 
@@ -239,19 +239,19 @@ describe "Jat::Plugins::JsonApi::Response" do
           {type: :chr, id: "a"}, {type: :chr, id: "b"}
         ]
       },
-      str_serializer.to_h("ab", params: {include: "chars"})
+      str_serializer.to_h("ab", include: "chars")
     )
   end
 
   it "accepts sparse_fieldset" do
     chr_serializer = Class.new(base_class) do
       type "chr"
-      attribute(:id) { |obj| obj }
+      id { |obj| obj }
     end
 
     str_serializer = Class.new(base_class) do
       type "str"
-      attribute(:id) { |obj| obj[0] }
+      id { |obj| obj[0] }
       relationship :chars, serializer: chr_serializer, many: true, exposed: false
     end
 
@@ -267,7 +267,7 @@ describe "Jat::Plugins::JsonApi::Response" do
           {type: :chr, id: "a"}, {type: :chr, id: "b"}
         ]
       },
-      str_serializer.to_h("ab", params: {fields: {str: "chars"}})
+      str_serializer.to_h("ab", fields: {str: "chars"})
     )
   end
 
@@ -275,7 +275,7 @@ describe "Jat::Plugins::JsonApi::Response" do
     let(:serializer) do
       Class.new(base_class) do
         type :foo
-        attribute(:id) { |obj| obj }
+        id { |obj| obj }
       end
     end
 
@@ -311,7 +311,7 @@ describe "Jat::Plugins::JsonApi::Response" do
     let(:serializer) do
       Class.new(base_class) do
         type :foo
-        attribute(:id) { |obj| obj }
+        id { |obj| obj }
       end
     end
 
@@ -347,7 +347,7 @@ describe "Jat::Plugins::JsonApi::Response" do
     let(:serializer) do
       Class.new(base_class) do
         type :foo
-        attribute(:id) { |obj| obj }
+        id { |obj| obj }
       end
     end
 
@@ -374,14 +374,14 @@ describe "Jat::Plugins::JsonApi::Response" do
     let(:bar_serializer) do
       Class.new(base_class) do
         type :bar
-        attribute(:id) { |obj| obj }
+        id { |obj| obj }
       end
     end
 
     let(:foo_serializer) do
       Class.new(base_class) do
         type :foo
-        attribute(:id) { |obj| obj }
+        id { |obj| obj }
       end
     end
 
@@ -401,7 +401,7 @@ describe "Jat::Plugins::JsonApi::Response" do
     let(:serializer) do
       Class.new(base_class) do
         type :foo
-        attribute(:id) { |obj| obj }
+        id { |obj| obj }
       end
     end
 
@@ -437,7 +437,7 @@ describe "Jat::Plugins::JsonApi::Response" do
     let(:serializer) do
       Class.new(base_class) do
         type :foo
-        attribute(:id) { |obj| obj }
+        id { |obj| obj }
       end
     end
 
@@ -464,14 +464,14 @@ describe "Jat::Plugins::JsonApi::Response" do
     let(:bar_serializer) do
       Class.new(base_class) do
         type :bar
-        attribute(:id) { |obj| obj }
+        id { |obj| obj }
       end
     end
 
     let(:foo_serializer) do
       Class.new(base_class) do
         type :foo
-        attribute(:id) { |obj| obj }
+        id { |obj| obj }
       end
     end
 

@@ -7,7 +7,7 @@ describe "Jat::Plugins::ToStr" do
     new_class = Class.new(Jat)
     new_class.plugin(:to_str)
     new_class.class_exec do
-      def to_h
+      def to_h(object)
         {object => context}
       end
     end
@@ -34,7 +34,7 @@ describe "Jat::Plugins::ToStr" do
         new_class = Class.new(Jat)
         new_class.plugin(:to_str, to_str: ->(data) { data.inspect })
         new_class.class_exec do
-          def to_h
+          def to_h(object)
             {object => context}
           end
         end
@@ -45,7 +45,7 @@ describe "Jat::Plugins::ToStr" do
 
     describe "#to_str" do
       it "returns json string of to_h" do
-        assert_equal '{"obj":"ctx"}', jat_class.new("obj", "ctx").to_str
+        assert_equal '{"obj":"ctx"}', jat_class.new("ctx").to_str("obj")
       end
     end
   end

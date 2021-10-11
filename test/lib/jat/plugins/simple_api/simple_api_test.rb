@@ -3,7 +3,7 @@
 require "test_helper"
 
 describe "Jat::Plugins::SimpleApi" do
-  before { @plugin = Jat::Plugins.load_plugin(:simple_api) }
+  before { @plugin = Jat::Plugins.find_plugin(:simple_api) }
 
   let(:jat_class) do
     new_class = Class.new(Jat)
@@ -15,39 +15,62 @@ describe "Jat::Plugins::SimpleApi" do
 
   let(:plugin) { @plugin }
 
-  describe ".after_apply" do
-    it "loads _json_api_activerecord plugin if activerecord option provided" do
+  describe ".after_load" do
+    it "loads simple_api_activerecord plugin if activerecord option provided" do
       jat_class = Class.new(Jat)
-      jat_class.expects(:plugin).with(:_json_api_activerecord, activerecord: true)
+      jat_class.expects(:plugin).with(:simple_api_activerecord, activerecord: true)
 
-      plugin.apply(jat_class)
-      plugin.after_apply(jat_class, activerecord: true)
+      plugin.load(jat_class)
+      plugin.after_load(jat_class, activerecord: true)
     end
 
     it "adds default `:meta` meta_key config option" do
       jat_class = Class.new(Jat)
       assert_nil jat_class.config[:meta_key]
 
-      plugin.apply(jat_class)
-      plugin.after_apply(jat_class, activerecord: true)
+      plugin.load(jat_class)
+      plugin.after_load(jat_class)
       assert_equal :meta, jat_class.config[:meta_key]
+    end
+
+    it "adds config variable with name of response plugin that was loaded" do
+      jat_class = Class.new(Jat)
+      jat_class.plugin(:simple_api)
+
+      assert_equal(:simple_api, jat_class.config[:response_plugin_loaded])
     end
   end
 
   describe "InstanceMethods" do
-    let(:jat) { jat_class.new("JAT", {}) }
+    let(:jat) { jat_class.new({}) }
 
     describe "#to_h" do
       it "returns response in a simple-api format" do
         expected_result = {data: {id: "JAT"}}
-        assert_equal expected_result, jat.to_h
+        assert_equal expected_result, jat.to_h("JAT")
       end
     end
 
-    describe "#traversal_map" do
-      it "returns memorized traversal_map hash" do
-        assert_equal jat.traversal_map.class, Hash
-        assert_same jat.traversal_map, jat.traversal_map
+    describe "#map" do
+      it "returns map for provided context" do
+        jat_class::Map.expects(:call).with("CONTEXT").returns "MAP"
+        assert_equal "MAP", jat_class.map("CONTEXT")
+      end
+    end
+
+    describe "#map_full" do
+      it "returns memorized map with all fields exposed" do
+        jat_class::Map.expects(:call).with(exposed: :all).returns "MAP"
+        assert_equal "MAP", jat_class.map_full
+        assert_same jat_class.map_full, jat_class.map_full
+      end
+    end
+
+    describe "#map_exposed" do
+      it "returns memorized map with exposed by default fields" do
+        jat_class::Map.expects(:call).with(exposed: :default).returns "MAP"
+        assert_equal "MAP", jat_class.map_exposed
+        assert_same jat_class.map_exposed, jat_class.map_exposed
       end
     end
   end

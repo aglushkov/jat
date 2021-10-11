@@ -253,7 +253,7 @@ describe "Jat::Plugins::SimpleApi::Response" do
 
     assert_equal(
       {chars: [{next: "b"}, {next: "c"}]},
-      str_serializer.to_h("ab", params: {fields: "chars(next)"})
+      str_serializer.to_h("ab", fields: "chars(next)")
     )
   end
 

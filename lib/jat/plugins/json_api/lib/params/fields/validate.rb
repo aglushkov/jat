@@ -8,17 +8,20 @@ class Jat
           class Validate
             class << self
               def call(jat, fields)
+                full_map = jat.maps.full
+
                 fields.each do |type, attributes_names|
-                  new(jat, type).validate(attributes_names)
+                  new(jat, type, full_map).validate(attributes_names)
                 end
               end
             end
 
-            attr_reader :jat, :type
+            attr_reader :jat, :type, :full_map
 
-            def initialize(jat, type)
+            def initialize(jat, type, full_map)
               @jat = jat
               @type = type
+              @full_map = full_map
             end
 
             def validate(attributes_names)
@@ -29,7 +32,7 @@ class Jat
             private
 
             def check_fields_type
-              return if jat.traversal_map.full.key?(type)
+              return if full_map.key?(type)
 
               raise Error, "#{jat.class} and its children have no requested type `#{type}`"
             end
@@ -41,7 +44,7 @@ class Jat
             end
 
             def check_attribute_name(attribute_name)
-              type_data = jat.traversal_map.full.fetch(type)
+              type_data = full_map.fetch(type)
               type_serializer = type_data.fetch(:serializer)
               return if type_serializer.attributes.key?(attribute_name)
 

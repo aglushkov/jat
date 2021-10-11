@@ -27,11 +27,7 @@ class Jat
           end
 
           def preload(object, preloads)
-            # Reset associations that will be preloaded to fix possible bugs with
-            # ActiveRecord::Associations::Preloader
-            preloads.each_key { |key| object.association(key).reset }
             ActiveRecord::Associations::Preloader.new.preload(object, preloads)
-
             object
           end
         end
@@ -46,7 +42,13 @@ class Jat
           end
 
           def preload(objects, preloads)
-            objects.preload(preloads)
+            if objects.loaded?
+              array_objects = objects.to_a
+              ActiverecordArray.preload(array_objects, preloads)
+              objects
+            else
+              objects.preload(preloads).load
+            end
           end
         end
 
@@ -62,19 +64,11 @@ class Jat
           end
 
           def preload(objects, preloads)
-            # Reset associations that will be preloaded to fix possible bugs with
-            # ActiveRecord::Associations::Preloader
-            preloads.each_key { |key| reset_association(objects, key) }
             ActiveRecord::Associations::Preloader.new.preload(objects, preloads)
-
             objects
           end
 
           private
-
-          def reset_association(objects, key)
-            objects.each { |object| object.association(key).reset }
-          end
 
           def same_kind?(objects)
             first_object_class = objects.first.class
