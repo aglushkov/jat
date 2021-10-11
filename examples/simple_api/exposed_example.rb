@@ -7,6 +7,7 @@ class SimpleSerializer < Jat
 end
 
 class UserSerializer < SimpleSerializer
+  root :data
   config[:exposed] = :default # Default value can be omitted. Other options: :all, :none
 
   # Attributes are exposed by default
@@ -21,6 +22,8 @@ class UserSerializer < SimpleSerializer
 
   # Expose relationship
   relationship :avatar, serializer: -> { AvatarSerializer }, exposed: true
+
+  meta(:foo) { "bat" }
 end
 
 class AvatarSerializer < SimpleSerializer

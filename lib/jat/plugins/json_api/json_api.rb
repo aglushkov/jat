@@ -1,29 +1,60 @@
 # frozen_string_literal: true
 
+require_relative "./lib/fields_param_parser"
+require_relative "./lib/include_param_parser"
+require_relative "./lib/map"
 require_relative "./lib/response"
-require_relative "./lib/traversal_map"
+require_relative "./lib/response_piece"
 
 # Serializes to JSON-API format
 class Jat
   module Plugins
     module JsonApi
-      def self.apply(jat_class)
+      def self.before_load(jat_class, **_opts)
+        response_plugin = jat_class.config[:response_plugin_loaded]
+        return unless response_plugin
+
+        raise Error, "Response plugin `#{response_plugin}` was already loaded before"
+      end
+
+      def self.load(jat_class, **_opts)
         jat_class.include(InstanceMethods)
         jat_class.extend(ClassMethods)
       end
 
-      def self.after_apply(jat_class, **opts)
-        jat_class.plugin(:_json_api_activerecord, **opts) if opts[:activerecord]
-        jat_class.attribute :id
+      def self.after_load(jat_class, **opts)
+        fields_parser_class = Class.new(FieldsParamParser)
+        fields_parser_class.jat_class = jat_class
+        jat_class.const_set(:FieldsParamParser, fields_parser_class)
+
+        includes_parser_class = Class.new(IncludeParamParser)
+        includes_parser_class.jat_class = jat_class
+        jat_class.const_set(:IncludeParamParser, includes_parser_class)
+
+        map_class = Class.new(Map)
+        map_class.jat_class = jat_class
+        jat_class.const_set(:Map, map_class)
+
+        response_class = Class.new(Response)
+        response_class.jat_class = jat_class
+        jat_class.const_set(:Response, response_class)
+
+        response_piece_class = Class.new(ResponsePiece)
+        response_piece_class.jat_class = jat_class
+        jat_class.const_set(:ResponsePiece, response_piece_class)
+
+        jat_class.config[:response_plugin_loaded] = :json_api
+        jat_class.plugin(:json_api_activerecord, **opts) if opts[:activerecord]
+        jat_class.id
       end
 
       module InstanceMethods
-        def to_h
-          Response.new(self).response
+        def to_h(object)
+          self.class::Response.call(object, context)
         end
 
-        def traversal_map
-          @traversal_map ||= TraversalMap.new(self)
+        def map
+          @map ||= self.class.map(context)
         end
       end
 
@@ -31,7 +62,28 @@ class Jat
         def inherited(subclass)
           super
 
+          fields_parser_class = Class.new(self::FieldsParamParser)
+          fields_parser_class.jat_class = subclass
+          subclass.const_set(:FieldsParamParser, fields_parser_class)
+
+          includes_parser_class = Class.new(self::IncludeParamParser)
+          includes_parser_class.jat_class = subclass
+          subclass.const_set(:IncludeParamParser, includes_parser_class)
+
+          map_class = Class.new(self::Map)
+          map_class.jat_class = subclass
+          subclass.const_set(:Map, map_class)
+
+          response_class = Class.new(self::Response)
+          response_class.jat_class = subclass
+          subclass.const_set(:Response, response_class)
+
+          response_piece_class = Class.new(self::ResponsePiece)
+          response_piece_class.jat_class = subclass
+          subclass.const_set(:ResponsePiece, response_piece_class)
+
           subclass.type(@type) if defined?(@type)
+          subclass.id(&get_id.params[:block])
 
           # Assign same jsonapi_data
           jsonapi_data.each_value do |attribute|
@@ -69,22 +121,27 @@ class Jat
             subclass.document_meta(params[:name], **params[:opts], &params[:block])
           end
 
-          # Assign same added_document_meta
+          # Assign same added_relationship_meta
           added_relationship_meta.each_value do |attribute|
             params = attribute.params
             subclass.relationship_meta(params[:name], **params[:opts], &params[:block])
           end
         end
 
-        def type(new_type = nil)
-          return (defined?(@type) && @type) || raise(Error, "#{self} has no defined type") unless new_type
+        def get_type
+          (defined?(@type) && @type) || raise(Error, "#{self} has no defined type")
+        end
 
-          new_type = new_type.to_sym
-          @type = new_type
+        def type(new_type)
+          @type = new_type.to_sym
+        end
+
+        def get_id
+          @id
         end
 
         def id(**opts, &block)
-          attribute(:id, **opts, &block)
+          @id = self::Attribute.new(name: :id, opts: opts, block: block)
         end
 
         # JSON API block values
@@ -169,6 +226,18 @@ class Jat
         def relationship_meta(name, **opts, &block)
           new_attr = self::Attribute.new(name: name, opts: opts, block: block)
           added_relationship_meta[new_attr.name] = new_attr
+        end
+
+        def map(context)
+          self::Map.call(context)
+        end
+
+        def map_full
+          @map_full ||= self::Map.call(exposed: :all)
+        end
+
+        def map_exposed
+          @map_exposed ||= self::Map.call(exposed: :default)
         end
       end
     end

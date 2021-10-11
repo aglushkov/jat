@@ -37,7 +37,7 @@ describe "Jat::Plugins::CamelLower" do
     it "accepts fields in camelLower format" do
       jat_class.attribute(:foo_bar, exposed: false) { 1 }
 
-      response = jat_class.to_h(true, params: {fields: "fooBar"})
+      response = jat_class.to_h(true, fields: "fooBar")
       assert_equal({fooBar: 1}, response)
     end
 
@@ -64,7 +64,7 @@ describe "Jat::Plugins::CamelLower" do
     before do
       jat_class.plugin(:json_api)
       jat_class.type :foo
-      jat_class.attribute(:id) { |object| object }
+      jat_class.id { |object| object }
     end
 
     it "returns attributes in camelLower case" do
@@ -76,7 +76,7 @@ describe "Jat::Plugins::CamelLower" do
     it "accepts `fields` in camelLower format" do
       jat_class.attribute(:foo_bar, exposed: false) { 1 }
 
-      response = jat_class.to_h(true, params: {fields: {foo: "fooBar"}})
+      response = jat_class.to_h(true, fields: {foo: "fooBar"})
       assert_equal({fooBar: 1}, response.dig(:data, :attributes))
     end
 
@@ -84,11 +84,11 @@ describe "Jat::Plugins::CamelLower" do
       new_serializer = Class.new(Jat)
       new_serializer.plugin(:json_api)
       new_serializer.type :new
-      new_serializer.attribute(:id) { |object| object }
+      new_serializer.id { |object| object }
 
       jat_class.relationship(:foo_bar, serializer: new_serializer) { 1 }
 
-      response = jat_class.to_h(true, params: {include: "fooBar"})
+      response = jat_class.to_h(true, include: "fooBar")
       response_relationships = response.dig(:data, :relationships).keys
       assert_includes(response_relationships, :fooBar)
     end

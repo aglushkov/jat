@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 module TestPlugin
-  def self.before_apply(jat_class, *)
-    jat_class.config[:before_apply] = jat_class.foo
+  def self.before_load(jat_class, *)
+    jat_class.config[:before_load] = jat_class.foo
   end
 
-  def self.apply(jat_class)
+  def self.load(jat_class, **_opts)
     jat_class.extend(ClassMethods)
     jat_class.include(InstanceMethods)
     jat_class::Attribute.extend(AttributeClassMethods)
@@ -14,8 +14,8 @@ module TestPlugin
     jat_class::Config.include(ConfigMethods)
   end
 
-  def self.after_apply(jat_class, *)
-    jat_class.config[:after_apply] = jat_class.foo
+  def self.after_load(jat_class, *)
+    jat_class.config[:after_load] = jat_class.foo
   end
 
   module ClassMethods

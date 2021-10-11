@@ -6,19 +6,36 @@ describe Jat do
   let(:jat_class) { Class.new(Jat) }
 
   describe ".plugin" do
-    it "raises error when trying to load not a symbol or module" do
-      plugin = "TEST_PLUGIN"
-      error = assert_raises(Jat::Error) { jat_class.plugin(plugin) }
+    it "loads same plugin only once" do
+      plugin = Module.new
+      jat_class.plugin plugin
+      jat_class.plugin plugin
 
-      error_message = "Plugin class must be a Symbol or a Module, #{plugin.inspect} given"
-      assert_equal error_message, error.message
+      assert_equal [plugin], jat_class.config[:plugins]
+    end
+  end
+
+  describe ".plugin_used?" do
+    it "tells if plugin has been already used in current serializer" do
+      assert_equal false, jat_class.plugin_used?(:json_api)
+      jat_class.plugin(:json_api)
+      assert_equal true, jat_class.plugin_used?(:json_api)
+    end
+
+    it "accepts Module" do
+      plugin = Module.new
+
+      assert_equal false, jat_class.plugin_used?(plugin)
+      jat_class.plugin(plugin)
+      assert_equal true, jat_class.plugin_used?(plugin)
     end
   end
 
   describe ".config" do
-    it "returns config object" do
+    it "returns config object with default values" do
       config = jat_class.config
       assert_equal jat_class::Config, config.class
+      assert_equal({plugins: []}, config.opts)
     end
   end
 
@@ -49,6 +66,8 @@ describe Jat do
   end
 
   describe ".to_h" do
+    let(:jat) { jat_class.allocate }
+
     it "raises error that we should add some response generation plugin" do
       error = assert_raises(Jat::Error) { jat_class.to_h(nil) }
 
@@ -56,13 +75,15 @@ describe Jat do
       assert_equal error_message, error.message
     end
 
-    it "initializes serializer instance with provided attributes" do
-      jat_class.expects(:new).with("obj", "context")
+    it "initializes serializer instance with provided context" do
+      jat.expects(:to_h).with("obj")
+      jat_class.expects(:new).with("context").returns(jat)
       jat_class.to_h("obj", "context")
     end
 
     it "adds empty hash context when context not provided" do
-      jat_class.expects(:new).with("obj", {})
+      jat.expects(:to_h).with("obj")
+      jat_class.expects(:new).with({}).returns(jat)
       jat_class.to_h("obj")
     end
   end
@@ -96,19 +117,17 @@ describe Jat do
   end
 
   describe "#initialize" do
-    it "initializes object and context attributes" do
-      jat = jat_class.new("obj", "context")
-
-      assert_equal "obj", jat.object
+    it "initializes context" do
+      jat = jat_class.new("context")
       assert_equal "context", jat.context
     end
   end
 
   describe "#to_h" do
     it "raises error" do
-      jat = jat_class.new(nil, nil)
+      jat = jat_class.new
 
-      error = assert_raises(Jat::Error) { jat.to_h }
+      error = assert_raises(Jat::Error) { jat.to_h(nil) }
       error_message = "Method #to_h must be implemented by plugin"
       assert_equal error_message, error.message
     end
@@ -116,7 +135,7 @@ describe Jat do
 
   describe "#config" do
     it "returns self class config" do
-      jat = jat_class.new(nil, nil)
+      jat = jat_class.new
 
       assert_same jat.config, jat_class.config
     end

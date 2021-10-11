@@ -5,14 +5,14 @@ require_relative "./lib/preloader"
 class Jat
   module Plugins
     module ActiverecordPreloads
-      def self.apply(jat_class)
+      def self.load(jat_class, **_opts)
         jat_class.include(InstanceMethods)
       end
 
       module InstanceMethods
-        def initialize(*)
+        def to_h(object)
+          object = add_preloads(object)
           super
-          @object = add_preloads(@object)
         end
 
         private
@@ -20,7 +20,7 @@ class Jat
         def add_preloads(obj)
           return obj if obj.nil? || (obj.is_a?(Array) && obj.empty?)
 
-          preloads = self.class.jat_preloads(self)
+          preloads = preloads()
           return obj if preloads.empty?
 
           Preloader.preload(obj, preloads)

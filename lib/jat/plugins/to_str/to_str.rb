@@ -3,24 +3,25 @@
 class Jat
   module Plugins
     module ToStr
-      def self.apply(jat_class)
+      def self.load(jat_class, **_opts)
         jat_class.include(InstanceMethods)
         jat_class.extend(ClassMethods)
       end
 
-      def self.after_apply(jat_class, **opts)
+      def self.after_load(jat_class, **opts)
         jat_class.config[:to_str] = opts[:to_str] || ->(data) { ToStrJSON.dump(data) }
       end
 
       module ClassMethods
-        def to_str(object, context = {})
-          new(object, context).to_str
+        def to_str(object, context = nil)
+          new(context || FROZEN_EMPTY_HASH).to_str(object)
         end
       end
 
       module InstanceMethods
-        def to_str
-          config[:to_str].call(to_h)
+        def to_str(object)
+          hash = to_h(object)
+          config[:to_str].call(hash)
         end
       end
 

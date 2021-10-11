@@ -7,7 +7,7 @@ require_relative "./lib/preloads_with_path"
 class Jat
   module Plugins
     module Preloads
-      def self.apply(jat_class)
+      def self.load(jat_class, **_opts)
         jat_class::Attribute.include(AttributeMethods)
       end
 
@@ -32,7 +32,7 @@ class Jat
         # we don't know which entity is main (:user or :profile in this example) but
         # we need to know main value to add nested preloads to it.
         # User can specify main preloaded entity by adding "!" suffix
-        # ({ user!: [:profile] } for example), othervice the latest key will be considered main.
+        # ({ user!: [:profile] } for example), otherwise the latest key will be considered main.
         def get_preloads_with_path
           preloads_provided = opts.key?(:preload)
           preloads =
@@ -47,7 +47,9 @@ class Jat
           return NULL_PRELOADS if preloads_provided && !preloads
 
           preloads = FormatUserPreloads.to_hash(preloads)
-          PreloadsWithPath.call(preloads)
+          preloads, path = PreloadsWithPath.call(preloads)
+
+          [EnumDeepFreeze.call(preloads), path.freeze]
         end
       end
     end

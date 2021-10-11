@@ -3,7 +3,7 @@
 require "test_helper"
 
 describe "Jat::Plugins::Preloads::PreloadsWithPath" do
-  before { Jat::Plugins.load_plugin(:_preloads) }
+  before { Jat::Plugins.find_plugin(:_preloads) }
 
   let(:described_class) { Jat::Plugins::Preloads::PreloadsWithPath }
 

@@ -4,7 +4,7 @@ require "test_helper"
 require "support/activerecord"
 
 describe "Jat::Plugins::ActiverecordPreloads" do
-  before { Jat::Plugins.load_plugin(:_activerecord_preloads) }
+  before { Jat::Plugins.find_plugin(:_activerecord_preloads) }
 
   describe "Preloader" do
     let(:described_class) { plugin::Preloader }

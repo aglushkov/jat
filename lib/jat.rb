@@ -6,10 +6,13 @@ require_relative "jat/plugins"
 
 # Main namespace
 class Jat
+  FROZEN_EMPTY_HASH = {}.freeze
+  FROZEN_EMPTY_ARRAY = [].freeze
+
   # A generic exception used by Jat.
   class Error < StandardError; end
 
-  @config = Config.new
+  @config = Config.new({plugins: []})
 
   module ClassMethods
     attr_reader :config
@@ -35,18 +38,29 @@ class Jat
       super
     end
 
-    def plugin(plugin, **opts)
-      if !plugin.is_a?(Symbol) && !plugin.is_a?(Module)
-        raise Error, "Plugin class must be a Symbol or a Module, #{plugin.inspect} given"
-      end
+    def plugin(name, **opts)
+      return if plugin_used?(name)
 
-      plugin = Plugins.load_plugin(plugin) if plugin.is_a?(Symbol)
+      plugin = Plugins.find_plugin(name)
 
-      Plugins.before_apply(plugin, self, **opts)
-      Plugins.apply(plugin, self)
-      Plugins.after_apply(plugin, self, **opts)
+      # Before load usually used to check plugin can be attached or to load additional plugins
+      plugin.before_load(self, **opts) if plugin.respond_to?(:before_load)
+
+      # Usually used to include/extend plugin modules
+      plugin.load(self, **opts) if plugin.respond_to?(:load)
+
+      # Store attached plugins, so we can check them later
+      config[:plugins] << plugin
+
+      # Set some config options for current plugin or load additional plugins
+      plugin.after_load(self, **opts) if plugin.respond_to?(:after_load)
 
       plugin
+    end
+
+    def plugin_used?(name)
+      plugin = Plugins.find_plugin(name)
+      config[:plugins].include?(plugin)
     end
 
     def call
@@ -54,7 +68,7 @@ class Jat
     end
 
     def to_h(object, context = nil)
-      new(object, context || {}).to_h
+      new(context || {}).to_h(object)
     end
 
     def attributes
@@ -72,14 +86,13 @@ class Jat
   end
 
   module InstanceMethods
-    attr_reader :object, :context
+    attr_reader :context
 
-    def initialize(object, context)
-      @object = object
+    def initialize(context = {})
       @context = context
     end
 
-    def to_h
+    def to_h(_object)
       raise Error, "Method #to_h must be implemented by plugin"
     end
 
