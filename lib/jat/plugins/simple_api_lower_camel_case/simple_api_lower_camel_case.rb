@@ -1,0 +1,30 @@
+# frozen_string_literal: true
+
+class Jat
+  module Plugins
+    module SimpleApiLowerCamelCase
+      def self.before_load(jat_class, **_opts)
+        raise Error, "Please load :simple_api plugin first" unless jat_class.plugin_used?(:simple_api)
+
+        jat_class.plugin :_lower_camel_case
+      end
+
+      def self.load(jat_class, **_opts)
+        jat_class::Response.include(ResponseInstanceMethods)
+      end
+
+      module ResponseInstanceMethods
+        private
+
+        def context_metadata
+          metadata = super
+          return metadata if metadata.empty?
+
+          metadata.transform_keys! { |key| Jat::LowerCamelCaseTransformation.call(key) }
+        end
+      end
+    end
+
+    register_plugin(:simple_api_lower_camel_case, SimpleApiLowerCamelCase)
+  end
+end

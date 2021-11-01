@@ -68,32 +68,54 @@ class Jat
           end
 
           def jsonapi_data
-            combine(jat_class.jsonapi_data, context[:jsonapi])
+            combine(jat_class.jsonapi_data, context_jsonapi)
           end
 
           def document_links
-            combine(jat_class.document_links, context[:links])
+            combine(jat_class.document_links, context_links)
           end
 
           def document_meta
-            combine(jat_class.added_document_meta, context[:meta])
+            combine(jat_class.added_document_meta, context_meta)
           end
 
-          def combine(attributes, attributes_context)
-            data = attributes_context&.transform_keys(&:to_sym) || {}
-            data.transform_keys! { |key| CamelLowerTransformation.call(key) } if jat_class.config[:camel_lower]
+          def combine(attributes, context_data)
+            return context_data if attributes.empty?
 
-            return data if attributes.empty?
+            data = context_data
 
-            attributes.each_value do |attr|
-              name = attr.name
+            attributes.each do |name, attribute|
               next if data.key?(name)
 
-              value = attr.block.call(object, context)
-              data[name] = value unless value.nil?
+              value = attribute_value(attribute)
+
+              unless value.nil?
+                data = data.dup if data.equal?(FROZEN_EMPTY_HASH)
+                data[name] = value
+              end
             end
 
             data
+          end
+
+          def attribute_value(attribute)
+            attribute.block.call(object, context)
+          end
+
+          def context_jsonapi
+            context_attr_transform(:jsonapi)
+          end
+
+          def context_links
+            context_attr_transform(:links)
+          end
+
+          def context_meta
+            context_attr_transform(:meta)
+          end
+
+          def context_attr_transform(key)
+            context[key]&.transform_keys(&:to_sym) || FROZEN_EMPTY_HASH
           end
         end
 

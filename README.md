@@ -19,7 +19,7 @@ JAT helps to serialize complex nested objects to JSON format.
 * **plugin :simple_api** - enables SIMPLE:API response formatting
 * **plugin :cache** - allows to cache response
 * **plugin :to_s** - adds `.to_s` method to serialize to string
-* **plugin :camel_lower** - transaforms all attributes to lowerCamelCase
+* **plugin :lower_camel_case** - transaforms all attributes to lowerCamelCase
 
 ## Quick Examples
 <details>
@@ -192,7 +192,7 @@ Plugins can be enabled on `Jat` class itself or inside any subclass
 ```ruby
 Jat.plugin :json_api 
 Jat.plugin :cache 
-Jat.plugin :camel_lower
+Jat.plugin :lower_camel_case
 Jat.plugin :to_str
 
 # or 
@@ -200,7 +200,7 @@ Jat.plugin :to_str
 class BaseSerializer < Jat
   Jat.plugin :simple_api 
   Jat.plugin :cache 
-  Jat.plugin :camel_lower
+  Jat.plugin :lower_camel_case
   Jat.plugin :to_str
 end
 ```

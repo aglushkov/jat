@@ -52,26 +52,6 @@ describe "Jat::Plugins::ActiverecordPreloads" do
         assert_equal true, user.association(:comments).loaded?
       end
 
-      it "resets activerecord object preloaded relations" do
-        user = AR::User.create!
-        comment = user.comments.create!
-        user.comments.to_a && comment.delete # preload comments manually and delete comment
-
-        described_class.preload(user, {comments: {}})
-
-        assert_equal true, user.association(:comments).loaded?
-        assert_equal [], user.comments
-      end
-
-      it "preloads data to activerecord relation object" do
-        user = AR::User.create!
-
-        result = described_class.preload(AR::User.where(id: user.id), {comments: {}})
-
-        assert_equal result, [user]
-        assert_equal true, result[0].association(:comments).loaded?
-      end
-
       it "preloads data to activerecord array" do
         user = AR::User.create!
 
@@ -82,16 +62,22 @@ describe "Jat::Plugins::ActiverecordPreloads" do
         assert_equal true, result[0].association(:comments).loaded?
       end
 
-      it "resets activerecord array preloaded relations" do
+      it "preloads data to activerecord relation" do
         user = AR::User.create!
-        comment = user.comments.create!
-        user.comments.to_a && comment.delete # preload comments manually and delete comment
 
-        users = [user]
-        result = described_class.preload(users, {comments: {}})
+        result = described_class.preload(AR::User.where(id: user.id), {comments: {}})
 
+        assert_equal result, [user]
         assert_equal true, result[0].association(:comments).loaded?
-        assert_equal [], result[0].comments
+      end
+
+      it "preloads data to loaded activerecord relation" do
+        user = AR::User.create!
+
+        result = described_class.preload(AR::User.where(id: user.id).load, {comments: {}})
+
+        assert_equal result, [user]
+        assert_equal true, result[0].association(:comments).loaded?
       end
     end
   end

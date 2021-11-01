@@ -37,7 +37,7 @@ class Jat
 
             map.each do |key, inner_map|
               attribute = jat_class.attributes.fetch(key)
-              value = value(attribute, object, context)
+              value = attribute_value(attribute)
 
               result[key] =
                 if attribute.relation?
@@ -56,7 +56,7 @@ class Jat
 
           private
 
-          def value(attribute, object, context)
+          def attribute_value(attribute)
             attribute.block.call(object, context)
           end
 
@@ -65,14 +65,14 @@ class Jat
             serializer::ResponsePiece.to_h(value, context, inner_map)
           end
 
-          def many?(attribute, object)
+          def many?(attribute, nested_object)
             is_many = attribute.many?
 
             # handle boolean
             return is_many if (is_many == true) || (is_many == false)
 
             # handle nil
-            object.is_a?(Enumerable)
+            nested_object.is_a?(Enumerable)
           end
         end
 

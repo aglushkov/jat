@@ -24,11 +24,11 @@ describe "Jat::Plugins::JsonApiValidateParams" do
     jat_class
   end
 
-  let(:serializer_camel_lower) do
+  let(:serializer_lower_camel_case) do
     jat_class = Class.new(Jat)
     jat_class.plugin :json_api
+    jat_class.plugin :json_api_lower_camel_case
     jat_class.plugin @plugin
-    jat_class.plugin :camel_lower
 
     jat_class.type "foo"
     jat_class.attribute :foo_bar
@@ -52,8 +52,8 @@ describe "Jat::Plugins::JsonApiValidateParams" do
     assert_equal(expected_message, error.message)
   end
 
-  it "validates attributes correctly when camel_lower plugin loaded" do
-    jat = serializer_camel_lower.new(fields: {foo: "fooBar,fooBaz"})
+  it "validates attributes correctly when lower_camel_case plugin loaded" do
+    jat = serializer_lower_camel_case.new(fields: {foo: "fooBar,fooBaz"})
     error = assert_raises(Jat::JsonApiParamsError) { jat.validate }
 
     expected_message = "No attribute 'fooBaz' in resource type 'foo'. Existing attributes are: 'fooBar', 'fooBazz'"
@@ -74,8 +74,8 @@ describe "Jat::Plugins::JsonApiValidateParams" do
     assert_equal(expected_message, error.message)
   end
 
-  it "validates includes correctly when camel_lower plugin loaded" do
-    jat = serializer_camel_lower.new(include: "extra")
+  it "validates includes correctly when lower_camel_case plugin loaded" do
+    jat = serializer_lower_camel_case.new(include: "extra")
     error = assert_raises(Jat::JsonApiParamsError) { jat.validate }
 
     expected_message = "Type 'foo' has no included 'extra' relationship. Existing relationships are: 'fooBazz'"

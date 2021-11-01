@@ -35,20 +35,13 @@ class Jat
             is_many = many?
             root = root_key(is_many)
 
-            result = is_many ? many(object) : one(object)
-            result = {root => result} if root
-            result ||= {}
+            response = is_many ? many(object) : one(object)
+            response = {root => response} if root
+            response ||= {}
 
-            # Add metadata to response
-            # We can add metadata to empty response, or to top-level namespace
-            # We should not mix metadata with object attributes
-            metadata.tap do |meta|
-              next if meta.empty?
-              raise Error, "Response must have a root key to add metadata" if !result.empty? && !root
-              result[meta_key] = meta
-            end
+            add_metadata(response, root)
 
-            result
+            response
           end
 
           private
@@ -78,30 +71,47 @@ class Jat
             end
           end
 
+          # Add metadata to response
+          # We can add metadata whether to empty response or to top-level namespace
+          # We should not mix metadata with object attributes
+          def add_metadata(response, root)
+            meta = metadata
+            return if meta.empty?
+
+            raise Error, "Response must have a root key to add metadata" if !response.empty? && !root
+            response[meta_key] = meta
+          end
+
           def meta_key
             context[:meta_key]&.to_sym || jat_class.config[:meta_key]
           end
 
           def metadata
             data = context_metadata
-            data.transform_keys! { |key| CamelLowerTransformation.call(key) } if jat_class.config[:camel_lower]
 
             meta = jat_class.added_meta
             return data if meta.empty?
 
-            meta.each_value do |attribute|
-              name = attribute.name
+            meta.each do |name, attribute|
               next if data.key?(name)
 
-              value = attribute.block.call(object, context)
-              data[name] = value if value
+              value = attribute_value(attribute)
+
+              unless value.nil?
+                data = data.dup if data.equal?(FROZEN_EMPTY_HASH)
+                data[name] = value
+              end
             end
 
             data
           end
 
           def context_metadata
-            context[:meta]&.transform_keys(&:to_sym) || {}
+            context[:meta]&.transform_keys(&:to_sym) || FROZEN_EMPTY_HASH
+          end
+
+          def attribute_value(attribute)
+            attribute.block.call(object, context)
           end
         end
 

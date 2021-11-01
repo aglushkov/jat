@@ -27,9 +27,9 @@ describe "Jat::Plugins::SimpleApiValidateParams" do
     jat_class
   end
 
-  let(:serializer_camel_lower) do
+  let(:serializer_lower_camel_case) do
     jat_class = Class.new(base_serializer)
-    jat_class.plugin :camel_lower
+    jat_class.plugin :lower_camel_case
 
     jat_class.attribute :foo_bar
     jat_class.relationship :foo_bazz, serializer: jat_class

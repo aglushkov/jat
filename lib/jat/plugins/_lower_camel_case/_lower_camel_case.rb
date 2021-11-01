@@ -2,26 +2,22 @@
 
 class Jat
   module Plugins
-    module CamelLower
+    module LowerCamelCase
       def self.load(jat_class, **_opts)
         jat_class::Attribute.include(AttributeInstanceMethods)
       end
 
-      def self.after_load(jat_class)
-        jat_class.config[:camel_lower] = true
-      end
-
       module AttributeInstanceMethods
         def name
-          CamelLowerTransformation.call(original_name)
+          LowerCamelCaseTransformation.call(original_name)
         end
       end
     end
 
-    register_plugin(:camel_lower, CamelLower)
+    register_plugin(:_lower_camel_case, LowerCamelCase)
   end
 
-  class CamelLowerTransformation
+  class LowerCamelCaseTransformation
     SEPARATOR = "_"
 
     def self.call(string)
