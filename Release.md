@@ -6,7 +6,7 @@
 4. Update version number in JAT_VERSION file
 5. Make local gem release `gem build jat.gemspec`
 6. Run examples `rake examples` and fix all errors if any.
-7. Repeat `standardrb --fix`, `rake test_with_coverage`, `gem build jat.gemspec`, `rake examples` until you have any chnages
+7. Repeat `standardrb --fix`, `rake test_with_coverage`, `gem build jat.gemspec`, `rake examples` until you have any changes
 8. Update CHANGELOG.md if needed
 9. Update README.md if needed
 10. Commit changes
