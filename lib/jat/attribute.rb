@@ -64,7 +64,7 @@ class Jat
         current_block = params.fetch(:block).tap { |bl| check_block_valid(bl) if bl }
         current_block ||= keyword_block
 
-        @block = anonymized_block(current_block)
+        @block = current_block
       end
 
       def value(object, context)
@@ -76,16 +76,6 @@ class Jat
       def keyword_block
         key_method_name = key
         proc { |object| object.public_send(key_method_name) }
-      end
-
-      def anonymized_block(block)
-        Class.new do
-          private
-
-          define_method(:_doe) do |object, context|
-            block.call(object, context)
-          end
-        end.new.method(:_doe)
       end
 
       def check_block_valid(block)

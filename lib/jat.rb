@@ -43,24 +43,29 @@ class Jat
 
       plugin = Plugins.find_plugin(name)
 
-      # Before load usually used to check plugin can be attached or to load additional plugins
+      # We split loading of plugin to three methods - before_load, load, after_load:
+      #
+      # - **before_load** usually used to check requirements and to load additional plugins
+      # - **load** usually used to include plugin modules
+      # - **after_load** usually used to add config options
       plugin.before_load(self, **opts) if plugin.respond_to?(:before_load)
-
-      # Usually used to include/extend plugin modules
       plugin.load(self, **opts) if plugin.respond_to?(:load)
-
-      # Store attached plugins, so we can check them later
-      config[:plugins] << plugin
-
-      # Set some config options for current plugin or load additional plugins
       plugin.after_load(self, **opts) if plugin.respond_to?(:after_load)
+
+      # Store attached plugins, so we can check it is loaded later
+      config[:plugins] << (plugin.respond_to?(:plugin_name) ? plugin.plugin_name : plugin)
 
       plugin
     end
 
-    def plugin_used?(name)
-      plugin = Plugins.find_plugin(name)
-      config[:plugins].include?(plugin)
+    def plugin_used?(plugin)
+      plugin_name =
+        case plugin
+        when Module then plugin.respond_to?(:plugin_name) ? plugin.plugin_name : plugin
+        else plugin
+        end
+
+      config[:plugins].include?(plugin_name)
     end
 
     def call

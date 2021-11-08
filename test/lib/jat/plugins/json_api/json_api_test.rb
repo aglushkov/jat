@@ -23,14 +23,6 @@ describe "Jat::Plugins::JsonApi" do
   end
 
   describe ".after_load" do
-    it "loads json_api_activerecord plugin if activerecord option provided" do
-      jat_class = Class.new(Jat)
-      jat_class.expects(:plugin).with(:json_api_activerecord, activerecord: true)
-
-      plugin.load(jat_class)
-      plugin.after_load(jat_class, activerecord: true)
-    end
-
     it "adds config variable with name of response plugin that was loaded" do
       jat_class = Class.new(Jat)
       jat_class.plugin(:json_api)
