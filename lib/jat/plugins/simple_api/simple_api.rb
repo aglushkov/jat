@@ -8,7 +8,9 @@ require_relative "./lib/response_piece"
 class Jat
   module Plugins
     module SimpleApi
-      DEFAULT_META_KEY = :meta
+      def self.plugin_name
+        :simple_api
+      end
 
       def self.before_load(jat_class, **_opts)
         response_plugin = jat_class.config[:response_plugin_loaded]
@@ -22,11 +24,10 @@ class Jat
         jat_class.extend(ClassMethods)
       end
 
-      def self.after_load(jat_class, **opts)
-        jat_class.config[:response_plugin_loaded] = :simple_api
-        jat_class.plugin(:simple_api_activerecord, **opts) if opts[:activerecord]
+      def self.after_load(jat_class, **_opts)
+        jat_class.config[:response_plugin_loaded] = plugin_name
 
-        jat_class.meta_key(DEFAULT_META_KEY)
+        jat_class.meta_key(:meta)
 
         fields_parser_class = Class.new(FieldsParamParser)
         fields_parser_class.jat_class = jat_class
@@ -119,6 +120,6 @@ class Jat
       end
     end
 
-    register_plugin(:simple_api, SimpleApi)
+    register_plugin(SimpleApi.plugin_name, SimpleApi)
   end
 end

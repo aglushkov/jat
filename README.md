@@ -1,24 +1,26 @@
 # JAT (JSON API TOOLKIT)
 
-JAT helps to serialize complex nested objects to JSON format.
+JAT helps to serialize objects to Hash format.
 
 ## Supported Formats
 
   - [JSON:API]
-  - [Simple:API] (it is just nested JSON objects, same response format as constructed by good old [AMS] or [Jbuilder])
+  - [SIMPLE:API]
 
-## Key Featurs:
+## Key Features:
 
-* Configurable exposed attributes
-* Auto preload (with ActiveRecord)
+* Configurable exposing of attributes
+* Auto preload (currently only with ActiveRecord, but more to come)
 * Modular design – plugin system allows you to load only functionality you need
 
 ## Plugins
 
 * **plugin :json_api** - enables JSON:API response formatting
 * **plugin :simple_api** - enables SIMPLE:API response formatting
+* **plugin :preloads** - adds method to show relationships names that will be loaded during serialization
+* **plugin :activerecord** - automatically preloads nested relationships to serializaed objects before serialization.
 * **plugin :cache** - allows to cache response
-* **plugin :to_s** - adds `.to_s` method to serialize to string
+* **plugin :to_str** - allows to serialize to json string
 * **plugin :lower_camel_case** - transaforms all attributes to lowerCamelCase
 
 ## Quick Examples
@@ -184,13 +186,12 @@ puts JSON.pretty_generate(response)
 ```
 </details>
 
-## DSL
-
-### Plugin
+## Plugins
 
 Plugins can be enabled on `Jat` class itself or inside any subclass
 ```ruby
-Jat.plugin :json_api 
+Jat.plugin :simple_api
+Jat.plugin :json_api
 Jat.plugin :cache 
 Jat.plugin :lower_camel_case
 Jat.plugin :to_str

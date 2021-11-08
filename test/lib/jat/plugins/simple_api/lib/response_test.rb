@@ -13,7 +13,7 @@ describe "Jat::Plugins::SimpleApi::Response" do
 
   it "returns correct structure with data" do
     str_serializer = Class.new(base_class) do
-      attribute(:id) { |_| "STRING" }
+      attribute(:id) { |obj| obj }
     end
 
     assert_equal({id: "STRING"}, str_serializer.to_h("STRING"))

@@ -10,6 +10,10 @@ require_relative "./lib/response_piece"
 class Jat
   module Plugins
     module JsonApi
+      def self.plugin_name
+        :json_api
+      end
+
       def self.before_load(jat_class, **_opts)
         response_plugin = jat_class.config[:response_plugin_loaded]
         return unless response_plugin
@@ -23,6 +27,8 @@ class Jat
       end
 
       def self.after_load(jat_class, **opts)
+        jat_class.config[:response_plugin_loaded] = plugin_name
+
         fields_parser_class = Class.new(FieldsParamParser)
         fields_parser_class.jat_class = jat_class
         jat_class.const_set(:FieldsParamParser, fields_parser_class)
@@ -43,8 +49,6 @@ class Jat
         response_piece_class.jat_class = jat_class
         jat_class.const_set(:ResponsePiece, response_piece_class)
 
-        jat_class.config[:response_plugin_loaded] = :json_api
-        jat_class.plugin(:json_api_activerecord, **opts) if opts[:activerecord]
         jat_class.id
       end
 
@@ -242,6 +246,6 @@ class Jat
       end
     end
 
-    register_plugin(:json_api, JsonApi)
+    register_plugin(JsonApi.plugin_name, JsonApi)
   end
 end

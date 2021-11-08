@@ -72,7 +72,8 @@ Comment.create!(user: user1, post: post2, text: "comment4")
 
 # Serializers
 class JsonapiSerializer < Jat
-  plugin :json_api, activerecord: true
+  plugin :json_api
+  plugin :json_api_activerecord
   plugin :json_api_validate_params
 end
 

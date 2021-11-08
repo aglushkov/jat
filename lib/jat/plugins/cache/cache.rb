@@ -3,6 +3,10 @@
 class Jat
   module Plugins
     module Cache
+      def self.plugin_name
+        :cache
+      end
+
       def self.before_load(jat_class, **opts)
         jat_class.plugin :to_str, **opts
       end
@@ -38,6 +42,6 @@ class Jat
       end
     end
 
-    register_plugin(:cache, Cache)
+    register_plugin(Cache.plugin_name, Cache)
   end
 end

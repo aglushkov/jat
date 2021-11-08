@@ -32,3 +32,9 @@ task :examples do
     `ruby '#{file}'`
   end
 end
+
+task :benchmarks do
+  Dir["benchmarks/json_api/*.rb", "benchmarks/simple_api/*.rb"].each do |file|
+    `ruby '#{file}'`
+  end
+end

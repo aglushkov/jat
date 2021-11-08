@@ -13,26 +13,12 @@ describe "Jat::Plugins::JsonApiActiverecord" do
     assert_match(/json_api/, error.message)
   end
 
-  it "loads other plugins in after_load" do
+  it "loads other plugins" do
     jat_class = Class.new(Jat)
     jat_class.plugin :json_api
+    jat_class.plugin :json_api_activerecord
 
-    jat_class.expects(:plugin).with(:_preloads, foo: :bar)
-    jat_class.expects(:plugin).with(:_activerecord_preloads, foo: :bar)
-
-    @plugin.after_load(jat_class, foo: :bar)
-  end
-
-  describe "InstanceMethods" do
-    it "add .preloads method as a delegator to #{@plugin}::Preloads" do
-      jat_class = Class.new(Jat)
-      jat_class.plugin :json_api
-      jat_class.plugin @plugin
-      jat = jat_class.allocate
-
-      @plugin::Preloads.expects(:call).with(jat).returns("RES")
-
-      assert_equal "RES", jat.preloads
-    end
+    assert jat_class.plugin_used?(:json_api_preloads)
+    assert jat_class.plugin_used?(:_activerecord_preloads)
   end
 end

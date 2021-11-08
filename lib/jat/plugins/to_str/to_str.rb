@@ -3,6 +3,10 @@
 class Jat
   module Plugins
     module ToStr
+      def self.plugin_name
+        :to_str
+      end
+
       def self.load(jat_class, **_opts)
         jat_class.include(InstanceMethods)
         jat_class.extend(ClassMethods)
@@ -45,6 +49,6 @@ class Jat
       end
     end
 
-    register_plugin(:to_str, ToStr)
+    register_plugin(ToStr.plugin_name, ToStr)
   end
 end

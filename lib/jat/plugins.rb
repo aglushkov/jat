@@ -18,7 +18,20 @@ class Jat
     # correctly.
     def self.find_plugin(name)
       return name if name.is_a?(Module)
-      require "jat/plugins/#{name}/#{name}" unless @plugins.key?(name)
+
+      begin
+        require "jat/plugins/#{name}/#{name}"
+      rescue LoadError
+        if name.start_with?("json_api")
+          require "jat/plugins/json_api/plugins/#{name}/#{name}"
+        elsif name.start_with?("simple_api")
+          require "jat/plugins/simple_api/plugins/#{name}/#{name}"
+        elsif name.start_with?("_")
+          require "jat/plugins/common/#{name}/#{name}"
+        else
+          raise
+        end
+      end
 
       @plugins[name] || raise(Error, "plugin #{name} did not register itself correctly in Jat::Plugins")
     end

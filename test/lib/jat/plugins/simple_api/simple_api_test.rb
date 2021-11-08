@@ -16,14 +16,6 @@ describe "Jat::Plugins::SimpleApi" do
   let(:plugin) { @plugin }
 
   describe ".after_load" do
-    it "loads simple_api_activerecord plugin if activerecord option provided" do
-      jat_class = Class.new(Jat)
-      jat_class.expects(:plugin).with(:simple_api_activerecord, activerecord: true)
-
-      plugin.load(jat_class)
-      plugin.after_load(jat_class, activerecord: true)
-    end
-
     it "adds default `:meta` meta_key config option" do
       jat_class = Class.new(Jat)
       assert_nil jat_class.config[:meta_key]
