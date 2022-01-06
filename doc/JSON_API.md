@@ -131,7 +131,6 @@ JSON:API is a standard format described at https://jsonapi.org/.
   * [Internal Cache]
 * [Miscellaneous]
   * [Configure Exposed Attributes]
-  * [Additional Meta]
   * [Paging]
 
 
