@@ -587,7 +587,7 @@ Enabling internal cache:
 
 ## Miscellaneous
 ### Configure Exposed Attributes
-  When developing application it is always a tricky question to find which attributes will be needed. Usually it is unwanted to expose everything, and at the same time it is unwanted to create different serializers with different attribute sets. This gem allows to configure what is needed. As exposing object attributes usually does not require additional (DB) queries, current gem exposes all attributes by default and hides all relationships.
+  When developing application it is always a tricky question to find which attributes will be needed. Usually it is unwanted to expose everything, and at the same time it is unwanted to create multiple serializers for same resource. This gem allows to configure what is needed. As exposing object attributes usually does not require additional (DB) queries, current gem exposes all attributes by default and hides all relationships.
 
   📌 Rule of thumb:
   - _attributes_ are **exposed by default**
