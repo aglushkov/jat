@@ -262,6 +262,7 @@ JSON:API is a standard format described at https://jsonapi.org/.
 
 ### Meta
   JSON:API allow to place meta at any of three response levels:
+
     - Document Meta
     - Relationship meta
     - Object meta
@@ -333,6 +334,7 @@ JSON:API is a standard format described at https://jsonapi.org/.
 
 ### Links
   JSON:API allow to place links at any of three response levels:
+
     - Document links
     - Relationship links
     - Object links

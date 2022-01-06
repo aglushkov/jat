@@ -20,6 +20,16 @@ class Jat
         extend ClassMethods
       end
 
+      class Loader
+        def self.call(records, associations)
+          if ActiveRecord::VERSION::MAJOR >= 7
+            ActiveRecord::Associations::Preloader.new(records: records, associations: associations).call
+          else
+            ActiveRecord::Associations::Preloader.new.preload(records, associations)
+          end
+        end
+      end
+
       class ActiverecordObject
         module ClassMethods
           def fit?(object)
@@ -27,7 +37,7 @@ class Jat
           end
 
           def preload(object, preloads)
-            ActiveRecord::Associations::Preloader.new.preload(object, preloads)
+            Loader.call([object], preloads)
             object
           end
         end
@@ -44,7 +54,7 @@ class Jat
           def preload(objects, preloads)
             if objects.loaded?
               array_objects = objects.to_a
-              ActiverecordArray.preload(array_objects, preloads)
+              Loader.call(array_objects, preloads)
               objects
             else
               objects.preload(preloads).load
@@ -64,7 +74,7 @@ class Jat
           end
 
           def preload(objects, preloads)
-            ActiveRecord::Associations::Preloader.new.preload(objects, preloads)
+            Loader.call(objects, preloads)
             objects
           end
 

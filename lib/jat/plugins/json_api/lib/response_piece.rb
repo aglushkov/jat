@@ -49,7 +49,7 @@ class Jat
           end
 
           def uid
-            {type: jat_class.get_type, id: jat_class.get_id.block.call(object, context)}
+            {type: type, id: id}
           end
 
           private
@@ -105,7 +105,8 @@ class Jat
           def add_relationship_data(rel_serializer, rel_object)
             rel_response_data = rel_serializer::ResponsePiece.new(rel_object, context, map, includes)
             rel_uid = rel_response_data.uid
-            includes[rel_uid] ||= rel_response_data.to_h
+            simple_uid = "#{rel_uid[:id]}-#{rel_uid[:type]}"
+            includes[simple_uid] ||= rel_response_data.to_h
             rel_uid
           end
 
@@ -155,6 +156,14 @@ class Jat
               .transform_values { |attr| attr.block.call(rel_object, context) }
               .tap(&:compact!)
               .tap { context.delete(:parent_object) }
+          end
+
+          def type
+            @type ||= jat_class.get_type
+          end
+
+          def id
+            @id ||= jat_class.get_id.block.call(object, context)
           end
         end
 
