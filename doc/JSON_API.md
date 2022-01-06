@@ -2,10 +2,6 @@
 
 JSON:API is a standard format described at https://jsonapi.org/.
 
-Current plugin uses standard way of exposing fields via `:fields` ([Sparse Fieldsets]) and `:include` ([Inclusion of Related Resources]).
-
-JSON:API automatically preloads nested relationships to avoid N+1 requests with [:activerecord] plugin, so it keeps your application code clean. For other ORMs, you can use [:preloads] plugin to find list of serialized relationships and preload them manually.
-
 <details>
   <summary>JSON:API FORMAT EXAMPLE</summary>
 
@@ -658,7 +654,7 @@ Enabling internal cache:
 [Activation]: #activation
 [Serialization]: #serialization
 [DSL]: #dsl
-  [Type and ID] #type-and-id
+  [Type and ID]: #type-and-id
   [Attribute]: #attribute
   [Relationship]: #relationship
   [Config]: #config
