@@ -32,6 +32,16 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "standard", "~> 1.0"
 
   # ORM plugins
-  gem.add_development_dependency "activerecord", RUBY_VERSION >= "2.5" ? "~> 6.0" : "~> 5.2"
+  ruby_version = Gem::Version.new(RUBY_VERSION)
+  ar_version =
+    if ruby_version >= Gem::Version.new("3.0")
+      "~> 7.0"
+    elsif ruby_version >= Gem::Version.new("2.5")
+      "~> 6.0"
+    else
+      "~> 5.2"
+    end
+
+  gem.add_development_dependency "activerecord", ar_version
   gem.add_development_dependency "sqlite3", "~> 1.4" unless RUBY_ENGINE == "jruby"
 end
