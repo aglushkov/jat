@@ -81,6 +81,7 @@ SIMPLE:API automatically preloads nested relationships to avoid N+1 requests wit
 * [Plugins]
   * [Preloads]
   * [Activerecord]
+  * [Types]
   * [Validate Params]
   * [Serializing to String]
   * [Caching]
@@ -292,6 +293,38 @@ end
     end
   ```
 
+### Types
+  Plugin `types` allows to make automatic type conversion.
+  There are some predefined types, but this list can be modified. New types should be callable and should take one argument. Adding types for attributes is not required.
+
+  ```ruby
+    class ApplicationSerializer < Jat
+      plugin :types
+
+      # Predefined type (config[:types])
+      # {
+      #   array: ->(value) { Array(value) },
+      #   bool: ->(value) { !!value },
+      #   float: ->(value) { Float(value) },
+      #   hash: ->(value) { Hash(value) },
+      #   int: ->(value) { Integer(value) },
+      #   str: ->(value) { String(value) }
+      # }
+
+      # Adding or replacing types:
+      config[:types][:bool] = Dry::Types['params.bool']
+      config[:types][:time] = ->(value) { value.iso8601(6) }
+    end
+
+    # Using types
+    class UserSerializer < ApplicationSerializer
+      attribute :premium, type: :bool
+      attribute :tags, type: :array
+      attribute :created_at, type: :time
+      attribute :address_lines, type: Types::Array(Types::String)
+    end
+  ```
+
 ### Validate Params
   By default when specified fields that not exist will be skipped.
   Plugin `:validate_params` can be used to validate `fields` parameters and to get errors.
@@ -481,6 +514,7 @@ Enabling internal cache:
 [Plugins]: #plugins
   [Preloads]: #preloads
   [Activerecord]: #activerecord
+  [Types]: #types
   [Validate Params]: #validate-params
   [Serializing to String]: #serializing-to-string
   [Caching]: #caching
