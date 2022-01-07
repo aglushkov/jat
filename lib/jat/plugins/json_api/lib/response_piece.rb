@@ -60,7 +60,7 @@ class Jat
 
             attributes_names.each_with_object({}) do |name, attrs|
               attribute = jat_class.attributes[name]
-              attrs[name] = attribute.block.call(object, context)
+              attrs[name] = attribute.value(object, context)
             end
           end
 
@@ -70,7 +70,7 @@ class Jat
 
             relationships_names.each_with_object({}) do |name, rels|
               rel_attribute = jat_class.attributes[name]
-              rel_object = rel_attribute.block.call(object, context)
+              rel_object = rel_attribute.value(object, context)
 
               rel_serializer = rel_attribute.serializer.call
               rel_links = get_relationship_links(rel_serializer, rel_object)
@@ -123,14 +123,14 @@ class Jat
           def get_links
             jat_class
               .object_links
-              .transform_values { |attr| attr.block.call(object, context) }
+              .transform_values { |attr| attr.value(object, context) }
               .tap(&:compact!)
           end
 
           def get_meta
             jat_class
               .added_object_meta
-              .transform_values { |attr| attr.block.call(object, context) }
+              .transform_values { |attr| attr.value(object, context) }
               .tap(&:compact!)
           end
 
@@ -141,7 +141,7 @@ class Jat
             context[:parent_object] = object
 
             links
-              .transform_values { |attr| attr.block.call(rel_object, context) }
+              .transform_values { |attr| attr.value(rel_object, context) }
               .tap(&:compact!)
               .tap { context.delete(:parent_object) }
           end
@@ -153,7 +153,7 @@ class Jat
             context[:parent_object] = object
 
             meta
-              .transform_values { |attr| attr.block.call(rel_object, context) }
+              .transform_values { |attr| attr.value(rel_object, context) }
               .tap(&:compact!)
               .tap { context.delete(:parent_object) }
           end
@@ -163,7 +163,7 @@ class Jat
           end
 
           def id
-            @id ||= jat_class.get_id.block.call(object, context)
+            @id ||= jat_class.get_id.value(object, context)
           end
         end
 

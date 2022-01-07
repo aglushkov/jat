@@ -5,19 +5,15 @@ require_relative "utils/enum_deep_dup"
 class Jat
   class Config
     module InstanceMethods
+      extend Forwardable
+
       attr_reader :opts
 
       def initialize(opts = {})
         @opts = EnumDeepDup.call(opts)
       end
 
-      def []=(key, value)
-        opts[key] = value
-      end
-
-      def [](key)
-        opts[key]
-      end
+      def_delegators :@opts, :[], :[]=, :fetch
     end
 
     module ClassMethods

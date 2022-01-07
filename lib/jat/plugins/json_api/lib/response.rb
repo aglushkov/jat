@@ -87,7 +87,7 @@ class Jat
             attributes.each do |name, attribute|
               next if data.key?(name)
 
-              value = attribute_value(attribute)
+              value = attribute.value(object, context)
 
               unless value.nil?
                 data = data.dup if data.equal?(FROZEN_EMPTY_HASH)
@@ -96,10 +96,6 @@ class Jat
             end
 
             data
-          end
-
-          def attribute_value(attribute)
-            attribute.block.call(object, context)
           end
 
           def context_jsonapi

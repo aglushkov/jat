@@ -37,7 +37,7 @@ class Jat
 
             map.each do |key, inner_map|
               attribute = jat_class.attributes.fetch(key)
-              value = attribute_value(attribute)
+              value = attribute.value(object, context)
 
               result[key] =
                 if attribute.relation?
@@ -55,10 +55,6 @@ class Jat
           end
 
           private
-
-          def attribute_value(attribute)
-            attribute.block.call(object, context)
-          end
 
           def inner_piece(attribute, value, inner_map)
             serializer = attribute.serializer.call

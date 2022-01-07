@@ -95,7 +95,7 @@ class Jat
             meta.each do |name, attribute|
               next if data.key?(name)
 
-              value = attribute_value(attribute)
+              value = attribute.value(object, context)
 
               unless value.nil?
                 data = data.dup if data.equal?(FROZEN_EMPTY_HASH)
@@ -108,10 +108,6 @@ class Jat
 
           def context_metadata
             context[:meta]&.transform_keys(&:to_sym) || FROZEN_EMPTY_HASH
-          end
-
-          def attribute_value(attribute)
-            attribute.block.call(object, context)
           end
         end
 
