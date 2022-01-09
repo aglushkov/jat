@@ -46,7 +46,7 @@ describe "Jat::Plugins::JsonApi" do
     describe "#map" do
       it "returns map for provided context" do
         jat_class::Map.expects(:call).with("CONTEXT").returns "MAP"
-        assert_equal "MAP", jat_class.map("CONTEXT")
+        assert_equal "MAP", jat_class.new("CONTEXT").map
       end
     end
 

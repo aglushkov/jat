@@ -148,5 +148,13 @@ describe Jat::Attribute do
       attribute = attribute_class.new(name: "foo", opts: {key: :length})
       assert_equal 3, attribute.value([1, 2, 3], nil)
     end
+
+    it "raises error if provide block with more than 2 params" do
+      jat_class.attribute(:foo) {}
+      jat_class.attribute(:foo) { |_| }
+      jat_class.attribute(:foo) { |_, _| }
+      err = assert_raises(Jat::Error) { jat_class.attribute(:foo) { |_, _, _| } }
+      assert_equal "Block can have 0-2 parameters", err.message
+    end
   end
 end

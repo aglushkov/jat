@@ -136,7 +136,7 @@ class Jat
 
           def get_relationship_links(rel_serializer, rel_object)
             links = rel_serializer.relationship_links
-            return FROZEN_EMPTY_HASH unless links
+            return FROZEN_EMPTY_HASH if links.empty?
 
             context[:parent_object] = object
 
@@ -148,7 +148,7 @@ class Jat
 
           def get_relationship_meta(rel_serializer, rel_object)
             meta = rel_serializer.added_relationship_meta
-            return FROZEN_EMPTY_HASH unless meta
+            return FROZEN_EMPTY_HASH if meta.empty?
 
             context[:parent_object] = object
 

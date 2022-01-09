@@ -36,8 +36,20 @@ describe "Jat::Plugins::SimpleApiValidateParams" do
     jat_class
   end
 
+  it "returns true when provided fields present" do
+    jat = serializer.new(fields: "foo_bar,foo_bazz(foo_bar)")
+    assert jat.validate
+  end
+
   it "validates fields" do
     jat = serializer.new(fields: "foo_bar,extra")
+    error = assert_raises(Jat::SimpleApiFieldsError) { jat.validate }
+    expected_message = "Field 'extra' not exists"
+    assert_equal(expected_message, error.message)
+  end
+
+  it "validates fields when using lower_camel_case plugin" do
+    jat = serializer_lower_camel_case.new(fields: "fooBar,extra")
     error = assert_raises(Jat::SimpleApiFieldsError) { jat.validate }
     expected_message = "Field 'extra' not exists"
     assert_equal(expected_message, error.message)

@@ -10,6 +10,12 @@ describe "Jat::Plugins::SimpleApiLowerCamelCase" do
     new_class
   end
 
+  it "checks simple_api plugin loaded before" do
+    jat_class = Class.new(Jat)
+    error = assert_raises(Jat::Error) { jat_class.plugin :simple_api_lower_camel_case }
+    assert_match(/simple_api/, error.message)
+  end
+
   it "loads _lower_camel_case plugin" do
     assert jat_class.plugin_used?(:base_lower_camel_case)
   end

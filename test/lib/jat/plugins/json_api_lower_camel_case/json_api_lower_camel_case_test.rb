@@ -15,6 +15,12 @@ describe "Jat::Plugins::JsonApiLowerCamelCase" do
     jat_class.id { |object| object }
   end
 
+  it "checks json_api plugin loaded before" do
+    jat_class = Class.new(Jat)
+    error = assert_raises(Jat::Error) { jat_class.plugin :json_api_lower_camel_case }
+    assert_match(/json_api/, error.message)
+  end
+
   it "returns attributes in lowerCamelCase case" do
     jat_class.attribute(:foo_bar) { 1 }
 

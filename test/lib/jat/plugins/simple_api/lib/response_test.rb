@@ -92,7 +92,8 @@ describe "Jat::Plugins::SimpleApi::Response" do
     end
 
     assert_equal({foo: {id: "1"}}, str_serializer.to_h("1", root: :foo))
-    assert_equal({foo: [{id: "1"}]}, str_serializer.to_h(["1"], root: :foo))
+    assert_equal({foo: {id: "1"}}, str_serializer.to_h("1", root: "foo"))
+    assert_equal({id: "1"}, str_serializer.to_h("1", root: nil))
   end
 
   it "returns correct structure with data multiple attributes" do
@@ -269,7 +270,8 @@ describe "Jat::Plugins::SimpleApi::Response" do
       empty_serializer.meta_key :metadata
       empty_serializer.meta(:foo) { :bar }
 
-      assert_equal({metadata: {foo: :bar, any: :thing}}, empty_serializer.to_h(nil, meta: {any: :thing}))
+      assert_equal({metadata: {foo: :bar}}, empty_serializer.to_h(nil))
+      assert_equal({new_meta: {foo: :bar}}, empty_serializer.to_h(nil, meta_key: "new_meta"))
     end
 
     it "returns correct structure with data and meta" do
@@ -343,6 +345,12 @@ describe "Jat::Plugins::SimpleApi::Response" do
       end
 
       assert_equal({root: {id: "1"}}, str_serializer.to_h("1", bazz: nil))
+    end
+  end
+
+  describe ".inspect" do
+    it "returns self name" do
+      assert_equal "#{base_class}::Response", base_class::Response.inspect
     end
   end
 end

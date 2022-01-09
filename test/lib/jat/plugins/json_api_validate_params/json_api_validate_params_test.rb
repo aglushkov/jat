@@ -13,34 +13,50 @@ describe "Jat::Plugins::JsonApiValidateParams" do
     assert_match(/json_api/, error.message)
   end
 
-  let(:serializer) do
+  let(:base) do
     jat_class = Class.new(Jat)
     jat_class.plugin :json_api
+    jat_class
+  end
+
+  let(:serializer) do
+    jat_class = Class.new(base)
     jat_class.plugin @plugin
 
     jat_class.type "foo"
     jat_class.attribute :foo_bar
-    jat_class.relationship :foo_bazz, serializer: jat_class
+    jat_class.relationship :foo_bazz, serializer: foo_bazz_serializer
+    jat_class
+  end
+
+  let(:foo_bazz_serializer) do
+    jat_class = Class.new(base)
+    jat_class.type "foo_bazz"
+    jat_class.attribute :bazz
     jat_class
   end
 
   let(:serializer_lower_camel_case) do
-    jat_class = Class.new(Jat)
-    jat_class.plugin :json_api
+    jat_class = Class.new(base)
     jat_class.plugin :json_api_lower_camel_case
     jat_class.plugin @plugin
 
     jat_class.type "foo"
     jat_class.attribute :foo_bar
-    jat_class.relationship :foo_bazz, serializer: jat_class
+    jat_class.relationship :foo_bazz, serializer: foo_bazz_serializer
     jat_class
+  end
+
+  it "returns true when provided fields present" do
+    jat = serializer.new(fields: {foo: "foo_bar,foo_bazz", foo_bazz: "bazz"})
+    assert jat.validate
   end
 
   it "validates fields types" do
     jat = serializer.new(fields: {bar: "any"})
     error = assert_raises(Jat::JsonApiParamsError) { jat.validate }
 
-    expected_message = "Response does not have resources with type 'bar'. Existing types are: 'foo'"
+    expected_message = "Response does not have resources with type 'bar'. Existing types are: 'foo', 'foo_bazz'"
     assert_equal(expected_message, error.message)
   end
 
@@ -79,6 +95,14 @@ describe "Jat::Plugins::JsonApiValidateParams" do
     error = assert_raises(Jat::JsonApiParamsError) { jat.validate }
 
     expected_message = "Type 'foo' has no included 'extra' relationship. Existing relationships are: 'fooBazz'"
+    assert_equal(expected_message, error.message)
+  end
+
+  it "validates nested includes" do
+    jat = serializer.new(include: "foo_bazz.extra")
+    error = assert_raises(Jat::JsonApiParamsError) { jat.validate }
+
+    expected_message = "Type 'foo_bazz' has no included 'extra' relationship. Existing relationships are: ''"
     assert_equal(expected_message, error.message)
   end
 end

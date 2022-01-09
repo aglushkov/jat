@@ -76,4 +76,9 @@ describe "Jat::Plugins::Types" do
 
     assert_equal("2020", attr_value(Time.new(2020, 10, 10)))
   end
+
+  it "allows to skip type" do
+    jat_class.attribute(:attr)
+    assert_equal(333, attr_value(333))
+  end
 end

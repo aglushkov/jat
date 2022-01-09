@@ -23,7 +23,7 @@ describe "Jat::Plugins::SimpleApiPreloads" do
   end
 
   describe "InstanceMethods" do
-    it "add .preloads method as a delegator to #{@plugin}::Preloads" do
+    it "adds #preloads method as a delegator to #{@plugin}::Preloads" do
       jat_class = Class.new(Jat)
       jat_class.plugin :simple_api
       jat_class.plugin @plugin
@@ -32,6 +32,20 @@ describe "Jat::Plugins::SimpleApiPreloads" do
       @plugin::Preloads.expects(:call).with(jat).returns("RES")
 
       assert_equal "RES", jat.preloads
+    end
+  end
+
+  describe "ClassMethods" do
+    it "adds .preloads method as a delegator to #{@plugin}::Preloads" do
+      jat_class = Class.new(Jat)
+      jat_class.plugin :simple_api
+      jat_class.plugin @plugin
+
+      jat = jat_class.allocate
+      jat_class.expects(:new).with("CONTEXT").returns(jat)
+      @plugin::Preloads.expects(:call).with(jat).returns("RES")
+
+      assert_equal "RES", jat_class.preloads("CONTEXT")
     end
   end
 end

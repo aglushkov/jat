@@ -21,6 +21,7 @@ class Jat
       end
 
       class Loader
+        # :nocov: We can check only one version of activerecord
         def self.call(records, associations)
           if ActiveRecord::VERSION::MAJOR >= 7
             ActiveRecord::Associations::Preloader.new(records: records, associations: associations).call
@@ -28,6 +29,7 @@ class Jat
             ActiveRecord::Associations::Preloader.new.preload(records, associations)
           end
         end
+        # :nocov:
       end
 
       class ActiverecordObject

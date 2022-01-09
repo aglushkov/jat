@@ -81,8 +81,8 @@ describe Jat::Plugins do
       err = assert_raises(Jat::PluginLoadError) { described_module.find_plugin(plugin_name) }
       assert_equal "Plugin '#{plugin_name}' did not register itself correctly", err.message
     ensure
-      File.unlink(plugin_path) if plugin_path
-      Dir.unlink(plugin_dir) if plugin_dir
+      File.unlink(plugin_path)
+      Dir.unlink(plugin_dir)
     end
   end
 end

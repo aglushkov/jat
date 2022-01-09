@@ -13,65 +13,75 @@ describe "Jat::Plugins::SimpleApi::FieldsParamParser" do
     ser
   end
 
+  let(:described_class) { jat_class::FieldsParamParser }
+
   def parse(str)
     jat_class::FieldsParamParser.parse(str)
   end
 
-  it "returns empty hash when nil provided" do
-    assert_equal({}, parse(nil))
+  describe ".inspect" do
+    it "returns self name" do
+      assert_equal "#{jat_class}::FieldsParamParser", described_class.inspect
+    end
   end
 
-  it "returns empty hash when empty string provided" do
-    assert_equal({}, parse(""))
-  end
+  describe ".parse" do
+    it "returns empty hash when nil provided" do
+      assert_equal({}, parse(nil))
+    end
 
-  it "parses single field" do
-    assert_equal({id: {}}, parse("id"))
-  end
+    it "returns empty hash when empty string provided" do
+      assert_equal({}, parse(""))
+    end
 
-  it "parses multiple fields" do
-    assert_equal({id: {}, name: {}}, parse("id, name"))
-  end
+    it "parses single field" do
+      assert_equal({id: {}}, parse("id"))
+    end
 
-  it "parses single resource with single field" do
-    assert_equal({users: {id: {}}}, parse("users(id)"))
-  end
+    it "parses multiple fields" do
+      assert_equal({id: {}, name: {}}, parse("id, name"))
+    end
 
-  it "parses fields started with open PAREN" do
-    assert_equal({users: {id: {}}}, parse("(users(id))"))
-  end
+    it "parses single resource with single field" do
+      assert_equal({users: {id: {}}}, parse("users(id)"))
+    end
 
-  it "parses single resource with multiple fields" do
-    assert_equal({users: {id: {}, name: {}}}, parse("users(id,name)"))
-  end
+    it "parses fields started with open PAREN" do
+      assert_equal({users: {id: {}}}, parse("(users(id))"))
+    end
 
-  it "parses multiple resources with fields" do
-    fields = "id,posts(title,text),news(title,text)"
-    resp = {
-      id: {},
-      posts: {title: {}, text: {}},
-      news: {title: {}, text: {}}
-    }
+    it "parses single resource with multiple fields" do
+      assert_equal({users: {id: {}, name: {}}}, parse("users(id,name)"))
+    end
 
-    assert_equal(resp, parse(fields))
-  end
+    it "parses multiple resources with fields" do
+      fields = "id,posts(title,text),news(title,text)"
+      resp = {
+        id: {},
+        posts: {title: {}, text: {}},
+        news: {title: {}, text: {}}
+      }
 
-  it "parses included resources" do
-    fields = "id,posts(title,text,comments(author(name),comment))"
-    resp = {
-      id: {},
-      posts: {
-        title: {},
-        text: {},
-        comments: {
-          author: {
-            name: {}
-          },
-          comment: {}
+      assert_equal(resp, parse(fields))
+    end
+
+    it "parses included resources" do
+      fields = "id,posts(title,text,comments(author(name),comment))"
+      resp = {
+        id: {},
+        posts: {
+          title: {},
+          text: {},
+          comments: {
+            author: {
+              name: {}
+            },
+            comment: {}
+          }
         }
       }
-    }
 
-    assert_equal(resp, parse(fields))
+      assert_equal(resp, parse(fields))
+    end
   end
 end

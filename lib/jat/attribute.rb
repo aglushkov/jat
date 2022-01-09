@@ -9,6 +9,8 @@ class Jat
       attr_reader :params, :opts
 
       def initialize(name:, opts: {}, block: nil)
+        check_block_valid(block)
+
         @opts = EnumDeepDup.call(opts)
         @params = EnumDeepFreeze.call(name: name, opts: @opts, block: block)
       end
@@ -61,7 +63,7 @@ class Jat
       def block
         return @block if instance_variable_defined?(:@block)
 
-        current_block = params.fetch(:block).tap { |bl| check_block_valid(bl) if bl }
+        current_block = params.fetch(:block)
         current_block ||= keyword_block
 
         @block = current_block
@@ -79,13 +81,10 @@ class Jat
       end
 
       def check_block_valid(block)
-        raise Error, "Block must be a Proc (not lambda)" if block.lambda?
+        return unless block
 
         params = block.parameters
         raise Error, "Block can have 0-2 parameters" if params.count > 2
-
-        valid_params_types = params.all? { |param| param[0] == :opt }
-        raise Error, "Block parameters must be optional and no keyword parameters" unless valid_params_types
       end
     end
 

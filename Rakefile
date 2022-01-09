@@ -21,12 +21,6 @@ end
 
 task default: :test
 
-task :test_with_coverage do
-  require "simplecov"
-  SimpleCov.start
-  Rake::Task["test"].invoke
-end
-
 task :examples do
   Dir["examples/json_api/*.rb", "examples/simple_api/*.rb"].each do |file|
     `ruby '#{file}'`

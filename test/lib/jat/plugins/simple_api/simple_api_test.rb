@@ -15,6 +15,16 @@ describe "Jat::Plugins::SimpleApi" do
 
   let(:plugin) { @plugin }
 
+  describe ".before_load" do
+    it "raises error if response plugin was already loaded" do
+      jat_class = Class.new(Jat)
+      jat_class.config[:response_plugin_loaded] = :foobar
+
+      err = assert_raises(Jat::Error) { jat_class.plugin(:simple_api) }
+      assert_equal("Response plugin `foobar` was already loaded before", err.message)
+    end
+  end
+
   describe ".after_load" do
     it "adds default `:meta` meta_key config option" do
       jat_class = Class.new(Jat)
@@ -46,7 +56,7 @@ describe "Jat::Plugins::SimpleApi" do
     describe "#map" do
       it "returns map for provided context" do
         jat_class::Map.expects(:call).with("CONTEXT").returns "MAP"
-        assert_equal "MAP", jat_class.map("CONTEXT")
+        assert_equal "MAP", jat_class.new("CONTEXT").map
       end
     end
 
@@ -133,6 +143,31 @@ describe "Jat::Plugins::SimpleApi" do
       it "symbolizes meta key" do
         jat_class.meta_key "metadata"
         assert_equal :metadata, jat_class.config[:meta_key]
+      end
+    end
+
+    describe ".inherited" do
+      it "inherits root" do
+        jat_class.root(:foo)
+        child = Class.new(jat_class)
+        assert_equal :foo, child.config[:root_one]
+        assert_equal :foo, child.config[:root_many]
+      end
+
+      it "inherits meta" do
+        jat_class.meta(:foo) { "bar" }
+        child = Class.new(jat_class)
+
+        assert_equal "bar", child.added_meta[:foo].value(nil, nil)
+      end
+
+      it "does not change parents meta when children meta changed" do
+        jat_class.meta(:foo) { "foo" }
+        child = Class.new(jat_class)
+        child.meta(:foo) { "bazz" }
+
+        assert_equal("foo", jat_class.added_meta[:foo].value(nil, nil))
+        assert_equal("bazz", child.added_meta[:foo].value(nil, nil))
       end
     end
   end

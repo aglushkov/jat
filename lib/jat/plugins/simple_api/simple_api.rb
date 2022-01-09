@@ -79,7 +79,7 @@ class Jat
           # Assign same meta
           added_meta.each_value do |attribute|
             params = attribute.params
-            subclass.attribute(params[:name], **params[:opts], &params[:block])
+            subclass.meta(params[:name], **params[:opts], &params[:block])
           end
         end
 
