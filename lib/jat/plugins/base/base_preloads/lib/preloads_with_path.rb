@@ -2,7 +2,7 @@
 
 class Jat
   module Plugins
-    module Preloads
+    module BasePreloads
       class PreloadsWithPath
         module ClassMethods
           BANG = "!"

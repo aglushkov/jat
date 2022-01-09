@@ -4,11 +4,11 @@ require "test_helper"
 require "support/activerecord"
 
 describe "Jat::Plugins::ActiverecordPreloads" do
-  before { Jat::Plugins.find_plugin(:_activerecord_preloads) }
+  before { Jat::Plugins.find_plugin(:base_activerecord_preloads) }
 
   describe "Preloader" do
     let(:described_class) { plugin::Preloader }
-    let(:plugin) { Jat::Plugins::ActiverecordPreloads }
+    let(:plugin) { Jat::Plugins::BaseActiverecordPreloads }
 
     describe ".handlers" do
       it "returns memorized array of handlers" do

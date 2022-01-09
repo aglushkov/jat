@@ -2,7 +2,7 @@
 
 class Jat
   module Plugins
-    module Preloads
+    module BasePreloads
       class FormatUserPreloads
         METHODS = {
           Array => :array_to_hash,

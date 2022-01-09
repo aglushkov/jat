@@ -2,13 +2,13 @@
 
 require "test_helper"
 
-describe "Jat::Plugins::ActiverecordPreloads" do
+describe "Jat::Plugins::BaseActiverecordPreloads" do
   let(:jat_class) do
     api_test = api_test()
 
     Class.new(Jat) do
       include api_test
-      plugin(:_activerecord_preloads)
+      plugin(:base_activerecord_preloads)
     end
   end
 
@@ -27,7 +27,7 @@ describe "Jat::Plugins::ActiverecordPreloads" do
       jat = jat_class.new
       jat.expects(:preloads).returns(preloads)
 
-      Jat::Plugins::ActiverecordPreloads::Preloader
+      Jat::Plugins::BaseActiverecordPreloads::Preloader
         .expects(:preload)
         .with(object, preloads).returns("OBJ_WITH_PRELOADS")
 

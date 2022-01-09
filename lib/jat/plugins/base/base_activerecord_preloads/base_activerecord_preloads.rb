@@ -4,9 +4,9 @@ require_relative "./lib/preloader"
 
 class Jat
   module Plugins
-    module ActiverecordPreloads
+    module BaseActiverecordPreloads
       def self.plugin_name
-        :_activerecord_preloads
+        :base_activerecord_preloads
       end
 
       def self.load(jat_class, **_opts)
@@ -33,6 +33,6 @@ class Jat
       end
     end
 
-    register_plugin(ActiverecordPreloads.plugin_name, ActiverecordPreloads)
+    register_plugin(BaseActiverecordPreloads.plugin_name, BaseActiverecordPreloads)
   end
 end

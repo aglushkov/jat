@@ -14,7 +14,7 @@ class Jat
 
       def self.load(jat_class, **opts)
         jat_class.plugin :json_api_preloads, **opts
-        jat_class.plugin :_activerecord_preloads, **opts
+        jat_class.plugin :base_activerecord_preloads, **opts
       end
     end
 

@@ -17,7 +17,7 @@ describe "Jat::Plugins::SimpleApiPreloads" do
     jat_class = Class.new(Jat)
     jat_class.plugin :simple_api
 
-    jat_class.expects(:plugin).with(:_preloads, foo: :bar)
+    jat_class.expects(:plugin).with(:base_preloads, foo: :bar)
 
     @plugin.before_load(jat_class, foo: :bar)
   end

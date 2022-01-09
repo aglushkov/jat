@@ -19,6 +19,6 @@ describe "Jat::Plugins::SimpleApiActiverecord" do
     jat_class.plugin :simple_api_activerecord
 
     assert jat_class.plugin_used?(:simple_api_preloads)
-    assert jat_class.plugin_used?(:_activerecord_preloads)
+    assert jat_class.plugin_used?(:base_activerecord_preloads)
   end
 end

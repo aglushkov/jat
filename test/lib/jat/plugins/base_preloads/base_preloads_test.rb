@@ -2,9 +2,9 @@
 
 require "test_helper"
 
-describe "Jat::Plugins::Preloads" do
+describe "Jat::Plugins::BasePreloads" do
   let(:jat_class) do
-    Class.new(Jat) { plugin(:_preloads) }
+    Class.new(Jat) { plugin(:base_preloads) }
   end
 
   def attribute(name, opts)

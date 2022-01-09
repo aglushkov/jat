@@ -11,7 +11,7 @@ describe "Jat::Plugins::SimpleApiLowerCamelCase" do
   end
 
   it "loads _lower_camel_case plugin" do
-    assert jat_class.plugin_used?(:_lower_camel_case)
+    assert jat_class.plugin_used?(:base_lower_camel_case)
   end
 
   it "returns attributes in lowerCamelCase case" do

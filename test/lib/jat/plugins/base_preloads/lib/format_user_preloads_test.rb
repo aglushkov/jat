@@ -2,10 +2,10 @@
 
 require "test_helper"
 
-describe "Jat::Plugins::Preloads::FormatUserPreloads" do
-  before { Jat::Plugins.find_plugin(:_preloads) }
+describe "Jat::Plugins::BasePreloads::FormatUserPreloads" do
+  before { Jat::Plugins.find_plugin(:base_preloads) }
 
-  let(:format) { Jat::Plugins::Preloads::FormatUserPreloads }
+  let(:format) { Jat::Plugins::BasePreloads::FormatUserPreloads }
 
   it "transforms nil to empty hash" do
     preloads = nil

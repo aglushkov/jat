@@ -1,17 +1,19 @@
 # frozen_string_literal: true
 
+# Main namespace
+class Jat
+  # A generic exception used by Jat.
+  class Error < StandardError; end
+
+  FROZEN_EMPTY_HASH = {}.freeze
+  FROZEN_EMPTY_ARRAY = [].freeze
+end
+
 require_relative "jat/attribute"
 require_relative "jat/config"
 require_relative "jat/plugins"
 
-# Main namespace
 class Jat
-  FROZEN_EMPTY_HASH = {}.freeze
-  FROZEN_EMPTY_ARRAY = [].freeze
-
-  # A generic exception used by Jat.
-  class Error < StandardError; end
-
   @config = Config.new({plugins: []})
 
   module ClassMethods

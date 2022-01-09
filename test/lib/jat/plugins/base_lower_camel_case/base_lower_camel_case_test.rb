@@ -2,10 +2,10 @@
 
 require "test_helper"
 
-describe "Jat::Plugins::LowerCamelCase" do
+describe "Jat::Plugins::BaseLowerCamelCase" do
   let(:jat_class) do
     new_class = Class.new(Jat)
-    new_class.plugin(:_lower_camel_case)
+    new_class.plugin(:base_lower_camel_case)
     new_class
   end
 

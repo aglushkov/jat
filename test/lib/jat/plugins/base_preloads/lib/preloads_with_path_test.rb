@@ -3,9 +3,9 @@
 require "test_helper"
 
 describe "Jat::Plugins::Preloads::PreloadsWithPath" do
-  before { Jat::Plugins.find_plugin(:_preloads) }
+  before { Jat::Plugins.find_plugin(:base_preloads) }
 
-  let(:described_class) { Jat::Plugins::Preloads::PreloadsWithPath }
+  let(:described_class) { Jat::Plugins::BasePreloads::PreloadsWithPath }
 
   it "returns provided preloads and path to last value" do
     preloads = {a: {b: {c: {}}, d: {}}, e: {}}

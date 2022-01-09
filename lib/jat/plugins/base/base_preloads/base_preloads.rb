@@ -6,9 +6,9 @@ require_relative "./lib/preloads_with_path"
 # This plugin adds attribute methods #preloads, #preloads_path
 class Jat
   module Plugins
-    module Preloads
+    module BasePreloads
       def self.plugin_name
-        :_preloads
+        :base_preloads
       end
 
       def self.load(jat_class, **_opts)
@@ -58,6 +58,6 @@ class Jat
       end
     end
 
-    register_plugin(Preloads.plugin_name, Preloads)
+    register_plugin(BasePreloads.plugin_name, BasePreloads)
   end
 end

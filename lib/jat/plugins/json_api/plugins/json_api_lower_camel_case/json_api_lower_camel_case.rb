@@ -10,7 +10,7 @@ class Jat
       def self.before_load(jat_class, **_opts)
         raise Error, "Please load :json_api plugin first" unless jat_class.plugin_used?(:json_api)
 
-        jat_class.plugin :_lower_camel_case
+        jat_class.plugin :base_lower_camel_case
       end
 
       def self.load(jat_class, **_opts)

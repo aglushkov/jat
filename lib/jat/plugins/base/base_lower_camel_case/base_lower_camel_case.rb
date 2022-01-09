@@ -2,9 +2,9 @@
 
 class Jat
   module Plugins
-    module LowerCamelCase
+    module BaseLowerCamelCase
       def self.plugin_name
-        :_lower_camel_case
+        :base_lower_camel_case
       end
 
       def self.load(jat_class, **_opts)
@@ -18,7 +18,7 @@ class Jat
       end
     end
 
-    register_plugin(LowerCamelCase.plugin_name, LowerCamelCase)
+    register_plugin(BaseLowerCamelCase.plugin_name, BaseLowerCamelCase)
   end
 
   class LowerCamelCaseTransformation
