@@ -1,3 +1,5 @@
+[![GitHub Actions](https://github.com/toptal/chewy/actions/workflows/ruby.yml/badge.svg)](https://github.com/toptal/chewy/actions/workflows/ruby.yml)
+
 # JAT (JSON API TOOLKIT)
 
 JAT helps to serialize objects to Hash format.
@@ -179,6 +181,24 @@ puts JSON.pretty_generate(response)
 }
 ```
 </details>
+
+## Supported rubies
+
+  Ruby versions:
+
+  - MRI 2.5
+  - MRI 2.6
+  - MRI 2.7
+  - MRI 3.0
+  - MRI 3.1
+  - jruby 9.3.2
+  - truffleruby 21.3.0
+
+  ActiveRecord versions:
+
+  - 5.2
+  - 6.1
+  - 7.0
 
 
 [JSON:API]: https://jsonapi.org/format/
