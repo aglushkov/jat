@@ -10,15 +10,10 @@ describe "Jat::Plugins::SimpleApiPreloads::Preloads" do
     end
   end
 
+  let(:described_class) { Jat::Plugins::SimpleApiPreloads::Preloads }
   let(:user_serializer) { Class.new(base) }
   let(:profile_serializer) { Class.new(base) }
-  let(:email_serializer) { Class.new(base) }
-
   let(:jat_user) { user_serializer.new }
-  let(:jat_profile) { profile_serializer.new }
-  let(:jat_email) { email_serializer.new }
-
-  let(:described_class) { Jat::Plugins::SimpleApiPreloads::Preloads }
 
   def define_map(map)
     user_serializer::Map.expects(:call).returns(map)

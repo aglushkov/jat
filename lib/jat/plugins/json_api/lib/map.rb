@@ -103,11 +103,10 @@ class Jat
           end
 
           def attribute_exposed?(attribute)
-            case exposed
-            when :all then true
-            when :none then false
-            else attribute.exposed?
-            end
+            return true if exposed == :all
+            return false if exposed == :none
+
+            attribute.exposed?
           end
         end
 

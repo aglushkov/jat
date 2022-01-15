@@ -4,7 +4,6 @@ require "test_helper"
 
 describe "Jat::Plugins::Types" do
   let(:struct) { Struct.new(:attr) }
-  let(:obj) { struct.new(nil) }
 
   let(:jat_class) do
     new_class = Class.new(Jat)

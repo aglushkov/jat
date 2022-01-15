@@ -50,6 +50,10 @@ describe "Jat::Plugins::SimpleApi::FieldsParamParser" do
       assert_equal({users: {id: {}}}, parse("(users(id))"))
     end
 
+    it "parses fields started with extra close PAREN" do
+      assert_equal({users: {}}, parse(")users)"))
+    end
+
     it "parses single resource with multiple fields" do
       assert_equal({users: {id: {}, name: {}}}, parse("users(id,name)"))
     end

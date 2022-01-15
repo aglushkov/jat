@@ -74,11 +74,10 @@ class Jat
           private
 
           def expose?(attribute, fields)
-            case exposed
-            when :all then true
-            when :none then manually_exposed?(attribute, fields)
-            else attribute.exposed? || manually_exposed?(attribute, fields)
-            end
+            return true if exposed == :all
+            return manually_exposed?(attribute, fields) if exposed == :none
+
+            attribute.exposed? || manually_exposed?(attribute, fields)
           end
 
           def manually_exposed?(attribute, fields)

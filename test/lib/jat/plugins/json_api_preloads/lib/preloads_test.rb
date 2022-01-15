@@ -15,9 +15,6 @@ describe "Jat::Plugins::JsonApiPreloads::Preloads" do
   let(:email_serializer) { Class.new(base) { type(:email) } }
 
   let(:jat_user) { user_serializer.allocate }
-  let(:jat_profile) { profile_serializer.allocate }
-  let(:jat_email) { email_serializer.allocate }
-
   let(:described_class) { Jat::Plugins::JsonApiPreloads::Preloads }
 
   def define_map(map)
