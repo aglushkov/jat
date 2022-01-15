@@ -23,25 +23,14 @@ Gem::Specification.new do |gem|
   }
 
   # General testing helpers
-  gem.add_development_dependency "minitest", "~> 5.14"
-  gem.add_development_dependency "mocha", "~> 1.12"
-  gem.add_development_dependency "rake", "~> 13.0"
+  gem.add_development_dependency "minitest"
+  gem.add_development_dependency "mocha"
+  gem.add_development_dependency "rake"
 
   # Code standard
-  gem.add_development_dependency "simplecov", "~> 0.21"
-  gem.add_development_dependency "standard", "~> 1.0"
+  gem.add_development_dependency "simplecov"
+  gem.add_development_dependency "standard"
 
   # ORM plugins
-  ruby_version = Gem::Version.new(RUBY_VERSION)
-  ar_version =
-    if ruby_version >= Gem::Version.new("3.0")
-      "~> 7.0"
-    elsif ruby_version >= Gem::Version.new("2.5")
-      "~> 6.0"
-    else
-      "~> 5.2"
-    end
-
-  gem.add_development_dependency "activerecord", ar_version
-  gem.add_development_dependency "sqlite3", "~> 1.4" unless RUBY_ENGINE == "jruby"
+  gem.add_development_dependency "activerecord"
 end

@@ -3,8 +3,6 @@
 require "test_helper"
 
 describe "Jat::Plugins::JsonApi::Params::Include" do
-  before { Jat::Plugins.find_plugin(:json_api) }
-
   let(:base_class) { Class.new(Jat) { plugin :json_api } }
   let(:a_serializer) { Class.new(base_class) }
   let(:b_serializer) { Class.new(base_class) }

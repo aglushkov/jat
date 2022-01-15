@@ -22,9 +22,7 @@ class Jat
             allowed_relationships = jat_class.attributes.each_value.select(&:relation?).map!(&:name)
             allowed_relationships = "'#{allowed_relationships.join("', '")}'"
 
-            raise JsonApiParamsError,
-              "Type '#{type}' has no included '#{name}' relationship. " \
-              "Existing relationships are: #{allowed_relationships}"
+            raise JsonApiParamsError, "Type '#{type}' has no included '#{name}' relationship. Existing relationships are: #{allowed_relationships}"
           end
         end
       end

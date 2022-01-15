@@ -40,9 +40,10 @@ class Jat
             value = original_block.call(object, context)
 
             # Type conversion
-            case type
-            when Symbol then self.class.jat_class.config.fetch(:types).fetch(type).call(value)
-            else type.call(value)
+            if type.is_a?(Symbol)
+              self.class.jat_class.config.fetch(:types).fetch(type).call(value)
+            else
+              type.call(value)
             end
           end
         end

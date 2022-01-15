@@ -18,7 +18,7 @@ class Jat
           def parse(fields)
             return FROZEN_EMPTY_HASH unless fields
 
-            new(fields).parse
+            new.parse(fields)
           end
         end
 
@@ -27,65 +27,55 @@ class Jat
           OPEN_BRACKET = "("
           CLOSE_BRACKET = ")"
 
-          def initialize(fields)
-            @fields = fields
-          end
-
           # user => { user: {} }
           # user(id) => { user: { id: {} } }
           # user(id,name) => { user: { id: {}, name: {} } }
           # user,comments => { user: {}, comments: {} }
           # user(comments(text)) => { user: { comments: { text: {} } } }
-          def parse
-            current_attr = nil
+          def parse(fields)
+            res = {}
+            current_attr = +""
+            current_route = nil
 
             fields.each_char do |char|
-              case char
-              when COMMA
-                next unless current_attr
-
-                add_attribute(current_attr)
-                current_attr = nil
-              when CLOSE_BRACKET
-                if current_attr
-                  add_attribute(current_attr)
-                  current_attr = nil
-                end
-
-                route.pop
-              when OPEN_BRACKET
-                next unless current_attr
-
-                attribute_name = add_attribute(current_attr, {})
-                route << attribute_name
-                current_attr = nil
-              else
-                current_attr = current_attr ? current_attr.insert(-1, char) : char
+              if char == COMMA
+                add_attribute(res, current_attr, current_route)
+                next
               end
+
+              if char == CLOSE_BRACKET
+                add_attribute(res, current_attr, current_route)
+                current_route&.pop
+                next
+              end
+
+              if char == OPEN_BRACKET
+                current_attr_name = add_attribute(res, current_attr, current_route, {})
+                (current_route ||= []) << current_attr_name if current_attr_name
+                next
+              end
+
+              current_attr.insert(-1, char)
             end
 
-            add_attribute(current_attr) if current_attr
+            add_attribute(res, current_attr, current_route)
 
             res
           end
 
           private
 
-          attr_reader :fields
+          def add_attribute(res, current_attr, current_route, nested_attrs = FROZEN_EMPTY_HASH)
+            current_attr.strip!
+            return if current_attr.empty?
 
-          def add_attribute(current_attr, nested_attrs = FROZEN_EMPTY_HASH)
-            current_resource = route.empty? ? res : res.dig(*route)
-            attribute_name = current_attr.strip.to_sym
-            current_resource[attribute_name] = nested_attrs
-            attribute_name
-          end
+            current_attr_name = current_attr.to_sym
+            current_attr.clear
 
-          def res
-            @res ||= {}
-          end
+            current_attrs = !current_route || current_route.empty? ? res : res.dig(*current_route)
+            current_attrs[current_attr_name] = nested_attrs
 
-          def route
-            @route ||= []
+            current_attr_name
           end
         end
 

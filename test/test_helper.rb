@@ -4,7 +4,8 @@
 # ARGV is not populated when running `ruby -Itest {file}`
 # ARGV is not populated when running test by `m` gem - `m {file}`
 # ARGV is not populated when running tests by `m` gem with line number - `m {file}:{line_number}`
-if ARGV.any?
+# jruby and truffleruby have bad simplecov support
+if RUBY_ENGINE == "ruby" && ARGV.any?
   require "simplecov"
   SimpleCov.start
 end
@@ -12,6 +13,10 @@ end
 require "bundler/setup"
 require "minitest/autorun"
 require "mocha/minitest"
-require "pry-byebug"
+
+begin
+  require "pry-byebug"
+rescue LoadError
+end
 
 require_relative "../lib/jat"

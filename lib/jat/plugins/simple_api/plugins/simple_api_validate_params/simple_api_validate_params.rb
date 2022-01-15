@@ -38,7 +38,7 @@ class Jat
       end
 
       module FieldsParamParserMethods
-        def parse
+        def parse(*)
           super.tap { |result| ValidateFieldsParam.call(self.class.jat_class, result) }
         end
       end

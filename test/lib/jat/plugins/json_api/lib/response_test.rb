@@ -76,7 +76,6 @@ describe "Jat::Plugins::JsonApi::Response" do
   it "does not return has-one relationship when not exposed" do
     int_serializer = Class.new(base_class) do
       type "int"
-      id { |obj| obj }
     end
 
     str_serializer = Class.new(base_class) do

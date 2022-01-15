@@ -25,11 +25,12 @@ class Jat
         begin
           require_plugin(name)
         rescue PluginLoadError
-          if name.start_with?("json_api")
+          name_str = name.to_s
+          if name_str.start_with?("json_api")
             require_plugin(name, "/json_api/plugins")
-          elsif name.start_with?("simple_api")
+          elsif name_str.start_with?("simple_api")
             require_plugin(name, "/simple_api/plugins")
-          elsif name.start_with?("base")
+          elsif name_str.start_with?("base")
             require_plugin(name, "/base")
           else
             raise

@@ -132,13 +132,11 @@ describe "Jat::Plugins::SimpleApi::Response" do
   end
 
   it "does not return has-one relationship when not exposed" do
-    int_serializer = Class.new(base_class) do
-      attribute(:id) { |obj| obj }
-    end
+    nested_serializer = Class.new(base_class)
 
     str_serializer = Class.new(base_class) do
       attribute(:id) { |obj| obj[0] }
-      attribute :length, serializer: int_serializer, exposed: false
+      attribute :length, serializer: nested_serializer, exposed: false
     end
 
     assert_equal({id: "S"}, str_serializer.to_h("STRING"))
@@ -243,12 +241,12 @@ describe "Jat::Plugins::SimpleApi::Response" do
     # All fields are not exposed in this serializers,
     # We will show only attributes provided in `fields` param
     chr_serializer = Class.new(base_class) do
-      attribute(:id, exposed: false) { |obj| obj }
+      attribute(:id, exposed: false)
       attribute :next, exposed: false
     end
 
     str_serializer = Class.new(base_class) do
-      attribute(:id, exposed: false) { |obj| obj }
+      attribute(:id, exposed: false)
       attribute :chars, serializer: chr_serializer, many: true, exposed: false
     end
 
@@ -308,14 +306,14 @@ describe "Jat::Plugins::SimpleApi::Response" do
     it "does not overwrite manually added meta" do
       str_serializer = Class.new(base_class) do
         root(:root)
-        meta(:version) { "1.2.3" }
+        meta(:length)
 
         attribute(:id) { |obj| obj }
       end
 
       assert_equal(
-        {root: {id: "1"}, meta: {version: "2.0.0"}},
-        str_serializer.to_h("1", meta: {version: "2.0.0"})
+        {root: {id: "1"}, meta: {length: "33"}},
+        str_serializer.to_h("1", meta: {length: "33"})
       )
     end
 
