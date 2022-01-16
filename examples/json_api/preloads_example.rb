@@ -13,7 +13,6 @@ gemfile(true, quiet: true) do
   gem "jat", "~> #{version}", local_file_exist ? {path: File.dirname(local_file)} : {}
   gem "sqlite3"
   gem "activerecord"
-  gem "pry-byebug", "~> 3.9"
 end
 
 require "active_record"

@@ -14,9 +14,4 @@ require "bundler/setup"
 require "minitest/autorun"
 require "mocha/minitest"
 
-begin
-  require "pry-byebug"
-rescue LoadError
-end
-
 require_relative "../lib/jat"
