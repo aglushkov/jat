@@ -34,48 +34,42 @@ class Jat
           # user(comments(text)) => { user: { comments: { text: {} } } }
           def parse(fields)
             res = {}
-            current_attr = +""
-            current_route = nil
+            attribute = +""
+            path_stack = nil
 
             fields.each_char do |char|
-              if char == COMMA
-                add_attribute(res, current_attr, current_route)
-                next
+              case char
+              when COMMA
+                add_attribute(res, path_stack, attribute, FROZEN_EMPTY_HASH)
+              when CLOSE_BRACKET
+                add_attribute(res, path_stack, attribute, FROZEN_EMPTY_HASH)
+                path_stack&.pop
+              when OPEN_BRACKET
+                name = add_attribute(res, path_stack, attribute, {})
+                (path_stack ||= []).push(name) if name
+              else
+                attribute.insert(-1, char)
               end
-
-              if char == CLOSE_BRACKET
-                add_attribute(res, current_attr, current_route)
-                current_route&.pop
-                next
-              end
-
-              if char == OPEN_BRACKET
-                current_attr_name = add_attribute(res, current_attr, current_route, {})
-                (current_route ||= []) << current_attr_name if current_attr_name
-                next
-              end
-
-              current_attr.insert(-1, char)
             end
 
-            add_attribute(res, current_attr, current_route)
+            add_attribute(res, path_stack, attribute, FROZEN_EMPTY_HASH)
 
             res
           end
 
           private
 
-          def add_attribute(res, current_attr, current_route, nested_attrs = FROZEN_EMPTY_HASH)
-            current_attr.strip!
-            return if current_attr.empty?
+          def add_attribute(res, path_stack, attribute, nested_attributes = FROZEN_EMPTY_HASH)
+            attribute.strip!
+            return if attribute.empty?
 
-            current_attr_name = current_attr.to_sym
-            current_attr.clear
+            name = attribute.to_sym
+            attribute.clear
 
-            current_attrs = !current_route || current_route.empty? ? res : res.dig(*current_route)
-            current_attrs[current_attr_name] = nested_attrs
+            current_attrs = !path_stack || path_stack.empty? ? res : res.dig(*path_stack)
+            current_attrs[name] = nested_attributes
 
-            current_attr_name
+            name
           end
         end
 
