@@ -82,6 +82,7 @@ SIMPLE:API automatically preloads nested relationships to avoid N+1 requests wit
   * [Preloads]
   * [Activerecord]
   * [Types]
+  * [Presenter]
   * [Validate Params]
   * [Serializing to String]
   * [Caching]
@@ -322,6 +323,28 @@ end
       attribute :tags, type: :array
       attribute :created_at, type: :time
       attribute :address_lines, type: Types::Array(Types::String)
+    end
+  ```
+
+### Presenter
+  Plugin `presenter` allows to add a Presenter class inside serializer to add additional methods to serialized object. This Presenter class is inherited from SimpleDelagator, so it has access to all object's public methods. At the same time, it includes Forwardable module and all methods called by `#method_missing` will be added to Presenter class after first serialization in order to make next serialization faster.
+
+  ```ruby
+    class ObjSerializer < ApplicationSerializer
+      plugin :presenter
+
+      attribute(:foo)
+      attribute(:bar) { |obj| obj.some_complex_logic_method }
+
+      class Presenter
+        def foo
+          # redefine existing `obj#foo` method
+        end
+
+        def some_complex_logic_method
+          # some complex logic, probably involving other methods
+        end
+      end
     end
   ```
 
