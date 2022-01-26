@@ -15,3 +15,9 @@ require "minitest/autorun"
 require "mocha/minitest"
 
 require_relative "../lib/jat"
+
+begin
+  require "debug" if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new("3.1.0")
+  require "pry-byebug"
+rescue LoadError
+end

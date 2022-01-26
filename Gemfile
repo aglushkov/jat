@@ -9,6 +9,7 @@ git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
 group :test do
   gem "m", "~> 1.5", ">= 1.5.1", require: false
   gem "debug", ">= 1.0.0"
+  gem "pry-byebug", "~> 3.9"
 
   # General testing helpers
   gem "minitest", "~> 5.14"
