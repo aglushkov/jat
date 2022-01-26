@@ -1,4 +1,6 @@
-[![GitHub Actions](https://github.com/toptal/chewy/actions/workflows/ruby.yml/badge.svg)](https://github.com/toptal/chewy/actions/workflows/ruby.yml)
+[![Gem Version](https://badge.fury.io/rb/jat.svg)](https://badge.fury.io/rb/jat)
+[![GitHub Actions](https://github.com/aglushkov/jat/actions/workflows/build.yml/badge.svg?event=push)](https://github.com/aglushkov/jat/actions/workflows/build.yml)
+
 
 # JAT (JSON API TOOLKIT)
 
