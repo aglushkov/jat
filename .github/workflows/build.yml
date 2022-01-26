@@ -47,10 +47,22 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
-      - name: Run Tests and Check Coverage
-        run: bundle exec rake
 
       # Check code standards only for latest MRI. It takes a lot of time for jruby or truffleruby
       - name: Check Code Standards
         if: startsWith(matrix.ruby, '3.1')
         run: bundle exec standardrb
+
+      - name: Run Tests and Check Coverage
+        env:
+          CC_TEST_REPORTER_ID: true
+        run: bundle exec rake
+
+      # https://github.com/paambaati/codeclimate-action
+      - name: Publish code coverage to code-climate
+        uses: paambaati/codeclimate-action@v2.7.5
+        env:
+          CC_TEST_REPORTER_ID: cd9c01e48624874454d6f304cbc2591921b1c8746cda31abc167db722c2121e1
+        with:
+          debug: true
+        if: (github.event_name == 'push') && startsWith(matrix.ruby, '3.1')
