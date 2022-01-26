@@ -1,6 +1,6 @@
 [![Gem Version](https://badge.fury.io/rb/jat.svg)](https://badge.fury.io/rb/jat)
 [![GitHub Actions](https://github.com/aglushkov/jat/actions/workflows/build.yml/badge.svg?event=push)](https://github.com/aglushkov/jat/actions/workflows/build.yml)
-
+[![Test Coverage](https://api.codeclimate.com/v1/badges/6a5b78710cb9426a436e/test_coverage)](https://codeclimate.com/github/aglushkov/jat/test_coverage)
 
 # JAT (JSON API TOOLKIT)
 
