@@ -41,6 +41,7 @@ describe "Jat::Plugins::Presenter" do
       end
 
       it "returns self name for top level presenter class" do
+        Jat::Plugins.find_plugin(:presenter)
         assert_equal "Jat::Plugins::Presenter::Presenter", Jat::Plugins::Presenter::Presenter.inspect
       end
     end

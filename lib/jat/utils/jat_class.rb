@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Jat
   module JatClass
     # Returns the Jat class that this class is namespaced under.
@@ -9,7 +11,7 @@ class Jat
     def inspect
       return super unless jat_class
 
-      path = to_s
+      path = superclass.inspect
       index = path.rindex("::") + 2
       class_name = path[index, path.length - index]
 
