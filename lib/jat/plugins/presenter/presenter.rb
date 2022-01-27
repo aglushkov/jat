@@ -32,18 +32,6 @@ class Jat
       end
 
       class Presenter < SimpleDelegator
-        module ClassMethods
-          # Returns the Jat class that this Presenter class is namespaced under.
-          attr_accessor :jat_class
-
-          # Since Presenter is anonymously subclassed when Jat is subclassed,
-          # and then assigned to a constant of the Jat subclass, make inspect
-          # reflect the likely name for the class.
-          def inspect
-            "#{jat_class.inspect}::Presenter"
-          end
-        end
-
         module InstanceMethods
           # Delegates all missing methods to current object.
           # We create real methods after first missing method.
@@ -57,11 +45,19 @@ class Jat
         end
 
         extend Forwardable
-        extend ClassMethods
+        extend Jat::JatClass
         include InstanceMethods
       end
 
       module ClassMethods
+        def inherited(subclass)
+          presenter_class = Class.new(self::Presenter)
+          presenter_class.jat_class = subclass
+          subclass.const_set(:Presenter, presenter_class)
+
+          super
+        end
+
         def attribute(name, **opts, &block)
           # Define attr_accessor in presenter automatically
           super.tap do |attribute|

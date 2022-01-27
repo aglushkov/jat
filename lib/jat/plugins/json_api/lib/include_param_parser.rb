@@ -8,16 +8,6 @@ class Jat
           COMMA = ","
           DOT = "."
 
-          # Returns the Jat class that this IncludeParamParser class is namespaced under.
-          attr_accessor :jat_class
-
-          # Since IncludeParamParser is anonymously subclassed when Jat is subclassed,
-          # and then assigned to a constant of the Jat subclass, make inspect
-          # reflect the likely name for the class.
-          def inspect
-            "#{jat_class.inspect}::IncludeParamParser"
-          end
-
           def parse(includes_string_param)
             return {} unless includes_string_param
 
@@ -77,6 +67,7 @@ class Jat
           end
         end
 
+        extend Jat::JatClass
         extend ClassMethods
       end
     end

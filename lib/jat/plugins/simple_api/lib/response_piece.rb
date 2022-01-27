@@ -6,16 +6,6 @@ class Jat
     module SimpleApi
       class ResponsePiece
         module ClassMethods
-          # Returns the Jat class that this ResponsePiece class is namespaced under.
-          attr_accessor :jat_class
-
-          # Since ResponsePiece is anonymously subclassed when Jat is subclassed,
-          # and then assigned to a constant of the Jat subclass, make inspect
-          # reflect the likely name for the class.
-          def inspect
-            "#{jat_class.inspect}::ResponsePiece"
-          end
-
           def to_h(object, context, map)
             new(object, context).piece(map)
           end
@@ -72,6 +62,7 @@ class Jat
           end
         end
 
+        extend Jat::JatClass
         extend ClassMethods
         include InstanceMethods
       end

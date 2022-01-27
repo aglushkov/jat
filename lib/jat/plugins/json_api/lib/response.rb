@@ -6,16 +6,6 @@ class Jat
     module JsonApi
       class Response
         module ClassMethods
-          # Returns the Jat class that this Response class is namespaced under.
-          attr_accessor :jat_class
-
-          # Since Response is anonymously subclassed when Jat is subclassed,
-          # and then assigned to a constant of the Jat subclass, make inspect
-          # reflect the likely name for the class.
-          def inspect
-            "#{jat_class.inspect}::Response"
-          end
-
           def call(object, context)
             new(object, context).to_h
           end
@@ -115,6 +105,7 @@ class Jat
           end
         end
 
+        extend Jat::JatClass
         extend ClassMethods
         include InstanceMethods
       end

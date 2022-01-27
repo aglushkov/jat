@@ -88,19 +88,7 @@ class Jat
       end
     end
 
-    module ClassMethods
-      # Returns the Jat class that this Attribute class is namespaced under.
-      attr_accessor :jat_class
-
-      # Since Attribute is anonymously subclassed when Jat is subclassed,
-      # and then assigned to a constant of the Jat subclass, make inspect
-      # reflect the likely name for the class.
-      def inspect
-        "#{jat_class.inspect}::Attribute"
-      end
-    end
-
-    extend ClassMethods
+    extend Jat::JatClass
     include InstanceMethods
   end
 end

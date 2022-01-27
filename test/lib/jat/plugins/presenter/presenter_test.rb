@@ -36,8 +36,12 @@ describe "Jat::Plugins::Presenter" do
     end
 
     describe ".inspect" do
-      it "returns self name" do
+      it "returns likely name of a class" do
         assert_equal "#{jat_class}::Presenter", presenter_class.inspect
+      end
+
+      it "returns self name for top level presenter class" do
+        assert_equal "Jat::Plugins::Presenter::Presenter", Jat::Plugins::Presenter::Presenter.inspect
       end
     end
   end
@@ -47,6 +51,15 @@ describe "Jat::Plugins::Presenter" do
       Class.new(Jat) do |base|
         base.plugin :simple_api
         base.plugin :presenter
+      end
+    end
+
+    describe ".inherited" do
+      let(:parent) { serializer }
+
+      it "inherits presenter class" do
+        child = Class.new(parent)
+        assert_equal parent::Presenter, child::Presenter.superclass
       end
     end
 
@@ -122,6 +135,15 @@ describe "Jat::Plugins::Presenter" do
         base.plugin :presenter
         base.type :test
         base.id { |obj| obj }
+      end
+    end
+
+    describe ".inherited" do
+      let(:parent) { serializer }
+
+      it "inherits presenter class" do
+        child = Class.new(parent)
+        assert_equal parent::Presenter, child::Presenter.superclass
       end
     end
 

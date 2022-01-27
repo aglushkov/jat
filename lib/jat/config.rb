@@ -17,19 +17,7 @@ class Jat
       def_delegators :@opts, :[], :[]=, :fetch
     end
 
-    module ClassMethods
-      # Returns the Jat class that this config class is namespaced under.
-      attr_accessor :jat_class
-
-      # Since Config is anonymously subclassed when Jat is subclassed,
-      # and then assigned to a constant of the Jat subclass, make inspect
-      # reflect the likely name for the class.
-      def inspect
-        "#{jat_class.inspect}::Config"
-      end
-    end
-
     include InstanceMethods
-    extend ClassMethods
+    extend Jat::JatClass
   end
 end

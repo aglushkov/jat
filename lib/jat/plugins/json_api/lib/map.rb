@@ -5,16 +5,6 @@ class Jat
     module JsonApi
       class Map
         module ClassMethods
-          # Returns the Jat class that this Map class is namespaced under.
-          attr_accessor :jat_class
-
-          # Since Map is anonymously subclassed when Jat is subclassed,
-          # and then assigned to a constant of the Jat subclass, make inspect
-          # reflect the likely name for the class.
-          def inspect
-            "#{jat_class.inspect}::Map"
-          end
-
           # Returns structure like
           # {
           #   type1 => {
@@ -110,6 +100,7 @@ class Jat
           end
         end
 
+        extend Jat::JatClass
         extend ClassMethods
         include InstanceMethods
       end

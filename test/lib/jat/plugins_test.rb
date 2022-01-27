@@ -36,6 +36,7 @@ describe Jat::Plugins do
       assert_equal "Jat::Plugins::LowerCamelCase", described_module.find_plugin(:lower_camel_case).name
       assert_equal "Jat::Plugins::MapsCache", described_module.find_plugin(:maps_cache).name
       assert_equal "Jat::Plugins::Preloads", described_module.find_plugin(:preloads).name
+      assert_equal "Jat::Plugins::Presenter", described_module.find_plugin(:presenter).name
       assert_equal "Jat::Plugins::SimpleApi", described_module.find_plugin(:simple_api).name
       assert_equal "Jat::Plugins::ToStr", described_module.find_plugin(:to_str).name
       assert_equal "Jat::Plugins::Types", described_module.find_plugin(:types).name

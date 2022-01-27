@@ -9,6 +9,7 @@ class Jat
   FROZEN_EMPTY_ARRAY = [].freeze
 end
 
+require_relative "jat/utils/jat_class"
 require_relative "jat/attribute"
 require_relative "jat/config"
 require_relative "jat/plugins"

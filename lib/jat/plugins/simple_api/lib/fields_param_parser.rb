@@ -5,16 +5,6 @@ class Jat
     module SimpleApi
       class FieldsParamParser
         module ClassMethods
-          # Returns the Jat class that this FieldsParamParser class is namespaced under.
-          attr_accessor :jat_class
-
-          # Since FieldsParamParser is anonymously subclassed when Jat is subclassed,
-          # and then assigned to a constant of the Jat subclass, make inspect
-          # reflect the likely name for the class.
-          def inspect
-            "#{jat_class.inspect}::FieldsParamParser"
-          end
-
           def parse(fields)
             return FROZEN_EMPTY_HASH unless fields
 
@@ -73,6 +63,7 @@ class Jat
           end
         end
 
+        extend Jat::JatClass
         extend ClassMethods
         include InstanceMethods
       end
