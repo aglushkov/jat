@@ -25,7 +25,7 @@ class Jat
       module InstanceMethods
         def to_str(object)
           hash = to_h(object)
-          config[:to_str].call(hash)
+          self.class.config[:to_str].call(hash)
         end
       end
 

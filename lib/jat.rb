@@ -99,10 +99,6 @@ class Jat
     def to_h(_object)
       raise Error, "Method #to_h must be implemented by plugin"
     end
-
-    def config
-      self.class.config
-    end
   end
 
   extend ClassMethods

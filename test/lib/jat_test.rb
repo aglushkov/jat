@@ -126,12 +126,4 @@ describe Jat do
       assert_equal error_message, error.message
     end
   end
-
-  describe "#config" do
-    it "returns self class config" do
-      jat = jat_class.new
-
-      assert_same jat.config, jat_class.config
-    end
-  end
 end
