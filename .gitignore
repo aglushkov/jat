@@ -2,3 +2,5 @@ coverage
 .ruby-version
 *.lock
 *.gem
+.vscode/
+.yardoc/
