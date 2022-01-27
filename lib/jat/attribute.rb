@@ -57,7 +57,8 @@ class Jat
       def serializer
         return @serializer if instance_variable_defined?(:@serializer)
 
-        @serializer = opts[:serializer]
+        serializer = opts[:serializer]
+        @serializer = serializer.is_a?(Proc) ? serializer.call : serializer
       end
 
       def block

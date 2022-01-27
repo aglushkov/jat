@@ -77,7 +77,7 @@ class Jat
 
             if attribute.relation?
               (type_map[:relationships] ||= []) << name
-              append_map(map, attribute.serializer.call)
+              append_map(map, attribute.serializer)
             else
               (type_map[:attributes] ||= []) << name
             end

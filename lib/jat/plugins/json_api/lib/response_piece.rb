@@ -62,7 +62,7 @@ class Jat
               rel_attribute = jat_class.attributes[name]
               rel_object = rel_attribute.value(object, context)
 
-              rel_serializer = rel_attribute.serializer.call
+              rel_serializer = rel_attribute.serializer
               rel_links = get_relationship_links(rel_serializer, rel_object)
               rel_meta = get_relationship_meta(rel_serializer, rel_object)
               rel_data =

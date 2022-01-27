@@ -24,7 +24,7 @@ class Jat
 
               path = attribute.preloads_path
               nested_result = nested(result, path)
-              nested_serializer = attribute.serializer.call
+              nested_serializer = attribute.serializer
 
               append_many(nested_result, nested_serializer, inner_keys)
             end

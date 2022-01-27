@@ -50,7 +50,7 @@ class Jat
         def add_nested_preloads(result, attribute)
           path = attribute.preloads_path
           nested_result = nested(result, path)
-          nested_serializer = attribute.serializer.call
+          nested_serializer = attribute.serializer
 
           append(nested_result, nested_serializer)
         end

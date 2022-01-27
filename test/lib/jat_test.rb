@@ -59,12 +59,6 @@ describe Jat do
     end
   end
 
-  describe ".call" do
-    it "returns self" do
-      assert_equal jat_class, jat_class.call
-    end
-  end
-
   describe ".to_h" do
     let(:jat) { jat_class.allocate }
 

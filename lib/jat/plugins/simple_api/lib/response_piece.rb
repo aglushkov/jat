@@ -47,7 +47,7 @@ class Jat
           private
 
           def inner_piece(attribute, value, inner_map)
-            serializer = attribute.serializer.call
+            serializer = attribute.serializer
             serializer::ResponsePiece.to_h(value, context, inner_map)
           end
 

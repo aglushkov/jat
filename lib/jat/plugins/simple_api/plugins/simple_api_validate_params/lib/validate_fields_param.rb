@@ -13,7 +13,7 @@ class Jat
               next if nested_fields.empty?
 
               raise_nested_error(name, prev_names, nested_fields) unless attribute.relation?
-              nested_serializer = attribute.serializer.call
+              nested_serializer = attribute.serializer
               call(nested_serializer, nested_fields, prev_names + [name])
             end
           end

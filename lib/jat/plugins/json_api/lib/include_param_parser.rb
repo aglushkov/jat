@@ -28,7 +28,7 @@ class Jat
             includes.each do |included_attr_name, nested_includes|
               add_typed_include(result, jat_class, included_attr_name)
 
-              nested_serializer = jat_class.attributes.fetch(included_attr_name).serializer.call
+              nested_serializer = jat_class.attributes.fetch(included_attr_name).serializer
               typed_includes(nested_serializer, nested_includes, result)
             end
 

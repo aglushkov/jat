@@ -50,7 +50,7 @@ class Jat
 
               result[name] =
                 if attribute.relation?
-                  nested_serializer = attribute.serializer.call
+                  nested_serializer = attribute.serializer
                   nested_fields = fields&.[](name)
                   map_for(nested_serializer, nested_fields, stack)
                 else

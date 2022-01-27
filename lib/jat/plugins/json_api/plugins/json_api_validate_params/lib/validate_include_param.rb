@@ -10,7 +10,7 @@ class Jat
               attribute = jat_class.attributes[name]
               raise_error(jat_class, name) if !attribute || !attribute.relation?
 
-              nested_serializer = attribute.serializer.call
+              nested_serializer = attribute.serializer
               call(nested_serializer, nested_includes)
             end
           end

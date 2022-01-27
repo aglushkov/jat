@@ -8,7 +8,7 @@ class Jat
           BANG = "!"
           NO_PRELOADS = [{}.freeze, [].freeze].freeze
 
-          # @param preload<Hash> Formatted user provided preloads hash
+          # @param preloads [Hash] Formatted user provided preloads hash
           def call(preloads)
             return NO_PRELOADS if preloads.empty?
 
