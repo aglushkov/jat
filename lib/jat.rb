@@ -71,10 +71,6 @@ class Jat
       config[:plugins].include?(plugin_name)
     end
 
-    def call
-      self
-    end
-
     def to_h(object, context = nil)
       new(context || {}).to_h(object)
     end
