@@ -23,14 +23,14 @@ class Jat
       end
 
       module InstanceMethods
-        def block
-          return @block if instance_variable_defined?(:@block)
+        def value_block
+          return @value_block if instance_variable_defined?(:@value_block)
 
           original_block = super
           type = opts[:type]
           return original_block unless type
 
-          @block = typed_block(type, original_block)
+          @value_block = typed_block(type, original_block)
         end
 
         private

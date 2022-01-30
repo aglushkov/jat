@@ -77,9 +77,8 @@ class Jat
           subclass.const_set(:ResponsePiece, response_piece_class)
 
           # Assign same meta
-          added_meta.each_value do |attribute|
-            params = attribute.params
-            subclass.meta(params[:name], **params[:opts], &params[:block])
+          added_meta.each_value do |attr|
+            subclass.meta(attr.name, **attr.opts, &attr.block)
           end
         end
 
@@ -103,7 +102,7 @@ class Jat
 
         def meta(name, **opts, &block)
           new_attr = self::Attribute.new(name: name, opts: opts, block: block)
-          added_meta[new_attr.name] = new_attr
+          added_meta[new_attr.serialized_name] = new_attr
         end
 
         def map(context)

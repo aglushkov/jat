@@ -71,7 +71,7 @@ class Jat
           end
 
           def manually_exposed?(attribute, fields)
-            fields&.include?(attribute.name)
+            fields&.include?(attribute.serialized_name)
           end
 
           def recursive_error_message(stack, name)
@@ -80,7 +80,7 @@ class Jat
           end
         end
 
-        extend Jat::JatClass
+        extend Jat::AnonymousClass
         extend ClassMethods
         include InstanceMethods
       end

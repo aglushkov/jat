@@ -18,12 +18,6 @@ describe "Jat::Plugins::JsonApi::FieldsParamParser" do
 
   let(:described_class) { jat_class::FieldsParamParser }
 
-  describe ".inspect" do
-    it "returns self name" do
-      assert_equal "#{jat_class}::FieldsParamParser", described_class.inspect
-    end
-  end
-
   describe ".parse" do
     it "returns empty hash when parameters not provided" do
       result = described_class.parse(nil)

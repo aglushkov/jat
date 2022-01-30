@@ -4,7 +4,7 @@
 
 # JAT (JSON API TOOLKIT)
 
-JAT helps to serialize objects to Hash format.
+JAT is a toolkit for handling objects serialization to JSON format in Ruby applications
 
 ## Supported Formats
 

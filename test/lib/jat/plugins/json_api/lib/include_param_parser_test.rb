@@ -35,12 +35,6 @@ describe "Jat::Plugins::JsonApi::Params::Include" do
 
   let(:described_class) { a_serializer::IncludeParamParser }
 
-  describe ".inspect" do
-    it "returns self name" do
-      assert_equal "#{a_serializer}::IncludeParamParser", described_class.inspect
-    end
-  end
-
   describe ".parse" do
     it "returns empty hash when param not provided" do
       result = described_class.parse(nil)

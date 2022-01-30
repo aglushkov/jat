@@ -3,9 +3,10 @@
 require_relative "./lib/format_user_preloads"
 require_relative "./lib/preloads_with_path"
 
-# This plugin adds attribute methods #preloads, #preloads_path
 class Jat
   module Plugins
+    # Base (core) plugin for :json_api_preloads and :simple_api_preloads.
+    # Adds Attribute#preloads, Attribute#preloads_path methods.
     module BasePreloads
       def self.plugin_name
         :base_preloads

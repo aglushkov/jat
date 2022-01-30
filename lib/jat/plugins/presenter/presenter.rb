@@ -45,7 +45,7 @@ class Jat
         end
 
         extend Forwardable
-        extend Jat::JatClass
+        extend Jat::AnonymousClass
         include InstanceMethods
       end
 
@@ -61,7 +61,7 @@ class Jat
         def attribute(name, **opts, &block)
           # Define attr_accessor in presenter automatically
           super.tap do |attribute|
-            self::Presenter.def_delegator(:__getobj__, attribute.key) unless attribute.params[:block]
+            self::Presenter.def_delegator(:__getobj__, attribute.key) unless attribute.block
           end
         end
       end

@@ -16,7 +16,7 @@ class Jat
   FROZEN_EMPTY_ARRAY = [].freeze
 end
 
-require_relative "jat/utils/jat_class"
+require_relative "jat/anonymous_class"
 require_relative "jat/attribute"
 require_relative "jat/config"
 require_relative "jat/plugins"
@@ -25,7 +25,7 @@ class Jat
   @config = Config.new({plugins: []})
 
   #
-  # DSL class methods
+  # Jat serializers core class methods
   #
   module ClassMethods
     # @return [Config] current serializer config
@@ -52,9 +52,8 @@ class Jat
       subclass.const_set(:Attribute, attribute_class)
 
       # Assign same attributes
-      attributes.each_value do |attribute|
-        params = attribute.params
-        subclass.attribute(params[:name], **params[:opts], &params[:block])
+      attributes.each_value do |attr|
+        subclass.attribute(attr.name, **attr.opts, &attr.block)
       end
 
       super
@@ -89,24 +88,24 @@ class Jat
     end
 
     #
-    # Shows if plugin is enabled
+    # Checks plugin is used
     #
     # @param plugin [Symbol, Module] Plugin name or plugin module itself
     #
     # @return [Boolean]
     #
-    def plugin_used?(plugin)
+    def plugin_used?(name)
       plugin_name =
-        case plugin
-        when Module then plugin.respond_to?(:plugin_name) ? plugin.plugin_name : plugin
-        else plugin
+        case name
+        when Module then name.respond_to?(:plugin_name) ? name.plugin_name : name
+        else name
         end
 
       config[:plugins].include?(plugin_name)
     end
 
     #
-    # Serializes object to Hash
+    # Serializes object
     #
     # @param object [Object] Serialized object (any type)
     # @param context [Hash] Serialization context
@@ -118,7 +117,7 @@ class Jat
     end
 
     #
-    # Shows all serialized attributes
+    # Lists attributes
     #
     # @return [Hash<Symbol, Jat::Attribute>] attributes list
     #
@@ -127,7 +126,7 @@ class Jat
     end
 
     #
-    # Adds attribute to serialize
+    # Adds attribute
     #
     # @param name [Symbol] Attribute name. Attribute value will be found by executing `object.<name>`
     # @param opts [Hash] Options to serialize attribute
@@ -142,15 +141,15 @@ class Jat
     #
     def attribute(name, **opts, &block)
       new_attr = self::Attribute.new(name: name, opts: opts, block: block)
-      attributes[new_attr.name] = new_attr
+      attributes[new_attr.serialized_name] = new_attr
     end
 
     #
-    # Adds relationship attribute to serialize
+    # Adds relationship attribute
     #
     # @param name [Symbol] Attribute name. Attribute value will be found by executing `object.<name>`
     # @param serializer [Jat, Proc] Specifies nested serializer for relationship
-    # @param opts [Hash] Options to serialize attribute
+    # @param opts [Hash] Options for attribute serialization
     # @option opts [Symbol] :key Attribute value will be found by executing `object.<key>`
     # @option opts [Boolean] :expose Specifies if current attribute is exposed or not
     # @option opts [Boolean] :many Tells explicitly that value is some kind of list
@@ -166,7 +165,7 @@ class Jat
   end
 
   #
-  # DSL Instance Methods
+  # Jat serializers core instance methods
   #
   module InstanceMethods
     attr_reader :context

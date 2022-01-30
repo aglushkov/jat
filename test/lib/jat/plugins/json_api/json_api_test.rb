@@ -71,7 +71,11 @@ describe "Jat::Plugins::JsonApi" do
     describe ".id" do
       it "adds new `:id`" do
         jat_class.id(key: :uuid)
-        assert_equal jat_class.get_id.params, {name: :id, opts: {key: :uuid}, block: nil}
+
+        attr = jat_class.get_id
+        assert_equal attr.name, :id
+        assert_equal attr.opts, {key: :uuid}
+        assert_nil attr.block
       end
     end
 

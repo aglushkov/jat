@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# Serializes to JSON-API format
 class Jat
   module Plugins
     module SimpleApi
@@ -101,7 +100,7 @@ class Jat
           end
         end
 
-        extend Jat::JatClass
+        extend Jat::AnonymousClass
         extend ClassMethods
         include InstanceMethods
       end

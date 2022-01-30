@@ -19,12 +19,6 @@ describe "Jat::Plugins::SimpleApi::FieldsParamParser" do
     jat_class::FieldsParamParser.parse(str)
   end
 
-  describe ".inspect" do
-    it "returns self name" do
-      assert_equal "#{jat_class}::FieldsParamParser", described_class.inspect
-    end
-  end
-
   describe ".parse" do
     it "returns empty hash when nil provided" do
       assert_equal({}, parse(nil))

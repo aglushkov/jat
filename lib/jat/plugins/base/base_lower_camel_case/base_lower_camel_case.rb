@@ -12,8 +12,8 @@ class Jat
       end
 
       module AttributeInstanceMethods
-        def name
-          LowerCamelCaseTransformation.call(original_name)
+        def serialized_name
+          LowerCamelCaseTransformation.call(name)
         end
       end
     end

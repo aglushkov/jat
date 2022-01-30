@@ -34,17 +34,6 @@ describe "Jat::Plugins::Presenter" do
         assert_same jat_class, presenter_class.jat_class
       end
     end
-
-    describe ".inspect" do
-      it "returns likely name of a class" do
-        assert_equal "#{jat_class}::Presenter", presenter_class.inspect
-      end
-
-      it "returns self name for top level presenter class" do
-        Jat::Plugins.find_plugin(:presenter)
-        assert_equal "Jat::Plugins::Presenter::Presenter", Jat::Plugins::Presenter::Presenter.inspect
-      end
-    end
   end
 
   describe "with simple_api" do

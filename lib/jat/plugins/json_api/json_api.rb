@@ -6,9 +6,9 @@ require_relative "./lib/map"
 require_relative "./lib/response"
 require_relative "./lib/response_piece"
 
-# Serializes to JSON-API format
 class Jat
   module Plugins
+    # Adds all functionality to serialize your objects to JSON:API format
     module JsonApi
       def self.plugin_name
         :json_api
@@ -87,48 +87,41 @@ class Jat
           subclass.const_set(:ResponsePiece, response_piece_class)
 
           subclass.type(@type) if defined?(@type)
-          subclass.id(&get_id.params[:block])
+          subclass.id(&get_id.block)
 
           # Assign same jsonapi_data
-          jsonapi_data.each_value do |attribute|
-            params = attribute.params
-            subclass.jsonapi(params[:name], **params[:opts], &params[:block])
+          jsonapi_data.each_value do |attr|
+            subclass.jsonapi(attr.name, **attr.opts, &attr.block)
           end
 
           # Assign same object_links
-          object_links.each_value do |attribute|
-            params = attribute.params
-            subclass.object_link(params[:name], **params[:opts], &params[:block])
+          object_links.each_value do |attr|
+            subclass.object_link(attr.name, **attr.opts, &attr.block)
           end
 
           # Assign same document_links
-          document_links.each_value do |attribute|
-            params = attribute.params
-            subclass.document_link(params[:name], **params[:opts], &params[:block])
+          document_links.each_value do |attr|
+            subclass.document_link(attr.name, **attr.opts, &attr.block)
           end
 
           # Assign same relationship_links
-          relationship_links.each_value do |attribute|
-            params = attribute.params
-            subclass.relationship_link(params[:name], **params[:opts], &params[:block])
+          relationship_links.each_value do |attr|
+            subclass.relationship_link(attr.name, **attr.opts, &attr.block)
           end
 
           # Assign same added_object_meta
-          added_object_meta.each_value do |attribute|
-            params = attribute.params
-            subclass.object_meta(params[:name], **params[:opts], &params[:block])
+          added_object_meta.each_value do |attr|
+            subclass.object_meta(attr.name, **attr.opts, &attr.block)
           end
 
           # Assign same added_document_meta
-          added_document_meta.each_value do |attribute|
-            params = attribute.params
-            subclass.document_meta(params[:name], **params[:opts], &params[:block])
+          added_document_meta.each_value do |attr|
+            subclass.document_meta(attr.name, **attr.opts, &attr.block)
           end
 
           # Assign same added_relationship_meta
-          added_relationship_meta.each_value do |attribute|
-            params = attribute.params
-            subclass.relationship_meta(params[:name], **params[:opts], &params[:block])
+          added_relationship_meta.each_value do |attr|
+            subclass.relationship_meta(attr.name, **attr.opts, &attr.block)
           end
         end
 
@@ -157,7 +150,7 @@ class Jat
 
         def jsonapi(name, **opts, &block)
           new_attr = self::Attribute.new(name: name, opts: opts, block: block)
-          jsonapi_data[new_attr.name] = new_attr
+          jsonapi_data[new_attr.serialized_name] = new_attr
         end
 
         # Links related to the resource
@@ -169,7 +162,7 @@ class Jat
 
         def object_link(name, **opts, &block)
           new_attr = self::Attribute.new(name: name, opts: opts, block: block)
-          object_links[new_attr.name] = new_attr
+          object_links[new_attr.serialized_name] = new_attr
         end
 
         # Top-level document links
@@ -181,7 +174,7 @@ class Jat
 
         def document_link(name, **opts, &block)
           new_attr = self::Attribute.new(name: name, opts: opts, block: block)
-          document_links[new_attr.name] = new_attr
+          document_links[new_attr.serialized_name] = new_attr
         end
 
         # Relationship links
@@ -193,7 +186,7 @@ class Jat
 
         def relationship_link(name, **opts, &block)
           new_attr = self::Attribute.new(name: name, opts: opts, block: block)
-          relationship_links[new_attr.name] = new_attr
+          relationship_links[new_attr.serialized_name] = new_attr
         end
 
         # Object meta
@@ -205,7 +198,7 @@ class Jat
 
         def object_meta(name, **opts, &block)
           new_attr = self::Attribute.new(name: name, opts: opts, block: block)
-          added_object_meta[new_attr.name] = new_attr
+          added_object_meta[new_attr.serialized_name] = new_attr
         end
 
         # Top-level document meta
@@ -217,7 +210,7 @@ class Jat
 
         def document_meta(name, **opts, &block)
           new_attr = self::Attribute.new(name: name, opts: opts, block: block)
-          added_document_meta[new_attr.name] = new_attr
+          added_document_meta[new_attr.serialized_name] = new_attr
         end
 
         # Relationship meta
@@ -229,7 +222,7 @@ class Jat
 
         def relationship_meta(name, **opts, &block)
           new_attr = self::Attribute.new(name: name, opts: opts, block: block)
-          added_relationship_meta[new_attr.name] = new_attr
+          added_relationship_meta[new_attr.serialized_name] = new_attr
         end
 
         def map(context)

@@ -485,10 +485,4 @@ describe "Jat::Plugins::JsonApi::Response" do
       assert_equal({self: "/self", related: "/foo/self"}, links)
     end
   end
-
-  describe ".inspect" do
-    it "returns self name" do
-      assert_equal "#{base_class}::Response", base_class::Response.inspect
-    end
-  end
 end

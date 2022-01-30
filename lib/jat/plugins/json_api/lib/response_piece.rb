@@ -157,7 +157,7 @@ class Jat
           end
         end
 
-        extend Jat::JatClass
+        extend Jat::AnonymousClass
         extend ClassMethods
         include InstanceMethods
       end

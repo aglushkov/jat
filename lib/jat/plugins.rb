@@ -1,23 +1,38 @@
 # frozen_string_literal: true
 
 class Jat
+  # Exception that raised when loading invalid plugin
   class PluginLoadError < Error; end
 
+  # Module in which all Jat plugins should be stored
   module Plugins
     @plugins = {}
 
     class << self
+      #
       # Registers given plugin to be able to load it using symbol name.
       #
-      # Example: Jat::Plugins.register_plugin(:plugin_name, PluginModule)
+      # @example Register plugin
+      #   Jat::Plugins.register_plugin(:plugin_name, PluginModule)
       def register_plugin(name, mod)
         @plugins[name] = mod
       end
 
-      # If the registered plugin already exists, use it. Otherwise, require
-      # and return it. This raises a LoadError if such a plugin doesn't exist,
-      # or a Jat::Error if it exists but it does not register itself
-      # correctly.
+      #
+      # Loads plugin code and returns plugin core module.
+      #
+      # @param name [Symbol, Module] plugin name or plugin itself
+      #
+      # @raise [PluginLoadError] Raises error when plugin was not found
+      #
+      # @example Find plugin when providing name
+      #   Jat::Plugins.find_plugin(:json_api) # => Jat::Plugins::JsonApi
+      #
+      # @example Find plugin when providing plugin itself
+      #   Jat::Plugins.find_plugin(SomePluginModule) # => SomePluginModule
+      #
+      # @return [Module] Plugin core module
+      #
       def find_plugin(name)
         return name if name.is_a?(Module)
         return @plugins[name] if @plugins.key?(name)

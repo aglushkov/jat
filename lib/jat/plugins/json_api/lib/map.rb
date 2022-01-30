@@ -73,7 +73,7 @@ class Jat
           end
 
           def fill_attr(map, type_map, attribute)
-            name = attribute.name
+            name = attribute.serialized_name
 
             if attribute.relation?
               (type_map[:relationships] ||= []) << name
@@ -84,7 +84,7 @@ class Jat
           end
 
           def expose?(type, attribute)
-            attribute_name = attribute.name
+            attribute_name = attribute.serialized_name
             fields_attribute_names = fields && fields[type]
             return fields_attribute_names.include?(attribute_name) if fields_attribute_names
 
@@ -100,7 +100,7 @@ class Jat
           end
         end
 
-        extend Jat::JatClass
+        extend Jat::AnonymousClass
         extend ClassMethods
         include InstanceMethods
       end

@@ -19,7 +19,7 @@ class Jat
 
           def raise_error(jat_class, name)
             type = jat_class.get_type
-            allowed_relationships = jat_class.attributes.each_value.select(&:relation?).map!(&:name)
+            allowed_relationships = jat_class.attributes.each_value.select(&:relation?).map!(&:serialized_name)
             allowed_relationships = "'#{allowed_relationships.join("', '")}'"
 
             raise JsonApiParamsError, "Type '#{type}' has no included '#{name}' relationship. Existing relationships are: #{allowed_relationships}"

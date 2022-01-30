@@ -20,12 +20,6 @@ describe Jat::Config do
     end
   end
 
-  describe ".inspect" do
-    it "returns self name" do
-      assert_equal "#{jat_class}::Config", config.class.inspect
-    end
-  end
-
   describe "#initialize" do
     it "deeply copies provided opts" do
       opts = {foo: {bar: {bazz: :bazz2}}}

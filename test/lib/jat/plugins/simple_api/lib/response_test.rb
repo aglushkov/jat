@@ -345,10 +345,4 @@ describe "Jat::Plugins::SimpleApi::Response" do
       assert_equal({root: {id: "1"}}, str_serializer.to_h("1", bazz: nil))
     end
   end
-
-  describe ".inspect" do
-    it "returns self name" do
-      assert_equal "#{base_class}::Response", base_class::Response.inspect
-    end
-  end
 end

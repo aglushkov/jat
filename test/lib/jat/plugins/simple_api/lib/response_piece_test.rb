@@ -4,10 +4,19 @@ require "test_helper"
 
 describe "Jat::Plugins::SimpleApi::ResponsePiece" do
   let(:jat_class) { Class.new(Jat) { plugin :simple_api } }
+  let(:described_class) { jat_class::ResponsePiece }
 
-  describe ".inspect" do
-    it "returns self name" do
-      assert_equal "#{jat_class}::ResponsePiece", jat_class::ResponsePiece.inspect
+  describe ".jat_class=" do
+    it "assigns @jat_class" do
+      described_class.jat_class = :foo
+      assert_equal :foo, described_class.instance_variable_get(:@jat_class)
+    end
+  end
+
+  describe ".jat_class" do
+    it "returns self @jat_class" do
+      assert_same jat_class, described_class.instance_variable_get(:@jat_class)
+      assert_same jat_class, described_class.jat_class
     end
   end
 end

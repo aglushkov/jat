@@ -132,10 +132,4 @@ describe "Jat::Plugins::SimpleApi::Map" do
       assert_equal "Recursive serialization: b -> c -> a -> b", error.message
     end
   end
-
-  describe ".inspect" do
-    it "returns self name" do
-      assert_equal "#{a}::Map", described_class.inspect
-    end
-  end
 end

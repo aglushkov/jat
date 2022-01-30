@@ -187,10 +187,4 @@ describe "Jat::Plugins::JsonApi::Map" do
       end
     end
   end
-
-  describe ".inspect" do
-    it "returns self name" do
-      assert_equal "#{a}::Map", described_class.inspect
-    end
-  end
 end

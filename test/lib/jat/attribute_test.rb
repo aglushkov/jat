@@ -20,20 +20,15 @@ describe Jat::Attribute do
     end
   end
 
-  describe ".inspect" do
-    it "returns self name" do
-      assert_equal "#{jat_class}::Attribute", attribute_class.inspect
-    end
-  end
-
   describe "#initialize" do
-    it "deeply copies provided params" do
-      params = {name: :foo, opts: {include: {foo: :bar}}, block: -> {}}
+    it "deeply copies provided opts" do
+      opts = {include: {foo: :bar}}
+      name = :foo
 
-      attribute = attribute_class.new(**params)
-      assert_equal attribute.params, params
-      refute_same attribute.params, params
-      refute_same attribute.opts, params[:opts]
+      attribute = attribute_class.new(name: name, opts: opts, block: -> {})
+      assert_equal attribute.opts, opts
+      refute_same attribute.opts, opts
+      refute_same attribute.opts[:include], opts[:include]
     end
   end
 
