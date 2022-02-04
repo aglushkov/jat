@@ -2,11 +2,21 @@
 
 class Jat
   module Plugins
+    # Loads correct plugin to get relationships to preload
     module Preloads
+      # @return [Symbol] plugin name
       def self.plugin_name
         :preloads
       end
 
+      #
+      # Loads additional plugins
+      #
+      # @param jat_class [Class] Current serializer class
+      # @param opts [<Type>] plugin opts
+      #
+      # @return [void]
+      #
       def self.load(jat_class, **opts)
         if jat_class.plugin_used?(:json_api)
           jat_class.plugin :json_api_preloads, **opts

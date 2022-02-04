@@ -2,11 +2,25 @@
 
 class Jat
   module Plugins
+    #
+    # Plugin that automatically loads JsonApiActiverecord or SimpleApiActiverecord plugin.
+    # @see Jat::Plugins::JsonApiActiverecord
+    # @see Jat::Plugins::SimpleApiActiverecord
+    #
     module Activerecord
+      # @return [Symbol] plugin name
       def self.plugin_name
         :activerecord
       end
 
+      #
+      # Loads additional plugins
+      #
+      # @param jat_class [Class] Current serializer class
+      # @param opts [Hash] loaded plugins opts
+      #
+      # @return [void]
+      #
       def self.load(jat_class, **opts)
         if jat_class.plugin_used?(:json_api)
           jat_class.plugin :json_api_activerecord, **opts

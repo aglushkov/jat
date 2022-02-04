@@ -90,7 +90,7 @@ class Jat
     #
     # Checks plugin is used
     #
-    # @param plugin [Symbol, Module] Plugin name or plugin module itself
+    # @param name [Symbol, Module] Plugin name or plugin module itself
     #
     # @return [Boolean]
     #

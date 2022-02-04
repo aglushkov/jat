@@ -3,8 +3,19 @@
 class Jat
   module Plugins
     module SimpleApiPreloads
+      #
+      # Finds relations to preload for provided serializer
+      #
       class Preloads
+        # Contains Preloads class methods
         module ClassMethods
+          #
+          # Constructs preloads hash for given serializer
+          #
+          # @param jat [Jat] Instance of Jat serializer
+          #
+          # @return [Hash]
+          #
           def call(jat)
             result = {}
             append_many(result, jat.class, jat.map)
