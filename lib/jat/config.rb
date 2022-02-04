@@ -21,7 +21,7 @@ class Jat
       # @param opts [Hash] Initial config options
       #
       def initialize(opts = {})
-        @opts = EnumDeepDup.call(opts)
+        @opts = Utils::EnumDeepDup.call(opts)
       end
 
       #

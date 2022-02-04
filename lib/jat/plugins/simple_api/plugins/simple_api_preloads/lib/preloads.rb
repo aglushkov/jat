@@ -44,7 +44,7 @@ class Jat
           def append_one(result, jat_class, preloads)
             return if preloads.empty?
 
-            preloads = EnumDeepDup.call(preloads)
+            preloads = Utils::EnumDeepDup.call(preloads)
             merge(result, preloads)
           end
 

@@ -54,7 +54,7 @@ class Jat
           preloads = FormatUserPreloads.to_hash(preloads)
           preloads, path = PreloadsWithPath.call(preloads)
 
-          [EnumDeepFreeze.call(preloads), path.freeze]
+          [Utils::EnumDeepFreeze.call(preloads), path.freeze]
         end
       end
     end

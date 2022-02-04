@@ -2,11 +2,11 @@
 
 require "test_helper"
 
-describe Jat::EnumDeepDup do
+describe Jat::Utils::EnumDeepDup do
   describe ".call" do
     it "makes deep dup of hash" do
       hash = {key1: {key11: {key111: :value111}}, key2: [{key22: {key222: :value222}}]}
-      dup = Jat::EnumDeepDup.call(hash)
+      dup = Jat::Utils::EnumDeepDup.call(hash)
 
       assert_equal hash, dup
 
@@ -21,7 +21,7 @@ describe Jat::EnumDeepDup do
 
     it "does not duplicates non-enumerable objects" do
       hash = {key1: Jat, key2: [-> {}]}
-      dup = Jat::EnumDeepDup.call(hash)
+      dup = Jat::Utils::EnumDeepDup.call(hash)
 
       assert_equal hash, dup
       assert_same hash[:key1], dup[:key1]

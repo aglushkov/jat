@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
-#
 # Parent class for your serializers
-#
 class Jat
-  #
   # A generic exception used by Jat.
-  #
   class Error < StandardError; end
+
+  # Namespace for utility functions
+  module Utils; end
 
   # @return [Hash] frozen hash
   FROZEN_EMPTY_HASH = {}.freeze

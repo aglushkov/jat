@@ -39,7 +39,7 @@ class Jat
         check_block_valid(block)
 
         @name = name.to_sym
-        @opts = EnumDeepDup.call(opts)
+        @opts = Utils::EnumDeepDup.call(opts)
         @block = block
       end
 

@@ -27,7 +27,7 @@ class Jat
         def maps_cache
           @maps_cache ||= Hash.new do |cache, cache_key|
             cache.shift if cache.length >= jat_class.config[:cached_maps_count] # protect from memory leak
-            cache[cache_key] = EnumDeepFreeze.call(yield)
+            cache[cache_key] = Utils::EnumDeepDup.call(yield)
           end
         end
 

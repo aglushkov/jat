@@ -2,11 +2,11 @@
 
 require "test_helper"
 
-describe Jat::EnumDeepFreeze do
+describe Jat::Utils::EnumDeepFreeze do
   describe ".call" do
     it "deeply freezes provided hash" do
       hash = {key1: {key11: {key111: :value111}}, key2: [{key22: {key222: :value222}}]}
-      Jat::EnumDeepFreeze.call(hash)
+      Jat::Utils::EnumDeepFreeze.call(hash)
 
       assert hash.frozen?
       assert hash[:key1].frozen?
@@ -19,7 +19,7 @@ describe Jat::EnumDeepFreeze do
 
     it "does not freezes non-enumerable objects" do
       hash = {key1: Jat, key2: [-> {}]}
-      Jat::EnumDeepFreeze.call(hash)
+      Jat::Utils::EnumDeepFreeze.call(hash)
 
       refute hash[:key1].frozen?
       refute hash[:key2][0].frozen?
