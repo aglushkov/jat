@@ -2,7 +2,7 @@
 
 class Jat
   module Plugins
-    module BaseActiverecordPreloads
+    module ActiverecordPreloads
       class Preloader
         module ClassMethods
           def preload(object, preloads)

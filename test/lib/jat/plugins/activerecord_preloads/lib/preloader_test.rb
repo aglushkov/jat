@@ -4,11 +4,19 @@ require "test_helper"
 require "support/activerecord"
 
 describe "Jat::Plugins::ActiverecordPreloads" do
-  before { Jat::Plugins.find_plugin(:base_activerecord_preloads) }
+  before { serializer_class }
+
+  # Plugin can be used only together with :simple_api or :json_api
+  let(:serializer_class) do
+    Class.new(Jat) do
+      plugin :simple_api
+      plugin :activerecord_preloads
+    end
+  end
 
   describe "Preloader" do
     let(:described_class) { plugin::Preloader }
-    let(:plugin) { Jat::Plugins::BaseActiverecordPreloads }
+    let(:plugin) { Jat::Plugins::ActiverecordPreloads }
 
     describe ".handlers" do
       it "returns memorized array of handlers" do
