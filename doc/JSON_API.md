@@ -143,7 +143,7 @@ JSON:API is a standard format described at https://jsonapi.org/.
       plugin :json_api
 
       # Other plugins
-      plugin :activerecord # auto preload
+      plugin :activerecord_preloads # automatically preloads relations
       plugin :validate_params # adds validate methods that check context[:fields]
       plugin :to_str # allows to serialize object to JSON string
       plugin :cache # allows to provide context[:cache] to cache response

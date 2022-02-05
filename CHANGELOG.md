@@ -6,6 +6,8 @@
 
 ### Changes
 
+  * Rename plugin :activerecord to :activerecord_preloads
+
 ### Bugs Fixed
 
 ## 0.0.10 (2022-01-26)

@@ -2,9 +2,9 @@
 
 require "test_helper"
 
-describe "Jat::Plugins::SimpleApiActiverecord" do
+describe "Jat::Plugins::SimpleApiActiverecordPreloads" do
   before do
-    @plugin = Jat::Plugins.find_plugin(:simple_api_activerecord)
+    @plugin = Jat::Plugins.find_plugin(:simple_api_activerecord_preloads)
   end
 
   it "checks simple_api plugin loaded before" do
@@ -16,7 +16,7 @@ describe "Jat::Plugins::SimpleApiActiverecord" do
   it "loads other plugins" do
     serializer_class = Class.new(Jat)
     serializer_class.plugin :simple_api
-    serializer_class.plugin :simple_api_activerecord
+    serializer_class.plugin :simple_api_activerecord_preloads
 
     assert serializer_class.plugin_used?(:simple_api_preloads)
     assert serializer_class.plugin_used?(:base_activerecord_preloads)

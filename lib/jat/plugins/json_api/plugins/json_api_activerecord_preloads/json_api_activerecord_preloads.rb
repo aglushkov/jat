@@ -5,10 +5,10 @@ class Jat
     #
     # Plugin is used to automatically preload relations to serialized object
     #
-    module JsonApiActiverecord
+    module JsonApiActiverecordPreloads
       # @return [Symbol] this plugin name
       def self.plugin_name
-        :json_api_activerecord
+        :json_api_activerecord_preloads
       end
 
       # Checks if plugin can be added
@@ -26,6 +26,6 @@ class Jat
       end
     end
 
-    register_plugin(JsonApiActiverecord.plugin_name, JsonApiActiverecord)
+    register_plugin(JsonApiActiverecordPreloads.plugin_name, JsonApiActiverecordPreloads)
   end
 end

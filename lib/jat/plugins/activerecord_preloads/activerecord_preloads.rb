@@ -3,14 +3,14 @@
 class Jat
   module Plugins
     #
-    # Plugin that automatically loads JsonApiActiverecord or SimpleApiActiverecord plugin.
-    # @see Jat::Plugins::JsonApiActiverecord
-    # @see Jat::Plugins::SimpleApiActiverecord
+    # Plugin that checks used plugins and loads correct Preloader for selected response type
+    # @see Jat::Plugins::JsonApiActiverecordPreloader
+    # @see Jat::Plugins::SimpleApiActiverecordPreloader
     #
-    module Activerecord
+    module ActiverecordPreloads
       # @return [Symbol] plugin name
       def self.plugin_name
-        :activerecord
+        :activerecord_preloads
       end
 
       #
@@ -23,15 +23,15 @@ class Jat
       #
       def self.load(serializer_class, **opts)
         if serializer_class.plugin_used?(:json_api)
-          serializer_class.plugin :json_api_activerecord, **opts
+          serializer_class.plugin :json_api_activerecord_preloads, **opts
         elsif serializer_class.plugin_used?(:simple_api)
-          serializer_class.plugin :simple_api_activerecord, **opts
+          serializer_class.plugin :simple_api_activerecord_preloads, **opts
         else
           raise Error, "Please load :json_api or :simple_api plugin first"
         end
       end
     end
 
-    register_plugin(Activerecord.plugin_name, Activerecord)
+    register_plugin(ActiverecordPreloads.plugin_name, ActiverecordPreloads)
   end
 end

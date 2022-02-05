@@ -30,7 +30,7 @@ describe Jat::Plugins do
     end
 
     it "returns global plugins found by name" do
-      assert_equal "Jat::Plugins::Activerecord", described_module.find_plugin(:activerecord).name
+      assert_equal "Jat::Plugins::ActiverecordPreloads", described_module.find_plugin(:activerecord_preloads).name
       assert_equal "Jat::Plugins::Cache", described_module.find_plugin(:cache).name
       assert_equal "Jat::Plugins::JsonApi", described_module.find_plugin(:json_api).name
       assert_equal "Jat::Plugins::LowerCamelCase", described_module.find_plugin(:lower_camel_case).name
@@ -44,7 +44,7 @@ describe Jat::Plugins do
     end
 
     it "returns json_api only plugins found by name (name has `json_api_` prefix)" do
-      assert_equal "Jat::Plugins::JsonApiActiverecord", described_module.find_plugin(:json_api_activerecord).name
+      assert_equal "Jat::Plugins::JsonApiActiverecordPreloads", described_module.find_plugin(:json_api_activerecord_preloads).name
       assert_equal "Jat::Plugins::JsonApiLowerCamelCase", described_module.find_plugin(:json_api_lower_camel_case).name
       assert_equal "Jat::Plugins::JsonApiMapsCache", described_module.find_plugin(:json_api_maps_cache).name
       assert_equal "Jat::Plugins::JsonApiPreloads", described_module.find_plugin(:json_api_preloads).name
@@ -52,7 +52,7 @@ describe Jat::Plugins do
     end
 
     it "returns simple_api only plugins found by name (name has `simple_api_` prefix)" do
-      assert_equal "Jat::Plugins::SimpleApiActiverecord", described_module.find_plugin(:simple_api_activerecord).name
+      assert_equal "Jat::Plugins::SimpleApiActiverecordPreloads", described_module.find_plugin(:simple_api_activerecord_preloads).name
       assert_equal "Jat::Plugins::SimpleApiLowerCamelCase", described_module.find_plugin(:simple_api_lower_camel_case).name
       assert_equal "Jat::Plugins::SimpleApiMapsCache", described_module.find_plugin(:simple_api_maps_cache).name
       assert_equal "Jat::Plugins::SimpleApiPreloads", described_module.find_plugin(:simple_api_preloads).name
