@@ -8,23 +8,23 @@ describe "Jat::Plugins::JsonApiMapsCache" do
   end
 
   it "checks json_api plugin loaded before" do
-    jat_class = Class.new(Jat)
-    error = assert_raises(Jat::Error) { jat_class.plugin @plugin }
+    serializer_class = Class.new(Jat)
+    error = assert_raises(Jat::Error) { serializer_class.plugin @plugin }
     assert_match(/json_api/, error.message)
   end
 
   it "adds config variable how many maps to store per serializer" do
-    jat_class = Class.new(Jat)
+    serializer_class = Class.new(Jat)
 
-    @plugin.after_load(jat_class)
-    assert_equal(100, jat_class.config[:cached_maps_count]) # default 100
+    @plugin.after_load(serializer_class)
+    assert_equal(100, serializer_class.config[:cached_maps_count]) # default 100
 
-    @plugin.after_load(jat_class, cached_maps_count: 10) # change value via opts
-    assert_equal(10, jat_class.config[:cached_maps_count])
+    @plugin.after_load(serializer_class, cached_maps_count: 10) # change value via opts
+    assert_equal(10, serializer_class.config[:cached_maps_count])
   end
 
   describe "Test maps responses" do
-    let(:jat_class) do
+    let(:serializer_class) do
       Class.new(Jat) do
         plugin(:json_api)
         plugin(:json_api_maps_cache)
@@ -40,14 +40,14 @@ describe "Jat::Plugins::JsonApiMapsCache" do
     end
 
     it "returns same maps when requested with same params" do
-      full_map1 = jat_class::Map.call(exposed: :all)
-      full_map2 = jat_class::Map.call(exposed: :all)
+      full_map1 = serializer_class::Map.call(exposed: :all)
+      full_map2 = serializer_class::Map.call(exposed: :all)
 
-      exposed_map1 = jat_class::Map.call(exposed: :default)
-      exposed_map2 = jat_class::Map.call(exposed: :default)
+      exposed_map1 = serializer_class::Map.call(exposed: :default)
+      exposed_map2 = serializer_class::Map.call(exposed: :default)
 
-      current_map1 = jat_class::Map.call(include: "rel2", fields: {foo: "attr1,rel1"})
-      current_map2 = jat_class::Map.call(include: "rel2", fields: {foo: "attr1,rel1"})
+      current_map1 = serializer_class::Map.call(include: "rel2", fields: {foo: "attr1,rel1"})
+      current_map2 = serializer_class::Map.call(include: "rel2", fields: {foo: "attr1,rel1"})
 
       assert_same(full_map1, full_map2)
       assert_same(exposed_map1, exposed_map2)
@@ -56,9 +56,9 @@ describe "Jat::Plugins::JsonApiMapsCache" do
       # check different maps are not same
 
       # should not match, include is not same
-      current_map3 = jat_class::Map.call(include: "rel1", fields: {foo: "attr1,rel1"})
+      current_map3 = serializer_class::Map.call(include: "rel1", fields: {foo: "attr1,rel1"})
       # should not match, fields are not same
-      current_map4 = jat_class::Map.call(include: "rel2", fields: {foo: "attr1,rel2"})
+      current_map4 = serializer_class::Map.call(include: "rel2", fields: {foo: "attr1,rel2"})
 
       assert !current_map1.equal?(current_map3)
       assert !current_map1.equal?(current_map4)
@@ -67,40 +67,40 @@ describe "Jat::Plugins::JsonApiMapsCache" do
 
     it "stores different maps keys" do
       # key 1
-      jat_class::Map.call(exposed: :all)
-      jat_class::Map.call(exposed: :all)
+      serializer_class::Map.call(exposed: :all)
+      serializer_class::Map.call(exposed: :all)
 
       # key 2
-      jat_class::Map.call(exposed: :default)
-      jat_class::Map.call(exposed: :default)
+      serializer_class::Map.call(exposed: :default)
+      serializer_class::Map.call(exposed: :default)
 
       # key 3
-      jat_class::Map.call(include: "rel2", fields: {foo: "attr1,rel1"})
-      jat_class::Map.call(include: "rel2", fields: {foo: "attr1,rel1"})
+      serializer_class::Map.call(include: "rel2", fields: {foo: "attr1,rel1"})
+      serializer_class::Map.call(include: "rel2", fields: {foo: "attr1,rel1"})
 
       # key 4
-      jat_class::Map.call(include: "rel1", fields: {foo: "attr1,rel1"})
+      serializer_class::Map.call(include: "rel1", fields: {foo: "attr1,rel1"})
 
       # key 5
-      jat_class::Map.call(include: "rel2", fields: {foo: "attr1,rel2"})
+      serializer_class::Map.call(include: "rel2", fields: {foo: "attr1,rel2"})
 
-      assert_equal 5, jat_class::Map.maps_cache.keys.count
+      assert_equal 5, serializer_class::Map.maps_cache.keys.count
     end
 
     it "clears old results when there are too many cache keys" do
-      jat_class.config[:cached_maps_count] = 1
+      serializer_class.config[:cached_maps_count] = 1
 
-      full_map1 = jat_class::Map.call(exposed: :all)
-      full_map2 = jat_class::Map.call(exposed: :all)
+      full_map1 = serializer_class::Map.call(exposed: :all)
+      full_map2 = serializer_class::Map.call(exposed: :all)
 
       # ensure maps refer to same object
       assert_same(full_map1, full_map2)
 
       # replace single possible cache key with another `exposed` map
-      jat_class::Map.call(exposed: :default)
+      serializer_class::Map.call(exposed: :default)
 
       # calculate full map again, it should not match
-      full_map3 = jat_class::Map.call(exposed: :all)
+      full_map3 = serializer_class::Map.call(exposed: :all)
       assert !full_map1.equal?(full_map3)
     end
   end

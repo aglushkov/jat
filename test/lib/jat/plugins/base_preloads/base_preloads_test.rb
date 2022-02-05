@@ -3,12 +3,12 @@
 require "test_helper"
 
 describe "Jat::Plugins::BasePreloads" do
-  let(:jat_class) do
+  let(:serializer_class) do
     Class.new(Jat) { plugin(:base_preloads) }
   end
 
   def attribute(name, opts)
-    jat_class.attribute(name, **opts)
+    serializer_class.attribute(name, **opts)
   end
 
   describe "AttributeMethods" do
@@ -28,13 +28,13 @@ describe "Jat::Plugins::BasePreloads" do
       end
 
       it "preloads main key when serializer exists and preloads are not" do
-        assert_equal({foo: {}}, attribute(:foo, serializer: jat_class).preloads)
-        assert_equal({bar: {}}, attribute(:foo, key: :bar, serializer: jat_class).preloads)
+        assert_equal({foo: {}}, attribute(:foo, serializer: serializer_class).preloads)
+        assert_equal({bar: {}}, attribute(:foo, key: :bar, serializer: serializer_class).preloads)
       end
 
       it "returns nil when requested to preload nil or false" do
-        assert_nil attribute(:foo, serializer: jat_class, preload: nil).preloads
-        assert_nil attribute(:foo, key: :bar, serializer: jat_class, preload: false).preloads
+        assert_nil attribute(:foo, serializer: serializer_class, preload: nil).preloads
+        assert_nil attribute(:foo, key: :bar, serializer: serializer_class, preload: false).preloads
       end
 
       it "removes bang (!) from preloads" do
@@ -52,12 +52,12 @@ describe "Jat::Plugins::BasePreloads" do
       end
 
       it "show path to main key when serializer exists and preloads are not" do
-        assert_equal([:foo], attribute(:foo, serializer: jat_class).preloads_path)
-        assert_equal([:bar], attribute(:foo, key: :bar, serializer: jat_class).preloads_path)
+        assert_equal([:foo], attribute(:foo, serializer: serializer_class).preloads_path)
+        assert_equal([:bar], attribute(:foo, key: :bar, serializer: serializer_class).preloads_path)
 
         # serializer with empty preloads provided
-        assert_equal([], attribute(:foo, serializer: jat_class, preload: nil).preloads_path)
-        assert_equal([], attribute(:foo, key: :bar, serializer: jat_class, preload: false).preloads_path)
+        assert_equal([], attribute(:foo, serializer: serializer_class, preload: nil).preloads_path)
+        assert_equal([], attribute(:foo, key: :bar, serializer: serializer_class, preload: false).preloads_path)
       end
 
       it "removes bang (!) and construct path to this preload" do

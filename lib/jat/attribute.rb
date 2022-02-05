@@ -61,7 +61,7 @@ class Jat
         return @exposed if instance_variable_defined?(:@exposed)
 
         @exposed =
-          case self.class.jat_class.config[:exposed]
+          case self.class.serializer_class.config[:exposed]
           when :all then opts.fetch(:exposed, true)
           when :none then opts.fetch(:exposed, false)
           else opts.fetch(:exposed, !relation?)
@@ -124,7 +124,7 @@ class Jat
       end
     end
 
-    extend Jat::AnonymousClass
+    extend Jat::Helpers::SerializerClassHelper
     include InstanceMethods
   end
 end

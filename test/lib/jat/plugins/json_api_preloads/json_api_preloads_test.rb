@@ -8,26 +8,26 @@ describe "Jat::Plugins::JsonApiPreloads" do
   end
 
   it "checks json_api plugin loaded before" do
-    jat_class = Class.new(Jat)
-    error = assert_raises(Jat::Error) { jat_class.plugin @plugin }
+    serializer_class = Class.new(Jat)
+    error = assert_raises(Jat::Error) { serializer_class.plugin @plugin }
     assert_match(/json_api/, error.message)
   end
 
   it "loads other plugins" do
-    jat_class = Class.new(Jat)
-    jat_class.plugin :json_api
+    serializer_class = Class.new(Jat)
+    serializer_class.plugin :json_api
 
-    jat_class.expects(:plugin).with(:base_preloads, foo: :bar)
+    serializer_class.expects(:plugin).with(:base_preloads, foo: :bar)
 
-    @plugin.before_load(jat_class, foo: :bar)
+    @plugin.before_load(serializer_class, foo: :bar)
   end
 
   describe "InstanceMethods" do
     it "adds #preloads method as a delegator to #{@plugin}::Preloads" do
-      jat_class = Class.new(Jat)
-      jat_class.plugin :json_api
-      jat_class.plugin @plugin
-      jat = jat_class.allocate
+      serializer_class = Class.new(Jat)
+      serializer_class.plugin :json_api
+      serializer_class.plugin @plugin
+      jat = serializer_class.allocate
 
       @plugin::Preloads.expects(:call).with(jat).returns("RES")
 
@@ -37,15 +37,15 @@ describe "Jat::Plugins::JsonApiPreloads" do
 
   describe "ClassMethods" do
     it "adds .preloads method as a delegator to #{@plugin}::Preloads" do
-      jat_class = Class.new(Jat)
-      jat_class.plugin :json_api
-      jat_class.plugin @plugin
+      serializer_class = Class.new(Jat)
+      serializer_class.plugin :json_api
+      serializer_class.plugin @plugin
 
-      jat = jat_class.allocate
-      jat_class.expects(:new).with("CONTEXT").returns(jat)
+      jat = serializer_class.allocate
+      serializer_class.expects(:new).with("CONTEXT").returns(jat)
       @plugin::Preloads.expects(:call).with(jat).returns("RES")
 
-      assert_equal "RES", jat_class.preloads("CONTEXT")
+      assert_equal "RES", serializer_class.preloads("CONTEXT")
     end
   end
 end

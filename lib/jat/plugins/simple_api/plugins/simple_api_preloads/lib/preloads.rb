@@ -24,13 +24,13 @@ class Jat
 
           private
 
-          def append_many(result, jat_class, keys)
+          def append_many(result, serializer_class, keys)
             keys.each do |key, inner_keys|
-              attribute = jat_class.attributes.fetch(key)
+              attribute = serializer_class.attributes.fetch(key)
               preloads = attribute.preloads
               next unless preloads
 
-              append_one(result, jat_class, preloads)
+              append_one(result, serializer_class, preloads)
               next if inner_keys.empty?
 
               path = attribute.preloads_path
@@ -41,7 +41,7 @@ class Jat
             end
           end
 
-          def append_one(result, jat_class, preloads)
+          def append_one(result, serializer_class, preloads)
             return if preloads.empty?
 
             preloads = Utils::EnumDeepDup.call(preloads)

@@ -8,43 +8,43 @@ describe "Jat::Plugins::JsonApiValidateParams" do
   end
 
   it "checks json_api plugin loaded before" do
-    jat_class = Class.new(Jat)
-    error = assert_raises(Jat::Error) { jat_class.plugin @plugin }
+    serializer_class = Class.new(Jat)
+    error = assert_raises(Jat::Error) { serializer_class.plugin @plugin }
     assert_match(/json_api/, error.message)
   end
 
   let(:base) do
-    jat_class = Class.new(Jat)
-    jat_class.plugin :json_api
-    jat_class
+    serializer_class = Class.new(Jat)
+    serializer_class.plugin :json_api
+    serializer_class
   end
 
   let(:serializer) do
-    jat_class = Class.new(base)
-    jat_class.plugin @plugin
+    serializer_class = Class.new(base)
+    serializer_class.plugin @plugin
 
-    jat_class.type "foo"
-    jat_class.attribute :foo_bar
-    jat_class.relationship :foo_bazz, serializer: foo_bazz_serializer
-    jat_class
+    serializer_class.type "foo"
+    serializer_class.attribute :foo_bar
+    serializer_class.relationship :foo_bazz, serializer: foo_bazz_serializer
+    serializer_class
   end
 
   let(:foo_bazz_serializer) do
-    jat_class = Class.new(base)
-    jat_class.type "foo_bazz"
-    jat_class.attribute :bazz
-    jat_class
+    serializer_class = Class.new(base)
+    serializer_class.type "foo_bazz"
+    serializer_class.attribute :bazz
+    serializer_class
   end
 
   let(:serializer_lower_camel_case) do
-    jat_class = Class.new(base)
-    jat_class.plugin :json_api_lower_camel_case
-    jat_class.plugin @plugin
+    serializer_class = Class.new(base)
+    serializer_class.plugin :json_api_lower_camel_case
+    serializer_class.plugin @plugin
 
-    jat_class.type "foo"
-    jat_class.attribute :foo_bar
-    jat_class.relationship :foo_bazz, serializer: foo_bazz_serializer
-    jat_class
+    serializer_class.type "foo"
+    serializer_class.attribute :foo_bar
+    serializer_class.relationship :foo_bazz, serializer: foo_bazz_serializer
+    serializer_class
   end
 
   it "returns true when provided fields present" do

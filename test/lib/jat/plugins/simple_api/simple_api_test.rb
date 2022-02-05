@@ -5,7 +5,7 @@ require "test_helper"
 describe "Jat::Plugins::SimpleApi" do
   before { @plugin = Jat::Plugins.find_plugin(:simple_api) }
 
-  let(:jat_class) do
+  let(:serializer_class) do
     new_class = Class.new(Jat)
     new_class.plugin(plugin)
     new_class.root :data
@@ -17,34 +17,34 @@ describe "Jat::Plugins::SimpleApi" do
 
   describe ".before_load" do
     it "raises error if response plugin was already loaded" do
-      jat_class = Class.new(Jat)
-      jat_class.config[:response_plugin_loaded] = :foobar
+      serializer_class = Class.new(Jat)
+      serializer_class.config[:response_plugin_loaded] = :foobar
 
-      err = assert_raises(Jat::Error) { jat_class.plugin(:simple_api) }
+      err = assert_raises(Jat::Error) { serializer_class.plugin(:simple_api) }
       assert_equal("Response plugin `foobar` was already loaded before", err.message)
     end
   end
 
   describe ".after_load" do
     it "adds default `:meta` meta_key config option" do
-      jat_class = Class.new(Jat)
-      assert_nil jat_class.config[:meta_key]
+      serializer_class = Class.new(Jat)
+      assert_nil serializer_class.config[:meta_key]
 
-      plugin.load(jat_class)
-      plugin.after_load(jat_class)
-      assert_equal :meta, jat_class.config[:meta_key]
+      plugin.load(serializer_class)
+      plugin.after_load(serializer_class)
+      assert_equal :meta, serializer_class.config[:meta_key]
     end
 
     it "adds config variable with name of response plugin that was loaded" do
-      jat_class = Class.new(Jat)
-      jat_class.plugin(:simple_api)
+      serializer_class = Class.new(Jat)
+      serializer_class.plugin(:simple_api)
 
-      assert_equal(:simple_api, jat_class.config[:response_plugin_loaded])
+      assert_equal(:simple_api, serializer_class.config[:response_plugin_loaded])
     end
   end
 
   describe "InstanceMethods" do
-    let(:jat) { jat_class.new({}) }
+    let(:jat) { serializer_class.new({}) }
 
     describe "#to_h" do
       it "returns response in a simple-api format" do
@@ -55,24 +55,24 @@ describe "Jat::Plugins::SimpleApi" do
 
     describe "#map" do
       it "returns map for provided context" do
-        jat_class::Map.expects(:call).with("CONTEXT").returns "MAP"
-        assert_equal "MAP", jat_class.new("CONTEXT").map
+        serializer_class::Map.expects(:call).with("CONTEXT").returns "MAP"
+        assert_equal "MAP", serializer_class.new("CONTEXT").map
       end
     end
 
     describe "#map_full" do
       it "returns memorized map with all fields exposed" do
-        jat_class::Map.expects(:call).with(exposed: :all).returns "MAP"
-        assert_equal "MAP", jat_class.map_full
-        assert_same jat_class.map_full, jat_class.map_full
+        serializer_class::Map.expects(:call).with(exposed: :all).returns "MAP"
+        assert_equal "MAP", serializer_class.map_full
+        assert_same serializer_class.map_full, serializer_class.map_full
       end
     end
 
     describe "#map_exposed" do
       it "returns memorized map with exposed by default fields" do
-        jat_class::Map.expects(:call).with(exposed: :default).returns "MAP"
-        assert_equal "MAP", jat_class.map_exposed
-        assert_same jat_class.map_exposed, jat_class.map_exposed
+        serializer_class::Map.expects(:call).with(exposed: :default).returns "MAP"
+        assert_equal "MAP", serializer_class.map_exposed
+        assert_same serializer_class.map_exposed, serializer_class.map_exposed
       end
     end
   end
@@ -80,93 +80,93 @@ describe "Jat::Plugins::SimpleApi" do
   describe "ClassMethods" do
     describe ".root" do
       it "sets root config values" do
-        jat_class.root :data
+        serializer_class.root :data
 
-        assert_equal :data, jat_class.config[:root_one]
-        assert_equal :data, jat_class.config[:root_many]
+        assert_equal :data, serializer_class.config[:root_one]
+        assert_equal :data, serializer_class.config[:root_many]
       end
 
       it "sets root config values separately for one or many objects" do
-        jat_class.root one: "user", many: "users"
+        serializer_class.root one: "user", many: "users"
 
-        assert_equal :user, jat_class.config[:root_one]
-        assert_equal :users, jat_class.config[:root_many]
+        assert_equal :user, serializer_class.config[:root_one]
+        assert_equal :users, serializer_class.config[:root_many]
       end
 
       it "removes root values when `false` or `nil` provided" do
-        jat_class.root :data
-        jat_class.root false
+        serializer_class.root :data
+        serializer_class.root false
 
-        assert_nil jat_class.config[:root_one]
-        assert_nil jat_class.config[:root_many]
+        assert_nil serializer_class.config[:root_one]
+        assert_nil serializer_class.config[:root_many]
 
-        jat_class.root :data
-        jat_class.root nil
+        serializer_class.root :data
+        serializer_class.root nil
 
-        assert_nil jat_class.config[:root_one]
-        assert_nil jat_class.config[:root_many]
+        assert_nil serializer_class.config[:root_one]
+        assert_nil serializer_class.config[:root_many]
       end
 
       it "removes root values when `false` or nil provided in hash" do
-        jat_class.root :data
-        jat_class.root one: nil, many: nil
-        assert_nil jat_class.config[:root_one]
-        assert_nil jat_class.config[:root_many]
+        serializer_class.root :data
+        serializer_class.root one: nil, many: nil
+        assert_nil serializer_class.config[:root_one]
+        assert_nil serializer_class.config[:root_many]
 
-        jat_class.root :data
-        jat_class.root one: false, many: false
-        assert_nil jat_class.config[:root_one]
-        assert_nil jat_class.config[:root_many]
+        serializer_class.root :data
+        serializer_class.root one: false, many: false
+        assert_nil serializer_class.config[:root_one]
+        assert_nil serializer_class.config[:root_many]
       end
 
       it "symbolizes root" do
-        jat_class.root "data"
-        assert_equal :data, jat_class.config[:root_one]
-        assert_equal :data, jat_class.config[:root_many]
+        serializer_class.root "data"
+        assert_equal :data, serializer_class.config[:root_one]
+        assert_equal :data, serializer_class.config[:root_many]
 
-        jat_class.root one: "user", many: "users"
-        assert_equal :user, jat_class.config[:root_one]
-        assert_equal :users, jat_class.config[:root_many]
+        serializer_class.root one: "user", many: "users"
+        assert_equal :user, serializer_class.config[:root_one]
+        assert_equal :users, serializer_class.config[:root_many]
       end
     end
 
     describe ".meta_key" do
       it "returns default meta_key" do
-        assert_equal :meta, jat_class.config[:meta_key]
+        assert_equal :meta, serializer_class.config[:meta_key]
       end
 
       it "changes meta key" do
-        jat_class.meta_key :metadata
-        assert_equal :metadata, jat_class.config[:meta_key]
+        serializer_class.meta_key :metadata
+        assert_equal :metadata, serializer_class.config[:meta_key]
       end
 
       it "symbolizes meta key" do
-        jat_class.meta_key "metadata"
-        assert_equal :metadata, jat_class.config[:meta_key]
+        serializer_class.meta_key "metadata"
+        assert_equal :metadata, serializer_class.config[:meta_key]
       end
     end
 
     describe ".inherited" do
       it "inherits root" do
-        jat_class.root(:foo)
-        child = Class.new(jat_class)
+        serializer_class.root(:foo)
+        child = Class.new(serializer_class)
         assert_equal :foo, child.config[:root_one]
         assert_equal :foo, child.config[:root_many]
       end
 
       it "inherits meta" do
-        jat_class.meta(:foo) { "bar" }
-        child = Class.new(jat_class)
+        serializer_class.meta(:foo) { "bar" }
+        child = Class.new(serializer_class)
 
         assert_equal "bar", child.added_meta[:foo].value(nil, nil)
       end
 
       it "does not change parents meta when children meta changed" do
-        jat_class.meta(:foo) { "foo" }
-        child = Class.new(jat_class)
+        serializer_class.meta(:foo) { "foo" }
+        child = Class.new(serializer_class)
         child.meta(:foo) { "bazz" }
 
-        assert_equal("foo", jat_class.added_meta[:foo].value(nil, nil))
+        assert_equal("foo", serializer_class.added_meta[:foo].value(nil, nil))
         assert_equal("bazz", child.added_meta[:foo].value(nil, nil))
       end
     end

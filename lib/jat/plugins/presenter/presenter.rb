@@ -10,25 +10,25 @@ class Jat
         :presenter
       end
 
-      def self.before_load(jat_class, **opts)
-        if jat_class.plugin_used?(:json_api)
-          jat_class.plugin :json_api_preloads, **opts
-        elsif jat_class.plugin_used?(:simple_api)
-          jat_class.plugin :simple_api_preloads, **opts
+      def self.before_load(serializer_class, **opts)
+        if serializer_class.plugin_used?(:json_api)
+          serializer_class.plugin :json_api_preloads, **opts
+        elsif serializer_class.plugin_used?(:simple_api)
+          serializer_class.plugin :simple_api_preloads, **opts
         else
           raise Error, "Please load :json_api or :simple_api plugin first"
         end
       end
 
-      def self.load(jat_class, **_opts)
-        jat_class.extend(ClassMethods)
-        jat_class::ResponsePiece.include(ResponsePieceInstanceMethods)
+      def self.load(serializer_class, **_opts)
+        serializer_class.extend(ClassMethods)
+        serializer_class::ResponsePiece.include(ResponsePieceInstanceMethods)
       end
 
-      def self.after_load(jat_class, **_opts)
+      def self.after_load(serializer_class, **_opts)
         presenter_class = Class.new(Presenter)
-        presenter_class.jat_class = jat_class
-        jat_class.const_set(:Presenter, presenter_class)
+        presenter_class.serializer_class = serializer_class
+        serializer_class.const_set(:Presenter, presenter_class)
       end
 
       class Presenter < SimpleDelegator
@@ -45,14 +45,14 @@ class Jat
         end
 
         extend Forwardable
-        extend Jat::AnonymousClass
+        extend Jat::Helpers::SerializerClassHelper
         include InstanceMethods
       end
 
       module ClassMethods
         def inherited(subclass)
           presenter_class = Class.new(self::Presenter)
-          presenter_class.jat_class = subclass
+          presenter_class.serializer_class = subclass
           subclass.const_set(:Presenter, presenter_class)
 
           super
@@ -69,7 +69,7 @@ class Jat
       module ResponsePieceInstanceMethods
         def initialize(*)
           super
-          @object = jat_class::Presenter.new(object)
+          @object = serializer_class::Presenter.new(object)
         end
       end
     end

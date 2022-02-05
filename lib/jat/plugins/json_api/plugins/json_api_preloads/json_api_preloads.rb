@@ -17,30 +17,30 @@ class Jat
       #
       # Checks if plugin can be loaded
       #
-      # @param jat_class [Jat] Class that loads plugin
+      # @param serializer_class [Jat] Class that loads plugin
       # @param opts [Hash] Any options
       #
       # @raise [Jat::Error] Raises error if :simple_api plugin is not added
       #
       # @return [void]
       #
-      def self.before_load(jat_class, **opts)
-        raise Error, "Please load :json_api plugin first" unless jat_class.plugin_used?(:json_api)
+      def self.before_load(serializer_class, **opts)
+        raise Error, "Please load :json_api plugin first" unless serializer_class.plugin_used?(:json_api)
 
-        jat_class.plugin :base_preloads, **opts
+        serializer_class.plugin :base_preloads, **opts
       end
 
       #
       # Includes plugin modules to current serializer
       #
-      # @param jat_class [Class] current serializer class
+      # @param serializer_class [Class] current serializer class
       # @param _opts [Hash] plugin opts
       #
       # @return [void]
       #
-      def self.load(jat_class, **_opts)
-        jat_class.extend(ClassMethods)
-        jat_class.include(InstanceMethods)
+      def self.load(serializer_class, **_opts)
+        serializer_class.extend(ClassMethods)
+        serializer_class.include(InstanceMethods)
       end
 
       # Adds .preloads class method

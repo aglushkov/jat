@@ -3,7 +3,7 @@
 require "test_helper"
 
 describe "Jat::Plugins::BaseActiverecordPreloads" do
-  let(:jat_class) do
+  let(:serializer_class) do
     api_test = api_test()
 
     Class.new(Jat) do
@@ -24,7 +24,7 @@ describe "Jat::Plugins::BaseActiverecordPreloads" do
     it "adds preloads to object when calling to_h" do
       object = "OBJ"
       preloads = "PRELOADS"
-      jat = jat_class.new
+      jat = serializer_class.new
       jat.expects(:preloads).returns(preloads)
 
       Jat::Plugins::BaseActiverecordPreloads::Preloader
@@ -36,21 +36,21 @@ describe "Jat::Plugins::BaseActiverecordPreloads" do
 
     it "skips preloadings for nil" do
       object = nil
-      jat = jat_class.new
+      jat = serializer_class.new
 
       assert_same object, jat.to_h(object)
     end
 
     it "skips preloadings for empty array" do
       object = []
-      jat = jat_class.new
+      jat = serializer_class.new
 
       assert_same object, jat.to_h(object)
     end
 
     it "skips preloadings when nothing to preload" do
       object = "OBJECT"
-      jat = jat_class.new
+      jat = serializer_class.new
       jat.expects(:preloads).returns({})
 
       assert_same object, jat.to_h(object)

@@ -4,8 +4,8 @@ class Jat
   module Plugins
     module JsonApiValidateParams
       class ValidateFieldsParam
-        def self.call(jat_class, fields)
-          full_map = jat_class.map_full
+        def self.call(serializer_class, fields)
+          full_map = serializer_class.map_full
 
           fields.each do |type, attributes_names|
             new(type, full_map).validate(attributes_names)

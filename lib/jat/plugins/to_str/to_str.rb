@@ -7,13 +7,13 @@ class Jat
         :to_str
       end
 
-      def self.load(jat_class, **_opts)
-        jat_class.include(InstanceMethods)
-        jat_class.extend(ClassMethods)
+      def self.load(serializer_class, **_opts)
+        serializer_class.include(InstanceMethods)
+        serializer_class.extend(ClassMethods)
       end
 
-      def self.after_load(jat_class, **opts)
-        jat_class.config[:to_str] = opts[:to_str] || ->(data) { ToStrJSON.dump(data) }
+      def self.after_load(serializer_class, **opts)
+        serializer_class.config[:to_str] = opts[:to_str] || ->(data) { ToStrJSON.dump(data) }
       end
 
       module ClassMethods

@@ -7,16 +7,16 @@ describe "Jat::Plugins::SimpleApi::FieldsParamParser" do
     Jat::Plugins.find_plugin :simple_api
   end
 
-  let(:jat_class) do
+  let(:serializer_class) do
     ser = Class.new(Jat)
     ser.plugin :simple_api
     ser
   end
 
-  let(:described_class) { jat_class::FieldsParamParser }
+  let(:described_class) { serializer_class::FieldsParamParser }
 
   def parse(str)
-    jat_class::FieldsParamParser.parse(str)
+    serializer_class::FieldsParamParser.parse(str)
   end
 
   describe ".parse" do

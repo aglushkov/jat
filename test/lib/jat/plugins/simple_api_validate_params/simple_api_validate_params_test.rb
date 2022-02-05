@@ -8,32 +8,32 @@ describe "Jat::Plugins::SimpleApiValidateParams" do
   end
 
   it "checks simple_api plugin loaded before" do
-    jat_class = Class.new(Jat)
-    error = assert_raises(Jat::Error) { jat_class.plugin @plugin }
+    serializer_class = Class.new(Jat)
+    error = assert_raises(Jat::Error) { serializer_class.plugin @plugin }
     assert_match(/simple_api/, error.message)
   end
 
   let(:base_serializer) do
-    jat_class = Class.new(Jat)
-    jat_class.plugin :simple_api
-    jat_class.plugin @plugin
-    jat_class
+    serializer_class = Class.new(Jat)
+    serializer_class.plugin :simple_api
+    serializer_class.plugin @plugin
+    serializer_class
   end
 
   let(:serializer) do
-    jat_class = Class.new(base_serializer)
-    jat_class.attribute :foo_bar
-    jat_class.relationship :foo_bazz, serializer: jat_class
-    jat_class
+    serializer_class = Class.new(base_serializer)
+    serializer_class.attribute :foo_bar
+    serializer_class.relationship :foo_bazz, serializer: serializer_class
+    serializer_class
   end
 
   let(:serializer_lower_camel_case) do
-    jat_class = Class.new(base_serializer)
-    jat_class.plugin :lower_camel_case
+    serializer_class = Class.new(base_serializer)
+    serializer_class.plugin :lower_camel_case
 
-    jat_class.attribute :foo_bar
-    jat_class.relationship :foo_bazz, serializer: jat_class
-    jat_class
+    serializer_class.attribute :foo_bar
+    serializer_class.relationship :foo_bazz, serializer: serializer_class
+    serializer_class
   end
 
   it "returns true when provided fields present" do

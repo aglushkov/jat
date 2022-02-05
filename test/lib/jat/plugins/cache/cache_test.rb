@@ -3,7 +3,7 @@
 require "test_helper"
 
 describe "Jat::Plugins::Cache" do
-  let(:jat_class) do
+  let(:serializer_class) do
     new_class = Class.new(Jat)
     to_h_mod = Module.new do
       def to_h(object)
@@ -28,8 +28,8 @@ describe "Jat::Plugins::Cache" do
   describe "InstanceMethods" do
     describe "#to_h" do
       it "takes result from cache" do
-        result1 = jat_class.new(context).to_h("OBJECT")
-        result2 = jat_class.new(context).to_h("OBJECT")
+        result1 = serializer_class.new(context).to_h("OBJECT")
+        result2 = serializer_class.new(context).to_h("OBJECT")
 
         assert_equal "RES_OBJECT", result1
         assert_equal "RES_OBJECT", result2
@@ -37,8 +37,8 @@ describe "Jat::Plugins::Cache" do
       end
 
       it "does not take cached result when cache keys are different" do
-        result1 = jat_class.new(context).to_h("OBJECT")
-        result2 = jat_class.new(context.merge(foo: :bazz)).to_h("OBJECT")
+        result1 = serializer_class.new(context).to_h("OBJECT")
+        result2 = serializer_class.new(context.merge(foo: :bazz)).to_h("OBJECT")
 
         assert_equal "RES_OBJECT", result1
         assert_equal "RES_OBJECT", result2
@@ -46,7 +46,7 @@ describe "Jat::Plugins::Cache" do
       end
 
       it "does not saves cache when no context[:cache] provided" do
-        jat_class.new({}).to_str("OBJECT")
+        serializer_class.new({}).to_str("OBJECT")
 
         assert_equal [], hash_storage.keys
       end
@@ -54,8 +54,8 @@ describe "Jat::Plugins::Cache" do
 
     describe "#to_str" do
       it "takes result from cache" do
-        result1 = jat_class.new(context).to_str("OBJECT")
-        result2 = jat_class.new(context).to_str("OBJECT")
+        result1 = serializer_class.new(context).to_str("OBJECT")
+        result2 = serializer_class.new(context).to_str("OBJECT")
 
         assert_equal '"RES_OBJECT"', result1
         assert_equal '"RES_OBJECT"', result2
@@ -63,8 +63,8 @@ describe "Jat::Plugins::Cache" do
       end
 
       it "does not take cached result when cache keys are different" do
-        result1 = jat_class.new(context).to_str("OBJECT")
-        result2 = jat_class.new(context.merge(foo: :bazz)).to_str("OBJECT")
+        result1 = serializer_class.new(context).to_str("OBJECT")
+        result2 = serializer_class.new(context.merge(foo: :bazz)).to_str("OBJECT")
 
         assert_equal '"RES_OBJECT"', result1
         assert_equal '"RES_OBJECT"', result2
@@ -73,7 +73,7 @@ describe "Jat::Plugins::Cache" do
 
       it "does not saves cache for #to_h" do
         context[:foo] = :bar
-        jat_class.new(context).to_str("OBJECT")
+        serializer_class.new(context).to_str("OBJECT")
 
         assert_equal ["OBJECT.bar.to_str"], hash_storage.keys
       end

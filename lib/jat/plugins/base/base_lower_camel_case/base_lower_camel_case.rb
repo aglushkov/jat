@@ -7,8 +7,8 @@ class Jat
         :base_lower_camel_case
       end
 
-      def self.load(jat_class, **_opts)
-        jat_class::Attribute.include(AttributeInstanceMethods)
+      def self.load(serializer_class, **_opts)
+        serializer_class::Attribute.include(AttributeInstanceMethods)
       end
 
       module AttributeInstanceMethods

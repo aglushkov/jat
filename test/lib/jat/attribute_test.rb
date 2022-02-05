@@ -3,20 +3,20 @@
 require "test_helper"
 
 describe Jat::Attribute do
-  let(:jat_class) { Class.new(Jat) }
-  let(:attribute_class) { jat_class::Attribute }
+  let(:serializer_class) { Class.new(Jat) }
+  let(:attribute_class) { serializer_class::Attribute }
 
-  describe ".jat_class=" do
-    it "assigns @jat_class" do
-      attribute_class.jat_class = :foo
-      assert_equal :foo, attribute_class.instance_variable_get(:@jat_class)
+  describe ".serializer_class=" do
+    it "assigns @serializer_class" do
+      attribute_class.serializer_class = :foo
+      assert_equal :foo, attribute_class.instance_variable_get(:@serializer_class)
     end
   end
 
-  describe ".jat_class" do
-    it "returns self @jat_class" do
-      assert_same jat_class, attribute_class.instance_variable_get(:@jat_class)
-      assert_same jat_class, attribute_class.jat_class
+  describe ".serializer_class" do
+    it "returns self @serializer_class" do
+      assert_same serializer_class, attribute_class.instance_variable_get(:@serializer_class)
+      assert_same serializer_class, attribute_class.serializer_class
     end
   end
 
@@ -58,25 +58,25 @@ describe Jat::Attribute do
     end
 
     it "returns true when all keys are exposed by config" do
-      jat_class.config[:exposed] = :all
+      serializer_class.config[:exposed] = :all
       attribute = attribute_class.new(name: "foo")
       assert_equal true, attribute.exposed?
     end
 
     it "returns false when no keys are exposed by config" do
-      jat_class.config[:exposed] = :none
+      serializer_class.config[:exposed] = :none
       attribute = attribute_class.new(name: "foo")
       assert_equal false, attribute.exposed?
     end
 
     it "returns false when serializer exists and config[:exposed] is default" do
-      jat_class.config[:exposed] = :default
-      attribute = attribute_class.new(name: "foo", opts: {serializer: jat_class})
+      serializer_class.config[:exposed] = :default
+      attribute = attribute_class.new(name: "foo", opts: {serializer: serializer_class})
       assert_equal false, attribute.exposed?
     end
 
     it "returns true when serializer not exists and config[:exposed] is default" do
-      jat_class.config[:exposed] = :default
+      serializer_class.config[:exposed] = :default
       attribute = attribute_class.new(name: "foo")
       assert_equal true, attribute.exposed?
     end
@@ -103,7 +103,7 @@ describe Jat::Attribute do
     end
 
     it "returns true with serializer key" do
-      attribute = attribute_class.new(name: "foo", opts: {serializer: jat_class})
+      attribute = attribute_class.new(name: "foo", opts: {serializer: serializer_class})
       assert_equal true, attribute.relation?
     end
   end
@@ -115,8 +115,8 @@ describe Jat::Attribute do
     end
 
     it "returns provided serializer" do
-      attribute = attribute_class.new(name: "foo", opts: {serializer: jat_class})
-      assert_same jat_class, attribute.serializer
+      attribute = attribute_class.new(name: "foo", opts: {serializer: serializer_class})
+      assert_same serializer_class, attribute.serializer
     end
   end
 
@@ -145,10 +145,10 @@ describe Jat::Attribute do
     end
 
     it "raises error if provide block with more than 2 params" do
-      jat_class.attribute(:foo) {}
-      jat_class.attribute(:foo) { |_| }
-      jat_class.attribute(:foo) { |_, _| }
-      err = assert_raises(Jat::Error) { jat_class.attribute(:foo) { |_, _, _| } }
+      serializer_class.attribute(:foo) {}
+      serializer_class.attribute(:foo) { |_| }
+      serializer_class.attribute(:foo) { |_, _| }
+      err = assert_raises(Jat::Error) { serializer_class.attribute(:foo) { |_, _, _| } }
       assert_equal "Block can have 0-2 parameters", err.message
     end
   end

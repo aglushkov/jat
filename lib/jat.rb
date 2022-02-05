@@ -8,6 +8,9 @@ class Jat
   # Namespace for utility functions
   module Utils; end
 
+  # Namespace for helpers
+  module Utils; end
+
   # @return [Hash] frozen hash
   FROZEN_EMPTY_HASH = {}.freeze
 
@@ -15,7 +18,7 @@ class Jat
   FROZEN_EMPTY_ARRAY = [].freeze
 end
 
-require_relative "jat/anonymous_class"
+require_relative "jat/helpers/serializer_class_helper"
 require_relative "jat/attribute"
 require_relative "jat/config"
 require_relative "jat/plugins"
@@ -23,9 +26,7 @@ require_relative "jat/plugins"
 class Jat
   @config = Config.new({plugins: []})
 
-  #
-  # Jat serializers core class methods
-  #
+  # Core serializer class methods
   module ClassMethods
     # @return [Config] current serializer config
     attr_reader :config
@@ -41,13 +42,13 @@ class Jat
     def inherited(subclass)
       # Initialize config
       config_class = Class.new(self::Config)
-      config_class.jat_class = subclass
+      config_class.serializer_class = subclass
       subclass.const_set(:Config, config_class)
       subclass.instance_variable_set(:@config, subclass::Config.new(config.opts))
 
       # Initialize attribute class
       attribute_class = Class.new(self::Attribute)
-      attribute_class.jat_class = subclass
+      attribute_class.serializer_class = subclass
       subclass.const_set(:Attribute, attribute_class)
 
       # Assign same attributes
@@ -164,7 +165,7 @@ class Jat
   end
 
   #
-  # Jat serializers core instance methods
+  # Core serializer instance methods
   #
   module InstanceMethods
     attr_reader :context

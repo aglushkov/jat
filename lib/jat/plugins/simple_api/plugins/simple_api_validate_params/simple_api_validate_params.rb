@@ -10,16 +10,16 @@ class Jat
         :simple_api_validate_params
       end
 
-      def self.before_load(jat_class, **_opts)
-        return if jat_class.plugin_used?(:simple_api)
+      def self.before_load(serializer_class, **_opts)
+        return if serializer_class.plugin_used?(:simple_api)
         raise Error, "Please load :simple_api plugin first"
       end
 
-      def self.load(jat_class, **_opts)
-        jat_class.extend(ClassMethods)
-        jat_class.include(InstanceMethods)
+      def self.load(serializer_class, **_opts)
+        serializer_class.extend(ClassMethods)
+        serializer_class.include(InstanceMethods)
 
-        jat_class::FieldsParamParser.include(FieldsParamParserMethods)
+        serializer_class::FieldsParamParser.include(FieldsParamParserMethods)
       end
 
       module InstanceMethods
@@ -39,7 +39,7 @@ class Jat
 
       module FieldsParamParserMethods
         def parse(*)
-          super.tap { |result| ValidateFieldsParam.call(self.class.jat_class, result) }
+          super.tap { |result| ValidateFieldsParam.call(self.class.serializer_class, result) }
         end
       end
     end

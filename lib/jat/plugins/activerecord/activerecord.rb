@@ -16,16 +16,16 @@ class Jat
       #
       # Loads additional plugins
       #
-      # @param jat_class [Class] Current serializer class
+      # @param serializer_class [Class] Current serializer class
       # @param opts [Hash] loaded plugins opts
       #
       # @return [void]
       #
-      def self.load(jat_class, **opts)
-        if jat_class.plugin_used?(:json_api)
-          jat_class.plugin :json_api_activerecord, **opts
-        elsif jat_class.plugin_used?(:simple_api)
-          jat_class.plugin :simple_api_activerecord, **opts
+      def self.load(serializer_class, **opts)
+        if serializer_class.plugin_used?(:json_api)
+          serializer_class.plugin :json_api_activerecord, **opts
+        elsif serializer_class.plugin_used?(:simple_api)
+          serializer_class.plugin :simple_api_activerecord, **opts
         else
           raise Error, "Please load :json_api or :simple_api plugin first"
         end

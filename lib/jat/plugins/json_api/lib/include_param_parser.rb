@@ -12,7 +12,7 @@ class Jat
             return {} unless includes_string_param
 
             includes_hash = parse_to_nested_hash(includes_string_param)
-            typed_includes(jat_class, includes_hash, {})
+            typed_includes(serializer_class, includes_hash, {})
           end
 
           private
@@ -24,11 +24,11 @@ class Jat
             end
           end
 
-          def typed_includes(jat_class, includes, result)
+          def typed_includes(serializer_class, includes, result)
             includes.each do |included_attr_name, nested_includes|
-              add_typed_include(result, jat_class, included_attr_name)
+              add_typed_include(result, serializer_class, included_attr_name)
 
-              nested_serializer = jat_class.attributes.fetch(included_attr_name).serializer
+              nested_serializer = serializer_class.attributes.fetch(included_attr_name).serializer
               typed_includes(nested_serializer, nested_includes, result)
             end
 
@@ -67,7 +67,7 @@ class Jat
           end
         end
 
-        extend Jat::AnonymousClass
+        extend Jat::Helpers::SerializerClassHelper
         extend ClassMethods
       end
     end

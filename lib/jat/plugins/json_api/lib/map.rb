@@ -24,20 +24,20 @@ class Jat
           private
 
           def construct_map(exposed, fields, includes)
-            fields = jat_class::FieldsParamParser.parse(fields) if fields
-            includes = jat_class::IncludeParamParser.parse(includes) if includes
+            fields = serializer_class::FieldsParamParser.parse(fields) if fields
+            includes = serializer_class::IncludeParamParser.parse(includes) if includes
 
             new(exposed, fields, includes).to_h
           end
         end
 
         module InstanceMethods
-          attr_reader :jat_class, :exposed, :includes, :fields
+          attr_reader :serializer_class, :exposed, :includes, :fields
 
           EXPOSED_TYPES = {all: :all, default: :default, none: :none}.freeze
 
           def initialize(exposed, fields, includes)
-            @jat_class = self.class.jat_class
+            @serializer_class = self.class.serializer_class
             @exposed = EXPOSED_TYPES.fetch(exposed)
             @fields = fields
             @includes = includes
@@ -45,27 +45,27 @@ class Jat
 
           def to_h
             map = {}
-            append_map(map, jat_class)
+            append_map(map, serializer_class)
             map
           end
 
           private
 
-          def append_map(map, jat_class)
-            type = jat_class.get_type
+          def append_map(map, serializer_class)
+            type = serializer_class.get_type
             return map if map.key?(type)
 
-            type_map = {serializer: jat_class}
+            type_map = {serializer: serializer_class}
             map[type] = type_map
 
-            fill_type_map(map, type_map, type, jat_class)
+            fill_type_map(map, type_map, type, serializer_class)
 
             type_map[:attributes] ||= FROZEN_EMPTY_ARRAY
             type_map[:relationships] ||= FROZEN_EMPTY_ARRAY
           end
 
-          def fill_type_map(map, type_map, type, jat_class)
-            jat_class.attributes.each_value do |attribute|
+          def fill_type_map(map, type_map, type, serializer_class)
+            serializer_class.attributes.each_value do |attribute|
               next unless expose?(type, attribute)
 
               fill_attr(map, type_map, attribute)
@@ -100,7 +100,7 @@ class Jat
           end
         end
 
-        extend Jat::AnonymousClass
+        extend Jat::Helpers::SerializerClassHelper
         extend ClassMethods
         include InstanceMethods
       end

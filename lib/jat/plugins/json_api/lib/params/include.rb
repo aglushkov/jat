@@ -13,20 +13,20 @@ class Jat
             def call(jat, includes_string)
               return {} unless includes_string
 
-              jat_class = jat.class
+              serializer_class = jat.class
               includes = Parse.call(includes_string)
-              Validate.call(jat_class, includes)
+              Validate.call(serializer_class, includes)
 
-              typed_includes(jat_class, includes, {})
+              typed_includes(serializer_class, includes, {})
             end
 
             private
 
-            def typed_includes(jat_class, includes, result)
+            def typed_includes(serializer_class, includes, result)
               includes.each do |included_attr_name, nested_includes|
-                add_include(result, jat_class, included_attr_name)
+                add_include(result, serializer_class, included_attr_name)
 
-                nested_serializer = jat_class.attributes.fetch(included_attr_name).serializer
+                nested_serializer = serializer_class.attributes.fetch(included_attr_name).serializer
                 typed_includes(nested_serializer, nested_includes, result)
               end
 

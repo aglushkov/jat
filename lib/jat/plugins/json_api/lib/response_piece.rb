@@ -11,14 +11,14 @@ class Jat
         end
 
         module InstanceMethods
-          attr_reader :jat_class, :object, :context, :map, :type_map, :includes
+          attr_reader :serializer_class, :object, :context, :map, :type_map, :includes
 
           def initialize(object, context, map, includes)
-            @jat_class = self.class.jat_class
+            @serializer_class = self.class.serializer_class
             @object = object
             @context = context
             @map = map
-            @type_map = map.fetch(jat_class.get_type)
+            @type_map = map.fetch(serializer_class.get_type)
             @includes = includes
           end
 
@@ -49,7 +49,7 @@ class Jat
             return if attributes_names.empty?
 
             attributes_names.each_with_object({}) do |name, attrs|
-              attribute = jat_class.attributes[name]
+              attribute = serializer_class.attributes[name]
               attrs[name] = attribute.value(object, context)
             end
           end
@@ -59,7 +59,7 @@ class Jat
             return if relationships_names.empty?
 
             relationships_names.each_with_object({}) do |name, rels|
-              rel_attribute = jat_class.attributes[name]
+              rel_attribute = serializer_class.attributes[name]
               rel_object = rel_attribute.value(object, context)
 
               rel_serializer = rel_attribute.serializer
@@ -111,14 +111,14 @@ class Jat
           end
 
           def get_links
-            jat_class
+            serializer_class
               .object_links
               .transform_values { |attr| attr.value(object, context) }
               .tap(&:compact!)
           end
 
           def get_meta
-            jat_class
+            serializer_class
               .added_object_meta
               .transform_values { |attr| attr.value(object, context) }
               .tap(&:compact!)
@@ -149,15 +149,15 @@ class Jat
           end
 
           def type
-            @type ||= jat_class.get_type
+            @type ||= serializer_class.get_type
           end
 
           def id
-            @id ||= jat_class.get_id.value(object, context)
+            @id ||= serializer_class.get_id.value(object, context)
           end
         end
 
-        extend Jat::AnonymousClass
+        extend Jat::Helpers::SerializerClassHelper
         extend ClassMethods
         include InstanceMethods
       end

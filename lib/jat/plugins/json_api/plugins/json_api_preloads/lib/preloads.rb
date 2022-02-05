@@ -32,9 +32,9 @@ class Jat
           end
 
           #  @!visibility private
-          def for(jat_class)
+          def for(serializer_class)
             result = {}
-            append(result, jat_class)
+            append(result, serializer_class)
             result
           end
 
@@ -42,18 +42,18 @@ class Jat
 
           attr_reader :current_map, :used
 
-          def append(result, jat_class)
-            attrs = current_map[jat_class.get_type]
+          def append(result, serializer_class)
+            attrs = current_map[serializer_class.get_type]
 
-            add_attributes(result, jat_class, attrs[:attributes])
-            add_attributes(result, jat_class, attrs[:relationships])
+            add_attributes(result, serializer_class, attrs[:attributes])
+            add_attributes(result, serializer_class, attrs[:relationships])
           end
 
-          def add_attributes(result, jat_class, attributes_names)
+          def add_attributes(result, serializer_class, attributes_names)
             attributes_names.each do |name|
-              next unless used.add?([jat_class, name]) # Protection from recursive preloads
+              next unless used.add?([serializer_class, name]) # Protection from recursive preloads
 
-              attribute = jat_class.attributes[name]
+              attribute = serializer_class.attributes[name]
               preloads = attribute.preloads
               next unless preloads # we should not add preloads and nested preloads when nil provided
 

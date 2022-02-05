@@ -7,18 +7,18 @@ class Jat
         class Include
           class Validate
             class << self
-              def call(jat_class, includes)
+              def call(serializer_class, includes)
                 includes.each do |name, nested_includes|
-                  attribute = jat_class.attributes[name]
-                  raise_error(jat_class, name) if !attribute || !attribute.relation?
+                  attribute = serializer_class.attributes[name]
+                  raise_error(serializer_class, name) if !attribute || !attribute.relation?
 
                   nested_serializer = attribute.serializer
                   call(nested_serializer, nested_includes)
                 end
               end
 
-              def raise_error(jat_class, name)
-                raise Error, "#{jat_class} has no `#{name}` relationship"
+              def raise_error(serializer_class, name)
+                raise Error, "#{serializer_class} has no `#{name}` relationship"
               end
             end
           end

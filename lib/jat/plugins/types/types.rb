@@ -7,12 +7,12 @@ class Jat
         :types
       end
 
-      def self.load(jat_class, **_opts)
-        jat_class::Attribute.include(InstanceMethods)
+      def self.load(serializer_class, **_opts)
+        serializer_class::Attribute.include(InstanceMethods)
       end
 
-      def self.after_load(jat_class, **_opts)
-        jat_class.config[:types] = {
+      def self.after_load(serializer_class, **_opts)
+        serializer_class.config[:types] = {
           array: ->(value) { Array(value) },
           bool: ->(value) { !!value },
           float: ->(value) { Float(value) },
@@ -41,7 +41,7 @@ class Jat
 
             # Type conversion
             if type.is_a?(Symbol)
-              self.class.jat_class.config.fetch(:types).fetch(type).call(value)
+              self.class.serializer_class.config.fetch(:types).fetch(type).call(value)
             else
               type.call(value)
             end

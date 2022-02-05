@@ -11,12 +11,12 @@ class Jat
         end
 
         module InstanceMethods
-          attr_reader :object, :context, :jat_class
+          attr_reader :object, :context, :serializer_class
 
           def initialize(object, context)
             @object = object
             @context = context
-            @jat_class = self.class.jat_class
+            @serializer_class = self.class.serializer_class
           end
 
           def to_h
@@ -40,8 +40,8 @@ class Jat
           end
 
           def one(obj)
-            map = jat_class.map(context)
-            jat_class::ResponsePiece.to_h(obj, context, map)
+            map = serializer_class.map(context)
+            serializer_class::ResponsePiece.to_h(obj, context, map)
           end
 
           def many?
@@ -55,7 +55,7 @@ class Jat
               root = context[:root]
               root ? root.to_sym : root
             else
-              config = jat_class.config
+              config = serializer_class.config
               is_many ? config[:root_many] : config[:root_one]
             end
           end
@@ -72,13 +72,13 @@ class Jat
           end
 
           def meta_key
-            context[:meta_key]&.to_sym || jat_class.config[:meta_key]
+            context[:meta_key]&.to_sym || serializer_class.config[:meta_key]
           end
 
           def metadata
             data = context_metadata
 
-            meta = jat_class.added_meta
+            meta = serializer_class.added_meta
             return data if meta.empty?
 
             meta.each do |name, attribute|
@@ -100,7 +100,7 @@ class Jat
           end
         end
 
-        extend Jat::AnonymousClass
+        extend Jat::Helpers::SerializerClassHelper
         extend ClassMethods
         include InstanceMethods
       end

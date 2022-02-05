@@ -7,12 +7,12 @@ class Jat
         :cache
       end
 
-      def self.before_load(jat_class, **opts)
-        jat_class.plugin :to_str, **opts
+      def self.before_load(serializer_class, **opts)
+        serializer_class.plugin :to_str, **opts
       end
 
-      def self.load(jat_class, **_opts)
-        jat_class.include(InstanceMethods)
+      def self.load(serializer_class, **_opts)
+        serializer_class.include(InstanceMethods)
       end
 
       module InstanceMethods

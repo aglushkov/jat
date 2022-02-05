@@ -5,9 +5,9 @@ class Jat
     module SimpleApiValidateParams
       class ValidateFieldsParam
         class << self
-          def call(jat_class, fields, prev_names = [])
+          def call(serializer_class, fields, prev_names = [])
             fields.each do |name, nested_fields|
-              attribute = jat_class.attributes[name]
+              attribute = serializer_class.attributes[name]
 
               raise_error(name, prev_names) unless attribute
               next if nested_fields.empty?

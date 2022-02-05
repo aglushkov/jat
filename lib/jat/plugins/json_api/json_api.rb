@@ -14,42 +14,42 @@ class Jat
         :json_api
       end
 
-      def self.before_load(jat_class, **_opts)
-        response_plugin = jat_class.config[:response_plugin_loaded]
+      def self.before_load(serializer_class, **_opts)
+        response_plugin = serializer_class.config[:response_plugin_loaded]
         return unless response_plugin
 
         raise Error, "Response plugin `#{response_plugin}` was already loaded before"
       end
 
-      def self.load(jat_class, **_opts)
-        jat_class.include(InstanceMethods)
-        jat_class.extend(ClassMethods)
+      def self.load(serializer_class, **_opts)
+        serializer_class.include(InstanceMethods)
+        serializer_class.extend(ClassMethods)
       end
 
-      def self.after_load(jat_class, **opts)
-        jat_class.config[:response_plugin_loaded] = plugin_name
+      def self.after_load(serializer_class, **opts)
+        serializer_class.config[:response_plugin_loaded] = plugin_name
 
         fields_parser_class = Class.new(FieldsParamParser)
-        fields_parser_class.jat_class = jat_class
-        jat_class.const_set(:FieldsParamParser, fields_parser_class)
+        fields_parser_class.serializer_class = serializer_class
+        serializer_class.const_set(:FieldsParamParser, fields_parser_class)
 
         includes_parser_class = Class.new(IncludeParamParser)
-        includes_parser_class.jat_class = jat_class
-        jat_class.const_set(:IncludeParamParser, includes_parser_class)
+        includes_parser_class.serializer_class = serializer_class
+        serializer_class.const_set(:IncludeParamParser, includes_parser_class)
 
         map_class = Class.new(Map)
-        map_class.jat_class = jat_class
-        jat_class.const_set(:Map, map_class)
+        map_class.serializer_class = serializer_class
+        serializer_class.const_set(:Map, map_class)
 
         response_class = Class.new(Response)
-        response_class.jat_class = jat_class
-        jat_class.const_set(:Response, response_class)
+        response_class.serializer_class = serializer_class
+        serializer_class.const_set(:Response, response_class)
 
         response_piece_class = Class.new(ResponsePiece)
-        response_piece_class.jat_class = jat_class
-        jat_class.const_set(:ResponsePiece, response_piece_class)
+        response_piece_class.serializer_class = serializer_class
+        serializer_class.const_set(:ResponsePiece, response_piece_class)
 
-        jat_class.id
+        serializer_class.id
       end
 
       module InstanceMethods
@@ -67,23 +67,23 @@ class Jat
           super
 
           fields_parser_class = Class.new(self::FieldsParamParser)
-          fields_parser_class.jat_class = subclass
+          fields_parser_class.serializer_class = subclass
           subclass.const_set(:FieldsParamParser, fields_parser_class)
 
           includes_parser_class = Class.new(self::IncludeParamParser)
-          includes_parser_class.jat_class = subclass
+          includes_parser_class.serializer_class = subclass
           subclass.const_set(:IncludeParamParser, includes_parser_class)
 
           map_class = Class.new(self::Map)
-          map_class.jat_class = subclass
+          map_class.serializer_class = subclass
           subclass.const_set(:Map, map_class)
 
           response_class = Class.new(self::Response)
-          response_class.jat_class = subclass
+          response_class.serializer_class = subclass
           subclass.const_set(:Response, response_class)
 
           response_piece_class = Class.new(self::ResponsePiece)
-          response_piece_class.jat_class = subclass
+          response_piece_class.serializer_class = subclass
           subclass.const_set(:ResponsePiece, response_piece_class)
 
           subclass.type(@type) if defined?(@type)

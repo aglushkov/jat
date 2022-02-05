@@ -5,33 +5,33 @@ require "test_helper"
 describe "Jat::Plugins::Presenter" do
   describe "before load" do
     it "raises error if no response plugin is loaded" do
-      jat_class = Class.new(Jat)
-      err = assert_raises(Jat::Error) { jat_class.plugin :presenter }
+      serializer_class = Class.new(Jat)
+      err = assert_raises(Jat::Error) { serializer_class.plugin :presenter }
       assert_equal "Please load :json_api or :simple_api plugin first", err.message
     end
   end
 
   describe "ClassMethods" do
-    let(:jat_class) do
-      jat_class = Class.new(Jat)
-      jat_class.plugin :simple_api
-      jat_class.plugin :presenter
-      jat_class
+    let(:serializer_class) do
+      serializer_class = Class.new(Jat)
+      serializer_class.plugin :simple_api
+      serializer_class.plugin :presenter
+      serializer_class
     end
 
-    let(:presenter_class) { jat_class::Presenter }
+    let(:presenter_class) { serializer_class::Presenter }
 
-    describe ".jat_class=" do
-      it "assigns @jat_class" do
-        presenter_class.jat_class = :foo
-        assert_equal :foo, presenter_class.instance_variable_get(:@jat_class)
+    describe ".serializer_class=" do
+      it "assigns @serializer_class" do
+        presenter_class.serializer_class = :foo
+        assert_equal :foo, presenter_class.instance_variable_get(:@serializer_class)
       end
     end
 
-    describe ".jat_class" do
-      it "returns self @jat_class" do
-        assert_same jat_class, presenter_class.instance_variable_get(:@jat_class)
-        assert_same jat_class, presenter_class.jat_class
+    describe ".serializer_class" do
+      it "returns self @serializer_class" do
+        assert_same serializer_class, presenter_class.instance_variable_get(:@serializer_class)
+        assert_same serializer_class, presenter_class.serializer_class
       end
     end
   end

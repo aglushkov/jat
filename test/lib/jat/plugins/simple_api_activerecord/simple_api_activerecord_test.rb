@@ -8,17 +8,17 @@ describe "Jat::Plugins::SimpleApiActiverecord" do
   end
 
   it "checks simple_api plugin loaded before" do
-    jat_class = Class.new(Jat)
-    error = assert_raises(Jat::Error) { jat_class.plugin @plugin }
+    serializer_class = Class.new(Jat)
+    error = assert_raises(Jat::Error) { serializer_class.plugin @plugin }
     assert_match(/simple_api/, error.message)
   end
 
   it "loads other plugins" do
-    jat_class = Class.new(Jat)
-    jat_class.plugin :simple_api
-    jat_class.plugin :simple_api_activerecord
+    serializer_class = Class.new(Jat)
+    serializer_class.plugin :simple_api
+    serializer_class.plugin :simple_api_activerecord
 
-    assert jat_class.plugin_used?(:simple_api_preloads)
-    assert jat_class.plugin_used?(:base_activerecord_preloads)
+    assert serializer_class.plugin_used?(:simple_api_preloads)
+    assert serializer_class.plugin_used?(:base_activerecord_preloads)
   end
 end

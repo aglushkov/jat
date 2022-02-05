@@ -3,7 +3,7 @@
 require "test_helper"
 
 describe "Jat::Plugins::ToStr" do
-  let(:jat_class) do
+  let(:serializer_class) do
     new_class = Class.new(Jat)
     new_class.plugin(:to_str)
     new_class.class_exec do
@@ -18,16 +18,16 @@ describe "Jat::Plugins::ToStr" do
   describe "Jat" do
     describe ".to_str" do
       it "returns json string of to_h" do
-        assert_equal '{"obj":"ctx"}', jat_class.to_str("obj", "ctx")
+        assert_equal '{"obj":"ctx"}', serializer_class.to_str("obj", "ctx")
       end
 
       it "returns json string of to_h with default empty hash context" do
-        assert_equal '{"obj":{}}', jat_class.to_str("obj")
+        assert_equal '{"obj":{}}', serializer_class.to_str("obj")
       end
 
       it "returns result serialized with given in config serializer" do
-        jat_class.config[:to_str] = ->(data) { data.inspect }
-        assert_equal '{"obj"=>"ctx"}', jat_class.to_str("obj", "ctx")
+        serializer_class.config[:to_str] = ->(data) { data.inspect }
+        assert_equal '{"obj"=>"ctx"}', serializer_class.to_str("obj", "ctx")
       end
 
       it "accepts to_str config option when loading plugin" do
@@ -45,7 +45,7 @@ describe "Jat::Plugins::ToStr" do
 
     describe "#to_str" do
       it "returns json string of to_h" do
-        assert_equal '{"obj":"ctx"}', jat_class.new("ctx").to_str("obj")
+        assert_equal '{"obj":"ctx"}', serializer_class.new("ctx").to_str("obj")
       end
     end
   end

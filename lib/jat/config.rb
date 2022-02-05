@@ -44,6 +44,6 @@ class Jat
     end
 
     include InstanceMethods
-    extend Jat::AnonymousClass
+    extend Jat::Helpers::SerializerClassHelper
   end
 end

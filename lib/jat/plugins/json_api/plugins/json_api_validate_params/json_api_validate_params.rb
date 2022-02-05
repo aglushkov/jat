@@ -11,17 +11,17 @@ class Jat
         :json_api_validate_params
       end
 
-      def self.before_load(jat_class, **_opts)
-        return if jat_class.plugin_used?(:json_api)
+      def self.before_load(serializer_class, **_opts)
+        return if serializer_class.plugin_used?(:json_api)
         raise Error, "Please load :json_api plugin first"
       end
 
-      def self.load(jat_class, **_opts)
-        jat_class.extend(ClassMethods)
-        jat_class.include(InstanceMethods)
+      def self.load(serializer_class, **_opts)
+        serializer_class.extend(ClassMethods)
+        serializer_class.include(InstanceMethods)
 
-        jat_class::FieldsParamParser.extend(FieldsParamParserClassMethods)
-        jat_class::IncludeParamParser.extend(IncludeParamParserClassMethods)
+        serializer_class::FieldsParamParser.extend(FieldsParamParserClassMethods)
+        serializer_class::IncludeParamParser.extend(IncludeParamParserClassMethods)
       end
 
       module InstanceMethods
@@ -43,7 +43,7 @@ class Jat
         private
 
         def parse_to_nested_hash(*)
-          super.tap { |result| ValidateIncludeParam.call(jat_class, result) }
+          super.tap { |result| ValidateIncludeParam.call(serializer_class, result) }
         end
       end
 
@@ -51,7 +51,7 @@ class Jat
         private
 
         def parse_to_nested_hash(*)
-          super.tap { |result| ValidateFieldsParam.call(jat_class, result) }
+          super.tap { |result| ValidateFieldsParam.call(serializer_class, result) }
         end
       end
     end

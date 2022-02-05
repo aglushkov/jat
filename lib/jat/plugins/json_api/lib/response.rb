@@ -11,12 +11,12 @@ class Jat
         end
 
         module InstanceMethods
-          attr_reader :jat_class, :object, :context
+          attr_reader :serializer_class, :object, :context
 
           def initialize(object, context)
             @object = object
             @context = context
-            @jat_class = self.class.jat_class
+            @serializer_class = self.class.serializer_class
           end
 
           def to_h
@@ -38,7 +38,7 @@ class Jat
 
           def data_with_includes
             includes = {}
-            map = jat_class::Map.call(context)
+            map = serializer_class::Map.call(context)
             data = many?(object, context) ? many(object, includes, map) : one(object, includes, map)
             [data, includes]
           end
@@ -48,7 +48,7 @@ class Jat
           end
 
           def one(object, includes, map)
-            jat_class::ResponsePiece.call(object, context, map, includes)
+            serializer_class::ResponsePiece.call(object, context, map, includes)
           end
 
           def many?(data, context)
@@ -57,15 +57,15 @@ class Jat
           end
 
           def jsonapi_data
-            combine(jat_class.jsonapi_data, context_jsonapi)
+            combine(serializer_class.jsonapi_data, context_jsonapi)
           end
 
           def document_links
-            combine(jat_class.document_links, context_links)
+            combine(serializer_class.document_links, context_links)
           end
 
           def document_meta
-            combine(jat_class.added_document_meta, context_meta)
+            combine(serializer_class.added_document_meta, context_meta)
           end
 
           def combine(attributes, context_data)
@@ -104,7 +104,7 @@ class Jat
           end
         end
 
-        extend Jat::AnonymousClass
+        extend Jat::Helpers::SerializerClassHelper
         extend ClassMethods
         include InstanceMethods
       end

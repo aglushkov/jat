@@ -7,14 +7,14 @@ class Jat
         :json_api_lower_camel_case
       end
 
-      def self.before_load(jat_class, **_opts)
-        raise Error, "Please load :json_api plugin first" unless jat_class.plugin_used?(:json_api)
+      def self.before_load(serializer_class, **_opts)
+        raise Error, "Please load :json_api plugin first" unless serializer_class.plugin_used?(:json_api)
 
-        jat_class.plugin :base_lower_camel_case
+        serializer_class.plugin :base_lower_camel_case
       end
 
-      def self.load(jat_class, **_opts)
-        jat_class::Response.include(ResponseInstanceMethods)
+      def self.load(serializer_class, **_opts)
+        serializer_class::Response.include(ResponseInstanceMethods)
       end
 
       module ResponseInstanceMethods

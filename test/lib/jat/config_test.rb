@@ -3,20 +3,20 @@
 require "test_helper"
 
 describe Jat::Config do
-  let(:jat_class) { Class.new(Jat) }
-  let(:config) { jat_class.config }
+  let(:serializer_class) { Class.new(Jat) }
+  let(:config) { serializer_class.config }
 
-  describe ".jat_class=" do
-    it "assigns @jat_class" do
-      config.class.jat_class = :foo
-      assert_equal :foo, config.class.instance_variable_get(:@jat_class)
+  describe ".serializer_class=" do
+    it "assigns @serializer_class" do
+      config.class.serializer_class = :foo
+      assert_equal :foo, config.class.instance_variable_get(:@serializer_class)
     end
   end
 
-  describe ".jat_class" do
-    it "returns self @jat_class" do
-      assert_same jat_class, config.class.instance_variable_get(:@jat_class)
-      assert_same jat_class, config.class.jat_class
+  describe ".serializer_class" do
+    it "returns self @serializer_class" do
+      assert_same serializer_class, config.class.instance_variable_get(:@serializer_class)
+      assert_same serializer_class, config.class.serializer_class
     end
   end
 

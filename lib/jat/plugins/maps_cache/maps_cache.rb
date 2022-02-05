@@ -7,11 +7,11 @@ class Jat
         :maps_cache
       end
 
-      def self.load(jat_class, **opts)
-        if jat_class.plugin_used?(:json_api)
-          jat_class.plugin :json_api_maps_cache, **opts
-        elsif jat_class.plugin_used?(:simple_api)
-          jat_class.plugin :simple_api_maps_cache, **opts
+      def self.load(serializer_class, **opts)
+        if serializer_class.plugin_used?(:json_api)
+          serializer_class.plugin :json_api_maps_cache, **opts
+        elsif serializer_class.plugin_used?(:simple_api)
+          serializer_class.plugin :simple_api_maps_cache, **opts
         else
           raise Error, "Please load :json_api or :simple_api plugin first"
         end

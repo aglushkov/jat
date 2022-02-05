@@ -7,17 +7,17 @@ class Jat
         :json_api_maps_cache
       end
 
-      def self.before_load(jat_class, **opts)
-        return if jat_class.plugin_used?(:json_api)
+      def self.before_load(serializer_class, **opts)
+        return if serializer_class.plugin_used?(:json_api)
         raise Error, "Please load :json_api plugin first"
       end
 
-      def self.load(jat_class, **_opts)
-        jat_class::Map.extend(MapsCacheClassMethods)
+      def self.load(serializer_class, **_opts)
+        serializer_class::Map.extend(MapsCacheClassMethods)
       end
 
-      def self.after_load(jat_class, **opts)
-        jat_class.config[:cached_maps_count] = opts[:cached_maps_count] || 100
+      def self.after_load(serializer_class, **opts)
+        serializer_class.config[:cached_maps_count] = opts[:cached_maps_count] || 100
       end
 
       module MapsCacheClassMethods
@@ -26,7 +26,7 @@ class Jat
 
         def maps_cache
           @maps_cache ||= Hash.new do |cache, cache_key|
-            cache.shift if cache.length >= jat_class.config[:cached_maps_count] # protect from memory leak
+            cache.shift if cache.length >= serializer_class.config[:cached_maps_count] # protect from memory leak
             cache[cache_key] = Utils::EnumDeepDup.call(yield)
           end
         end

@@ -11,12 +11,12 @@ class Jat
         end
 
         module InstanceMethods
-          attr_reader :jat_class, :object, :context
+          attr_reader :serializer_class, :object, :context
 
           def initialize(object, context)
             @object = object
             @context = context
-            @jat_class = self.class.jat_class
+            @serializer_class = self.class.serializer_class
           end
 
           def piece(map)
@@ -25,7 +25,7 @@ class Jat
             result = {}
 
             map.each do |key, inner_map|
-              attribute = jat_class.attributes.fetch(key)
+              attribute = serializer_class.attributes.fetch(key)
               value = attribute.value(object, context)
 
               result[key] =
@@ -61,7 +61,7 @@ class Jat
           end
         end
 
-        extend Jat::AnonymousClass
+        extend Jat::Helpers::SerializerClassHelper
         extend ClassMethods
         include InstanceMethods
       end

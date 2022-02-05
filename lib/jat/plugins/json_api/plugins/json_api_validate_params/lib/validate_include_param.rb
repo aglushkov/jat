@@ -5,10 +5,10 @@ class Jat
     module JsonApiValidateParams
       class ValidateIncludeParam
         class << self
-          def call(jat_class, includes)
+          def call(serializer_class, includes)
             includes.each do |name, nested_includes|
-              attribute = jat_class.attributes[name]
-              raise_error(jat_class, name) if !attribute || !attribute.relation?
+              attribute = serializer_class.attributes[name]
+              raise_error(serializer_class, name) if !attribute || !attribute.relation?
 
               nested_serializer = attribute.serializer
               call(nested_serializer, nested_includes)
@@ -17,9 +17,9 @@ class Jat
 
           private
 
-          def raise_error(jat_class, name)
-            type = jat_class.get_type
-            allowed_relationships = jat_class.attributes.each_value.select(&:relation?).map!(&:serialized_name)
+          def raise_error(serializer_class, name)
+            type = serializer_class.get_type
+            allowed_relationships = serializer_class.attributes.each_value.select(&:relation?).map!(&:serialized_name)
             allowed_relationships = "'#{allowed_relationships.join("', '")}'"
 
             raise JsonApiParamsError, "Type '#{type}' has no included '#{name}' relationship. Existing relationships are: #{allowed_relationships}"

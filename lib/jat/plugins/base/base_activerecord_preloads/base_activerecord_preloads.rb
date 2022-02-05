@@ -9,8 +9,8 @@ class Jat
         :base_activerecord_preloads
       end
 
-      def self.load(jat_class, **_opts)
-        jat_class.include(InstanceMethods)
+      def self.load(serializer_class, **_opts)
+        serializer_class.include(InstanceMethods)
       end
 
       module InstanceMethods

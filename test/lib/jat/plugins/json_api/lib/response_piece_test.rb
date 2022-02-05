@@ -3,20 +3,20 @@
 require "test_helper"
 
 describe "Jat::Plugins::JsonApi::ResponsePiece" do
-  let(:jat_class) { Class.new(Jat) { plugin :json_api } }
-  let(:described_class) { jat_class::ResponsePiece }
+  let(:serializer_class) { Class.new(Jat) { plugin :json_api } }
+  let(:described_class) { serializer_class::ResponsePiece }
 
-  describe ".jat_class=" do
-    it "assigns @jat_class" do
-      described_class.jat_class = :foo
-      assert_equal :foo, described_class.instance_variable_get(:@jat_class)
+  describe ".serializer_class=" do
+    it "assigns @serializer_class" do
+      described_class.serializer_class = :foo
+      assert_equal :foo, described_class.instance_variable_get(:@serializer_class)
     end
   end
 
-  describe ".jat_class" do
-    it "returns self @jat_class" do
-      assert_same jat_class, described_class.instance_variable_get(:@jat_class)
-      assert_same jat_class, described_class.jat_class
+  describe ".serializer_class" do
+    it "returns self @serializer_class" do
+      assert_same serializer_class, described_class.instance_variable_get(:@serializer_class)
+      assert_same serializer_class, described_class.serializer_class
     end
   end
 end

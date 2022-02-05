@@ -20,7 +20,7 @@ class Jat
           private
 
           def construct_map(exposed, fields)
-            fields = jat_class::FieldsParamParser.parse(fields) if fields
+            fields = serializer_class::FieldsParamParser.parse(fields) if fields
             new(exposed, fields).to_h
           end
         end
@@ -36,7 +36,7 @@ class Jat
           end
 
           def to_h
-            map_for(self.class.jat_class, fields)
+            map_for(self.class.serializer_class, fields)
           end
 
           def map_for(serializer, fields, stack = [])
@@ -80,7 +80,7 @@ class Jat
           end
         end
 
-        extend Jat::AnonymousClass
+        extend Jat::Helpers::SerializerClassHelper
         extend ClassMethods
         include InstanceMethods
       end

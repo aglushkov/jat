@@ -12,8 +12,8 @@ class Jat
         :base_preloads
       end
 
-      def self.load(jat_class, **_opts)
-        jat_class::Attribute.include(AttributeMethods)
+      def self.load(serializer_class, **_opts)
+        serializer_class::Attribute.include(AttributeMethods)
       end
 
       module AttributeMethods
