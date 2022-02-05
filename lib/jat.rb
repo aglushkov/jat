@@ -35,7 +35,7 @@ class Jat
     # This method called automatically when current serializer is inherited.
     # Copies config and attributes into inherited subclass
     #
-    # @param subclass [Jat] inherited class
+    # @param subclass [Class<Jat>] inherited class
     #
     # @return [void]
     #
